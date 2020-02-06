@@ -55,12 +55,15 @@ protected:
 
 	}
 	bool hit = false;
+	bool collision = false;
 private:
 	friend class Collision;
 	void CreateTexture();
 	void DrawBoundingBox();
 	DirectX::BoundingBox GetBounds()
 	{
+		if (vTransbBox.empty())
+			return vOGbBox[0];
 		return vTransbBox[0];
 	}
 	ID3D11Device* pDevice;
@@ -92,6 +95,11 @@ public:
 	}
 	virtual void Update()
 	{
+
+		return;
+	}
+	virtual std::optional<Events*> Queue()
+	{
 		for (const auto& C : collidable)
 		{
 			//C->DrawBoundingBox();
@@ -111,11 +119,21 @@ public:
 				}
 				C->CheckRay = false;
 			}
+			for (const auto& c : collidable)
+			{
+				if (c != C)
+				{
+					if (!c->hit && !c->collision)
+					{
+						if (C->GetBounds().Contains(c->GetBounds()))
+						{
+							c->collision = C->collision = true;
+						}
+
+					}
+				}
+			}
 		}
-		return;
-	}
-	virtual std::optional<Events*> Queue()
-	{
 		return this;
 	}
 	void Clear()

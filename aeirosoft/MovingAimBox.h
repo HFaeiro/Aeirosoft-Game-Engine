@@ -9,13 +9,11 @@ class MovingAimBox : public Events , public model
 
 {
 public:
-	MovingAimBox(graphics* g): g(g) {};
+	MovingAimBox(graphics* g): g(g) , model(L"Data\\Objects\\Target\\target.obj", g, 5) { srand(static_cast <unsigned> (time(0))); };
 	~MovingAimBox() {};
 
 	virtual bool Initialize()
 	{
-		*((model*)this) = model(L"Data\\Objects\\Target\\target.obj", g);
-		srand(static_cast <unsigned> (time(0)));
 		SetRandomSpawn();
 		//UpdateScale({ 20, 20, 20});
 		delta.restart();
@@ -25,30 +23,27 @@ public:
 	virtual void Update()
 	{
 
-		if (direction == prevDirection)
-		{
-			float rando;
-			if ((rando = (rand() / static_cast <float> (RAND_MAX / 10))) >= 1)
-			{
-				SetRandomMove();
-				if (rando >= 5)
-					moveSpeed = -moveSpeed;
-				Update();
-				return;
+		//direction = prevDirection;
+		//float rando;
+		//if((rando = (rand() / static_cast <float> (RAND_MAX / 10))) <= 2)
+		//{
+		//	
+		//		SetRandomMove();
+		//		/*if (rando >= 8)
+		//			moveSpeed = -moveSpeed;*/
 
-			}
-			moveSpeed *= (rand() / static_cast <float> (RAND_MAX * rando)) * direction;
-		}
+		//}
 		DirectX::XMFLOAT3 pos = getPosition();
-		moveSpeed = moveSpeed * delta.GetSecondsElapsed();
+		double elap = delta.GetSecondsElapsed();
+		double moveSpeed = m_moveSpeed * elap;
 
 
-		if (pos.y < 10 )
+		if (pos.y < 5 )
 		{
 			direction = 2;
 			//moveSpeed *= 2;
 		}
-		if (pos.y > 40 && direction == 2)
+		if (pos.y > 60)
 		{
 			direction = 3;
 			//moveSpeed *= 2;
@@ -124,6 +119,7 @@ public:
 		default:
 			break;
 		}
+		timeMoving += delta.GetSecondsElapsed();
 		delta.restart();
 		Render(g->m_TextureShader);
 		prevDirection = direction;
@@ -140,9 +136,16 @@ public:
 			Initialize();
 			
 		}
+		if (collision) {
+			Initialize();
+			collision = false;
+			
+		}
 		hit = false;
-		srand(static_cast <unsigned> (time(0)));
-		SetRandomMove();
+		if (moveTime <= timeMoving) {
+			SetRandomMove();
+			timeMoving = 0.f;
+		}
 
 		return this;
 	}
@@ -153,18 +156,22 @@ public:
 private:
 	void SetRandomMove()
 	{
-		moveSpeed = (rand() / static_cast <float> (RAND_MAX / 25));
+		m_moveSpeed = (rand() % 200 + 10);
 		direction = (rand() / static_cast <float> (RAND_MAX / 11));
+		moveTime = (rand() / static_cast <double> (RAND_MAX / 1));
+		m_moveSpeed += direction;
 
 	}
 	void SetRandomSpawn ()
 	{
-		float x = (rand() / static_cast <float> (RAND_MAX / 80));
-		float y = (rand() / static_cast <float> (RAND_MAX / 20));
-		float z = (rand() / static_cast <float> (RAND_MAX / 80));
+		double delt = delta.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
+		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
+		float x = (rand() % 20 - playerpos.x);
+		float y = (rand() % 20 + playerpos.y);
+		float z = (rand() % 20 - playerpos.z);
 
 		float rando;
-		if ((rando = (rand() / static_cast <float> (RAND_MAX / 5))) <= 1)
+		if ((rando = (rand() / static_cast <float> (RAND_MAX / 5))) <= 2.5)
 		{
 			x = -x;
 			z = -z;
@@ -174,10 +181,12 @@ private:
 
 
 	}
+	double moveTime = 0.f;
+	double timeMoving = 0.f;
 	Timer aliveTime;
 	int hits = 0;
 	DWORD prevDirection;
-	float moveSpeed;
+	double m_moveSpeed;
 	DWORD direction;
 	graphics* g;
 	Timer delta;

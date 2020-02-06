@@ -19,9 +19,9 @@ class weapon : public model
 {
 public:
 	
-	weapon(graphics* g , const std::wstring& filename) : g(g)
+	weapon(graphics* g , const std::wstring& filename, float scale = 1.f) : g(g)
 	{
-		init(filename, g);
+		init(filename, g, scale);
 	}
 	~weapon() {};
 

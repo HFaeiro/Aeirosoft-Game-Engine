@@ -17,10 +17,11 @@ static bool _compare_max_z(Vertex const& p1, Vertex const& p2) { return p1.posit
 
 
 
-void model::init(const std::wstring& filename, graphics* g) 
+void model::init(const std::wstring& filename, graphics* g, float scale) 
 {
 	*((Collidable*)this) = Collidable(g);
 
+	this->scale = scale;
 	this->directory = helper::strings::GetDirectoryFromPath(filename);
 	this->pDevice = g->GetDevice();
 	this->pContext = g->GetDeviceContext();
@@ -29,24 +30,24 @@ void model::init(const std::wstring& filename, graphics* g)
 }
 
 
-model::model(const std::wstring& filename, graphics* g): Collidable(g)
+model::model(const std::wstring& filename, graphics* g, float scale): Collidable(g)
 {
+
+	this->scale = scale;
 	this->pDevice = g->GetDevice();
 	this->pContext = g->GetDeviceContext();
-	this->scale = DirectX::XMMatrixScaling(1, 1, 1);
 	this->pos = DirectX::XMFLOAT3(0, 0, 0);
 	this->rot = DirectX::XMFLOAT3(0, 0, 0);
-	UpdateWorldMatrix();
 	this->directory = helper::strings::GetDirectoryFromPath(filename);
 	initBuffers(filename);
 }
 
 model::model() : Collidable(nullptr)
 {
-	this->scale = DirectX::XMMatrixScaling(1, 1, 1);
+
 	this->pos = DirectX::XMFLOAT3(0, 0, 0);
 	this->rot = DirectX::XMFLOAT3(0, 0, 0);
-	UpdateWorldMatrix();
+	
 }
 
 model::~model()
@@ -146,15 +147,12 @@ void model::Render(TextureShader pTextureShader)
 	//DrawBoundingBox();
 
 }
-void model::UpdateScale(DirectX::XMFLOAT3 scale)
-{
-	this->scale = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-}
+
 
 void model::UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix)
 {
 
-	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) * viewMatrix * scale;
+	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) * viewMatrix;
 
 	TransformBounds(world);
 
@@ -163,7 +161,7 @@ void model::UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix)
 void model::UpdateWorldMatrix()
 {
 
-	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) * scale;
+	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 	TransformBounds(world);
 
@@ -214,9 +212,9 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		if (mesh->mTextureCoords[0])
 			for (UINT i = 0; i < mesh->mNumVertices; i++)
 			{
-				vertices.emplace_back(mesh->mVertices[i].x,
-					mesh->mVertices[i].y,
-					mesh->mVertices[i].z,
+				vertices.emplace_back(mesh->mVertices[i].x * scale,
+					mesh->mVertices[i].y * scale,
+					mesh->mVertices[i].z * scale,
 					(float)mesh->mTextureCoords[0][i].x,
 					(float)mesh->mTextureCoords[0][i].y
 				);

@@ -33,136 +33,6 @@ app::~app()
 //}
 
 
-bool LoadModel(const std::wstring& filename, ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-{
-
-	FILE* file;
-	_wfopen_s(&file, filename.c_str(), L"r");
-	if (file == NULL)
-		return false;
-	std::wstring line;
-	const std::wstring directory = helper::strings::GetDirectoryFromPath(filename);
-	float x, y, z;
-	int i, t, n;
-	std::wstring mtlfile = L"";
-
-	struct wavefront
-	{
-		std::wstring name;
-		std::wstring material;
-		std::vector<DirectX::XMFLOAT3> vertices;
-		std::vector<DirectX::XMFLOAT2> textureCoords;
-		std::vector<DirectX::XMFLOAT3> normals;
-		std::vector<DWORD> indecies;
-		std::vector<DWORD> tindecies;
-		std::vector<DWORD> nindecies;
-		wavefront(std::wstring n) { name = n; }
-	};
-	std::vector<wavefront> wf;
-	
-
-	int wfsize;
-	line.resize(100);
-	while(!feof(file))
-	//while (fgetws(line.data(), line.size(), file))
-	{
-		std::wstring substr;
-
-		
-		wchar_t str[100];
-		int size = fwscanf_s(file, L"%s", str, 100);
-		if(size)
-			substr.resize(size);
-
-
-		wfsize = wf.size() - 1;
-		if (str[0] == L'#')
-		{
-			fgetws(line.data(), line.size(), file);
-			continue;
-		}
-			
-		if (str[0] == L's')
-		{
-			fgetws(line.data(), line.size(), file);
-			continue;
-		}
-		if (str[0] == L'm')
-		{
-			fwscanf_s(file, L"%s\n", line.data(), 100);
-			mtlfile = line;
-			continue;
-		}
-		if (str[0] == L'u')
-		{
-			fwscanf_s(file, L"%s\n", line.data(), 100);
-			wf[wfsize].material = line;
-			continue;
-		}
-		if(str[0] == L'v')
-		{
-			fwscanf_s(file, L"%f %f %f\n", &x, &y, &z);
-			if(str[1] == L'n')
-				wf[wfsize].normals.push_back({ x, y, z });
-			else if(str[1] == L't')
-				wf[wfsize].textureCoords.push_back({ x, y });
-			else
-				wf[wfsize].vertices.push_back({ x, y, z });
-			continue;
-		}
-		
-		if (str[0] == L'f')
-		{
-			for (int j = 0; j < 2; j++) {
-				fwscanf_s(file, L"%d/%d/%d ", &i, &t, &n);
-				i -= 1;
-				t -= 1;
-				n -= 1;
-				wf[wfsize].indecies.push_back(i);
-				wf[wfsize].tindecies.push_back(t);
-				wf[wfsize].nindecies.push_back(n);
-			}
-			fwscanf_s(file, L"%d/%d/%d\n", &i, &t, &n);
-			i -= 1;
-			t -= 1;
-			n -= 1;
-			wf[wfsize].indecies.push_back(i);
-			wf[wfsize].tindecies.push_back(t);
-			wf[wfsize].nindecies.push_back(n);
-			continue;
-		}
-		if (str[0] == L'o')
-		{
-			fwscanf_s(file, L"%s\n", line.data(), 100);
-			wf.push_back(line);
-			continue;
-		}
-		
-	}
-	fclose(file);
-	std::vector<Vertex> v;
-	std::vector<texture> vTexture;
-	std::vector<Mesh> meshes;
-	vTexture.push_back(texture(pDevice, colors::UnhandledTexturecolor, aiTextureType::aiTextureType_DIFFUSE));
-	for (auto& w : wf)
-	{
-
-		
-
-		for (auto& index : w.tindecies)
-		{
-			if (index >= w.vertices.size() || index >= w.textureCoords.size())
-			{
-				int poo = 0;
-			}
-			v.emplace_back(w.vertices[index], w.textureCoords[index]);
-			
-		}
-		meshes.push_back(Mesh(pDevice, pContext, v, w.indecies, vTexture));
-		v.clear();
-	}
-	int p = 8;
-}
 
 
 int app::begin()
@@ -186,14 +56,16 @@ int app::begin()
 
 	MovingAimBox M(&m_Graphics);
 	MovingAimBox M1(&m_Graphics);
+	MovingAimBox M2(&m_Graphics);
 	C.AddCollidable(&M);
 	C.AddCollidable(&M1);
+	C.AddCollidable(&M2);
 	events.push_back(&i);
 	events.push_back(&s);
 	events.push_back(&C);
 	events.push_back(&M);
 	events.push_back(&M1);
-
+	events.push_back(&M2);
 	//LoadModel(L"Data\\Objects\\nanosuit\\nanosuit.obj", m_Graphics.GetDevice(), m_Graphics.GetDeviceContext());
 	texture t(m_Graphics.GetDevice().Get(), L"Data\\Textures\\RustyPaint.dds", aiTextureType::aiTextureType_DIFFUSE);
 
@@ -224,7 +96,7 @@ int app::begin()
 		std::wstringstream wss;
 		std::wstringstream wsshots;
 		std::wstringstream wssAcc;
-		int hits = M.GetHits() + M1.GetHits();
+		int hits = M.GetHits() + M1.GetHits() + M2.GetHits();
 		int shots = p.GetShots();
 		float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
 		wss << L"Hits: " << hits;
@@ -418,3 +290,133 @@ void app::CreateClickRay()
 }
 */
 
+//bool LoadModel(const std::wstring& filename, ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+//{
+//
+//	FILE* file;
+//	_wfopen_s(&file, filename.c_str(), L"r");
+//	if (file == NULL)
+//		return false;
+//	std::wstring line;
+//	const std::wstring directory = helper::strings::GetDirectoryFromPath(filename);
+//	float x, y, z;
+//	int i, t, n;
+//	std::wstring mtlfile = L"";
+//
+//	struct wavefront
+//	{
+//		std::wstring name;
+//		std::wstring material;
+//		std::vector<DirectX::XMFLOAT3> vertices;
+//		std::vector<DirectX::XMFLOAT2> textureCoords;
+//		std::vector<DirectX::XMFLOAT3> normals;
+//		std::vector<DWORD> indecies;
+//		std::vector<DWORD> tindecies;
+//		std::vector<DWORD> nindecies;
+//		wavefront(std::wstring n) { name = n; }
+//	};
+//	std::vector<wavefront> wf;
+//	
+//
+//	int wfsize;
+//	line.resize(100);
+//	while(!feof(file))
+//	//while (fgetws(line.data(), line.size(), file))
+//	{
+//		std::wstring substr;
+//
+//		
+//		wchar_t str[100];
+//		int size = fwscanf_s(file, L"%s", str, 100);
+//		if(size)
+//			substr.resize(size);
+//
+//
+//		wfsize = wf.size() - 1;
+//		if (str[0] == L'#')
+//		{
+//			fgetws(line.data(), line.size(), file);
+//			continue;
+//		}
+//			
+//		if (str[0] == L's')
+//		{
+//			fgetws(line.data(), line.size(), file);
+//			continue;
+//		}
+//		if (str[0] == L'm')
+//		{
+//			fwscanf_s(file, L"%s\n", line.data(), 100);
+//			mtlfile = line;
+//			continue;
+//		}
+//		if (str[0] == L'u')
+//		{
+//			fwscanf_s(file, L"%s\n", line.data(), 100);
+//			wf[wfsize].material = line;
+//			continue;
+//		}
+//		if(str[0] == L'v')
+//		{
+//			fwscanf_s(file, L"%f %f %f\n", &x, &y, &z);
+//			if(str[1] == L'n')
+//				wf[wfsize].normals.push_back({ x, y, z });
+//			else if(str[1] == L't')
+//				wf[wfsize].textureCoords.push_back({ x, y });
+//			else
+//				wf[wfsize].vertices.push_back({ x, y, z });
+//			continue;
+//		}
+//		
+//		if (str[0] == L'f')
+//		{
+//			for (int j = 0; j < 2; j++) {
+//				fwscanf_s(file, L"%d/%d/%d ", &i, &t, &n);
+//				i -= 1;
+//				t -= 1;
+//				n -= 1;
+//				wf[wfsize].indecies.push_back(i);
+//				wf[wfsize].tindecies.push_back(t);
+//				wf[wfsize].nindecies.push_back(n);
+//			}
+//			fwscanf_s(file, L"%d/%d/%d\n", &i, &t, &n);
+//			i -= 1;
+//			t -= 1;
+//			n -= 1;
+//			wf[wfsize].indecies.push_back(i);
+//			wf[wfsize].tindecies.push_back(t);
+//			wf[wfsize].nindecies.push_back(n);
+//			continue;
+//		}
+//		if (str[0] == L'o')
+//		{
+//			fwscanf_s(file, L"%s\n", line.data(), 100);
+//			wf.push_back(line);
+//			continue;
+//		}
+//		
+//	}
+//	fclose(file);
+//	std::vector<Vertex> v;
+//	std::vector<texture> vTexture;
+//	std::vector<Mesh> meshes;
+//	vTexture.push_back(texture(pDevice, colors::UnhandledTexturecolor, aiTextureType::aiTextureType_DIFFUSE));
+//	for (auto& w : wf)
+//	{
+//
+//		
+//
+//		for (auto& index : w.tindecies)
+//		{
+//			if (index >= w.vertices.size() || index >= w.textureCoords.size())
+//			{
+//				int poo = 0;
+//			}
+//			v.emplace_back(w.vertices[index], w.textureCoords[index]);
+//			
+//		}
+//		meshes.push_back(Mesh(pDevice, pContext, v, w.indecies, vTexture));
+//		v.clear();
+//	}
+//	int p = 8;
+//}

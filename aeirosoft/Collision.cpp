@@ -23,6 +23,10 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 	this->currentMatrix = m;
 	vTransbBox.clear();
 	DirectX::BoundingBox tmpBox;
+	if (vOGbBox.empty())
+	{
+		return;
+	}
 	for (auto& v : vOGbBox) {
 		v.Transform(tmpBox, m);
 		vTransbBox.push_back(tmpBox);

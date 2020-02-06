@@ -13,11 +13,11 @@ class model :public Collidable
 public:
 
 
-	model( const std::wstring& filename, graphics *g);
+	model( const std::wstring& filename, graphics *g, float scale = 1.f);
 	model();
 	~model();
 
-	void init(const std::wstring& filename, graphics *g);
+	void init(const std::wstring& filename, graphics *g, float scale = 1.f);
 
 	virtual void adjustPosition(DirectX::XMFLOAT3 pos);
 	virtual void adjustPosition(float x, float y, float z);
@@ -34,7 +34,6 @@ public:
 
 	void Render(TextureShader);
 
-	void UpdateScale(DirectX::XMFLOAT3);
 
 	void UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix);
 
@@ -64,8 +63,8 @@ private:
 	
 	void ReleaseTexture();
 	bool initBuffers(const std::wstring& filename);
+	float scale;
 
-	DirectX::XMMATRIX scale;
 	
 
 
