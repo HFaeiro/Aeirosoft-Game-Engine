@@ -38,46 +38,46 @@ public:
 		double moveSpeed = m_moveSpeed * elap;
 
 
-		if (pos.y < 5 )
+		if (pos.y < 5 && (direction == 3 || direction == 9 || direction == 11))
 		{
 			direction = 2;
 			//moveSpeed *= 2;
 		}
-		if (pos.y > 60)
+		if (pos.y > 60 && (direction == 2 || direction == 8 || direction == 10))
 		{
 			direction = 3;
 			//moveSpeed *= 2;
 		}
-		if (pos.z < -100 && direction == 5)
-		{
-			direction = 4;
-			//moveSpeed *= 2;
-		}
-		if (pos.z > 100 && direction == 4)
-		{
-			direction = 5;
-			//moveSpeed *= 2;
-		}
-		if (pos.x < -100 && direction == 1)
-		{
-			direction = 0;
-			//moveSpeed *= 2;
-		}
-		if (pos.x > 100 && direction == 0)
-		{
-			direction = 1;
-			//moveSpeed *= 2;
-		}
-		if (pos.x > 100 && pos.z > 100)
-		{
-			direction = 7;
-			//moveSpeed *= 2;
-		}
-		if (pos.x < -100 && pos.z < -100)
-		{
-			direction = 6;
-			//moveSpeed *= 2;
-		}
+		//if (pos.z < -100 && direction == 5)
+		//{
+		//	direction = 4;
+		//	//moveSpeed *= 2;
+		//}
+		//if (pos.z > 100 && direction == 4)
+		//{
+		//	direction = 5;
+		//	//moveSpeed *= 2;
+		//}
+		//if (pos.x < -100 && direction == 1)
+		//{
+		//	direction = 0;
+		//	//moveSpeed *= 2;
+		//}
+		//if (pos.x > 100 && direction == 0)
+		//{
+		//	direction = 1;
+		//	//moveSpeed *= 2;
+		//}
+		//if (pos.x > 100 && pos.z > 100)
+		//{
+		//	direction = 7;
+		//	//moveSpeed *= 2;
+		//}
+		//if (pos.x < -100 && pos.z < -100)
+		//{
+		//	direction = 6;
+		//	//moveSpeed *= 2;
+		//}
 		switch (direction)
 		{
 		case 0:
@@ -156,7 +156,7 @@ public:
 private:
 	void SetRandomMove()
 	{
-		m_moveSpeed = (rand() % 200 + 10);
+		m_moveSpeed = (rand() % 100 + 10);
 		direction = (rand() / static_cast <float> (RAND_MAX / 11));
 		moveTime = (rand() / static_cast <double> (RAND_MAX / 1));
 		m_moveSpeed += direction;
@@ -166,16 +166,16 @@ private:
 	{
 		double delt = delta.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
 		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
-		float x = (rand() % 20 - playerpos.x);
+		float x = (rand() % 20 + playerpos.x);
 		float y = (rand() % 20 + playerpos.y);
-		float z = (rand() % 20 - playerpos.z);
+		float z = (rand() % 20 + playerpos.z);
 
 		float rando;
-		if ((rando = (rand() / static_cast <float> (RAND_MAX / 5))) <= 2.5)
-		{
-			x = -x;
-			z = -z;
-		}
+		//if ((rando = (rand() / static_cast <float> (RAND_MAX / 5))) <= 2.5)
+		//{
+		//	x = -x;
+		//	z = -z;
+		//}
 
 		setPosition(x,y,z);
 
