@@ -1,0 +1,141 @@
+﻿  Gui.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Gui.cpp(127,90): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Gui.cpp(127,85): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Gui.cpp(129,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Gui.cpp(129,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\xmemory(671,103): warning C4244: 'argument': conversion from '_Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=int
+          ]
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\vector(683): message : see reference to function template instantiation 'void std::_Default_allocator_traits<_Alloc>::construct<_Ty,float&,float&,float,int,int>(_Alloc &,_Objty *const ,float &,float &,float &&,int &&,int &&)' being compiled
+          with
+          [
+              _Alloc=std::allocator<Vertex>,
+              _Ty=Vertex,
+              _Objty=Vertex
+          ]
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\vector(688): message : see reference to function template instantiation 'void std::_Default_allocator_traits<_Alloc>::construct<_Ty,float&,float&,float,int,int>(_Alloc &,_Objty *const ,float &,float &,float &&,int &&,int &&)' being compiled
+          with
+          [
+              _Alloc=std::allocator<Vertex>,
+              _Ty=Vertex,
+              _Objty=Vertex
+          ]
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\vector(701): message : see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<float&,float&,float,int,int>(float &,float &,float &&,int &&,int &&)' being compiled
+          with
+          [
+              _Ty=Vertex
+          ]
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Gui.cpp(32): message : see reference to function template instantiation '_Ty &std::vector<_Ty,std::allocator<_Ty>>::emplace_back<float&,float&,float,int,int>(float &,float &,float &&,int &&,int &&)' being compiled
+          with
+          [
+              _Ty=Vertex
+          ]
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(632): message : see reference to class template instantiation 'std::chrono::duration<double,std::ratio<1,1>>' being compiled
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(178): message : see reference to class template instantiation 'std::chrono::duration<__int64,std::nano>' being compiled
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\chrono(610): message : see reference to class template instantiation 'std::chrono::time_point<std::chrono::steady_clock,std::chrono::nanoseconds>' being compiled
+  Player.cpp
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(27,17): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(28,18): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,72): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,67): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,83): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,78): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Player.h(123,68): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  Scenes.cpp
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(27,17): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(28,18): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,72): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,67): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,83): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,78): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Player.h(123,68): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  aeirosoft.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(27,17): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(28,18): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,72): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,67): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,83): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,78): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Player.h(123,68): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\aeirosoft.cpp(25,11): warning C4101: 'p': unreferenced local variable
+  app.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(27,17): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(28,18): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,72): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(36,67): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(38,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,83): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(44,78): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,14): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Collision.h(46,5): warning C4244: 'argument': conversion from 'LONG' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\Player.h(123,68): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\MovingAimBox.h(43,25): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\MovingAimBox.h(157,23): warning C4244: '=': conversion from 'float' to 'DWORD', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\app.cpp(78,25): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\app.cpp(81,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\app.cpp(87,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\app.cpp(264,19): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\app.cpp(265,20): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+  input.cpp
+  C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\dinput.h: DIRECTINPUT_VERSION undefined. Defaulting to version 0x0800
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\input.cpp(77,46): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\input.cpp(81,11): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\input.cpp(84,5): warning C4305: 'argument': truncation from 'unsigned int' to 'UCHAR'
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\input.cpp(84,12): warning C4309: 'argument': truncation of constant value
+  window.cpp
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\window.cpp(154,28): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\window.cpp(155,27): warning C4244: '=': conversion from 'double' to 'LONG', possible loss of data
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\optional(66,17): warning C4244: 'initializing': conversion from 'WPARAM' to 'int', possible loss of data
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\window.cpp(169): message : see reference to function template instantiation 'std::_Optional_destruct_base<_Ty,true>::_Optional_destruct_base<WPARAM&>(std::in_place_t,WPARAM &)' being compiled
+          with
+          [
+              _Ty=int
+          ]
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\window.cpp(169): message : see reference to function template instantiation 'std::_Optional_destruct_base<_Ty,true>::_Optional_destruct_base<WPARAM&>(std::in_place_t,WPARAM &)' being compiled
+          with
+          [
+              _Ty=int
+          ]
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\optional(183): message : see reference to function template instantiation 'std::_Optional_construct_base<_Ty>::_Optional_construct_base<WPARAM&>(std::in_place_t,WPARAM &)' being compiled
+          with
+          [
+              _Ty=int
+          ]
+D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\include\optional(183): message : see reference to function template instantiation 'std::_Optional_construct_base<_Ty>::_Optional_construct_base<WPARAM&>(std::in_place_t,WPARAM &)' being compiled
+          with
+          [
+              _Ty=int
+          ]
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\window.cpp(37): message : see reference to function template instantiation 'std::optional<int>::optional<WPARAM&,0>(_Ty2)' being compiled
+          with
+          [
+              _Ty2=WPARAM &
+          ]
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\window.cpp(37): message : see reference to function template instantiation 'std::optional<int>::optional<WPARAM&,0>(_Ty2)' being compiled
+          with
+          [
+              _Ty2=WPARAM &
+          ]
+  Generating Code...
+C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\aeirosoft\app.cpp(165): warning C4715: 'LoadModel': not all control paths return a value
+  aeirosoft.vcxproj -> C:\Users\mike\source\repos\aeirosoft\Aeirosoft-Game-Engine\aeirosoft\x64\Debug\aeirosoft.exe

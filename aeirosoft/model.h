@@ -1,43 +1,73 @@
 #pragma once
 #include "framework.h"
-#include <wrl.h>
-#include "Mesh.h"
 #include "Inc/Assimp/Importer.hpp"
 #include "Inc/Assimp/postprocess.h"
 #include "Inc/Assimp/scene.h"
-#include <DirectXCollision.h>
+#include <algorithm>
+#include "Collision.h"
+#include "Mesh.h"
+#include "TextureShader.h"
 
-
-class model
+class model :public Collidable
 {
 public:
-	
+
+
+	model( const std::wstring& filename, graphics *g);
 	model();
 	~model();
-	void init(const std::string & filename, ID3D11Device*, ID3D11DeviceContext*);
-	void Render();
-	
-	std::vector<std::vector<Vertex>> GetBounds() { return vBVerts; }
-	DirectX::BoundingBox bBox;
+
+	void init(const std::wstring& filename, graphics *g);
+
+	virtual void adjustPosition(DirectX::XMFLOAT3 pos);
+	virtual void adjustPosition(float x, float y, float z);
+	virtual void adjustRotation(float x, float y, float z);
+	virtual void setPosition(float x, float y, float z);
+	virtual void setPosition(float x, float y);
+	void setPositionAndRotation(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot);
+	virtual void setPosition(DirectX::XMFLOAT3 pos);
+	virtual void setRotation(DirectX::XMFLOAT3 rot);
+	virtual void setRotation(float x, float y, float z);
+	virtual void setRotation(float x, float y);
+	DirectX::XMFLOAT3 getPosition() { return pos; }
+	DirectX::XMFLOAT3 getRotation() { return rot; }
+
+	void Render(TextureShader);
+
+	void UpdateScale(DirectX::XMFLOAT3);
+
+	void UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix);
+
+
+
+
+	bool active = false;
 private:
+	bool DEBUG = true;
+	void UpdateWorldMatrix();
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 rot;
+	DirectX::XMMATRIX world;
 	Microsoft::WRL::ComPtr < ID3D11Device			> pDevice = nullptr;
 	Microsoft::WRL::ComPtr < ID3D11DeviceContext	> pContext = nullptr;
-
+	
 	std::vector<Mesh> meshes;
-	void ProcessNode(aiNode* node, const aiScene* scene);
+	void ProcessNode(aiScene* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-	bool LoadModel(const std::string& filename);
+	bool LoadModel(const std::wstring& filename);
 	std::vector<texture> LoadTextures(aiMaterial* pMaterial, aiTextureType type, const aiScene* pScene);
-
-	void CreateBounding(std::vector<Vertex>);
-	void DrawBoundings();
-	void FillBoundingBuffers();
+	TextureStorageType GetStorageType(const aiScene*, aiMaterial*, int index, aiTextureType);
+	
 	std::vector<std::vector<Vertex>> vBVerts;
 	std::vector<std::vector<DWORD>> vBIndecies;
-
+	std::wstring directory = L"";
 	
 	void ReleaseTexture();
-	bool initBuffers(const std::string & filename);
+	bool initBuffers(const std::wstring& filename);
+
+	DirectX::XMMATRIX scale;
 	
+
+
 };
 

@@ -1,14 +1,47 @@
 #include "graphics.h"
 
-
-
-graphics::graphics(HWND hWnd)
+graphics::graphics(const graphics& g)
 {
-	fpsTimer.Start();
-	window = hWnd;
+	if (this != &g)
+	{
+		this->pContext = g.pContext;
+		this->pDevice = g.pDevice;
+		this->pSwap = g.pSwap;
+		this->m_TextureShader = g.m_TextureShader;
+		this->m_ViewMatrix = g.m_ViewMatrix;
+		this->m_OrthoMatrix = g.m_OrthoMatrix;
+		this->m_WorldMatrix = g.m_WorldMatrix;
+		this->m_ProjectionMatrix = g.m_ProjectionMatrix;
+		this->m_Camera = g.m_Camera;
+		this->pDisabledStencilState = g.pDisabledStencilState;
+		this->m_Window = g.m_Window;
+		
+	}
 
-	getWindowDimentions();
+}
+graphics::graphics(HWND hWnd, bool fullscreen, bool vSync)
+{
+	this->m_Window = hWnd;
+	this->m_vsync_enabled = vSync;
+	this->fullScreen = fullscreen;
+}
+graphics::~graphics()
+{
 
+	pSwap->SetFullscreenState(false, NULL);
+
+}
+
+
+bool graphics::CreateDeviceAndSwap()
+{
+
+	RECT r = helper::window::GetRect(m_Window);
+
+	int height = r.bottom;
+	int width = r.right;
+
+	HRESULT hr;
 
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferDesc.Width = width;
@@ -22,198 +55,223 @@ graphics::graphics(HWND hWnd)
 	sd.SampleDesc.Quality = 0;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.BufferCount = 1;
-	sd.OutputWindow = hWnd;
-	sd.Windowed = TRUE;
+	sd.OutputWindow = m_Window;
+	sd.Windowed = !fullScreen;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	sd.Flags = 0;
 
-	D3D11CreateDeviceAndSwapChain(
-		nullptr,
-		D3D_DRIVER_TYPE_HARDWARE,
-		nullptr,
-		0,
-		nullptr,
-		0,
-		D3D11_SDK_VERSION,
-		&sd,
-		&pSwap,
-		&pDevice,
-		nullptr,
-		&pContext
-	);
 
-	Microsoft::WRL::ComPtr < ID3D11Resource> pBackBuffer = nullptr;
-	pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
-	pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget);
+	hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
+		0, nullptr, 0, D3D11_SDK_VERSION, &sd,
+		&pSwap, &pDevice, nullptr,
+		&pContext);
+
+	if (FAILED(hr))
+		return false;
+
+	return true;
+}
+
+
+
+bool graphics::Initialize()
+{
+
+	this->fovDegrees = 90.f;
+	FOV = (fovDegrees / 360) * DirectX::XM_PI;
+
+
+
+
+	HRESULT hr;
+
+	if (!CreateDeviceAndSwap())
+		return false;
+	
+	hr = pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
+	
+	if (FAILED(hr))
+		return false;
+	
+	hr = pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget);
 	pBackBuffer->Release();
 
-	if (!create2DTexture())
-		throw;
+	if (FAILED(hr))
+		return false;
 
+	if(!CreateDepthStencil())
+		return false;
 
-	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	TurnZBufferOn();
+
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
 
-	if (!setRasterState())
-		throw;
+	if (!CreateRasterStates())
+		return false;
 
-	setViewport();
+	TurnOnCulling();
 
-	// Setup the projection matrix.
-	float fovDegrees = 90.f;
-	fieldOfView = (fovDegrees / 360) * DirectX::XM_PI;
-	screenAspect = (float)width / (float)height;
+	SetDefaultViewport();
 
-	// Create the projection matrix for 3D rendering.
-	pprojectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
-	
+	if (!CreateBlendState())
+		return false;
+
+	if (!m_TextureShader.init(pDevice.Get(),m_Window))
+		return false;
+
+	UpdateOrthoProjectionMatrix();
+
 	// Initialize the world matrix to the identity matrix.
-	pworldMatrix = DirectX::XMMatrixIdentity();
+	m_WorldMatrix = DirectX::XMMatrixIdentity();
 
-	// Create an orthographic projection matrix for 2D rendering.
-	porthoMatrix = DirectX::XMMatrixOrthographicLH((float)width, (float)height, screenNear, screenDepth);
 
-	pModel.init("Data\\Objects\\nanosuit\\nanosuit.obj",pDevice.Get(),pContext.Get());
 
-	pCamera.setPosition(0.f, 0.f, -20.f);
-	pCamera.setProjection(pprojectionMatrix);
-	pTextureShader.init(pDevice.Get(), hWnd);
+	m_Camera.setPosition(0.f, 0.f, -.1f);
+	
+	m_Camera.setProjection(m_ProjectionMatrix);
 
+
+	
+	//Load Models
+	//m_Model.init(L"Data\\Objects\\nanosuit\\nanosuit.obj", pDevice.Get(), pContext.Get());
+
+	//asteroid.init(L"Data\\Objects\\nanosuit\\nanosuit.obj", pDevice.Get(), pContext.Get());
+	//m_Model.adjustPosition(10, 0, 0);
+	m_batch = std::make_unique<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>>(pContext.Get());
+	
 	pSpriteBatch = std::make_unique<DirectX::SpriteBatch>(this->pContext.Get());
 	pSpriteFont = std::make_unique<DirectX::SpriteFont>(pDevice.Get(), L"Data\\Fonts\\hFontSm.spritefont");
 
-
+	
+	return true;
 
 }
-
-graphics::~graphics()
+void graphics::CreateFloor(DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to,texture t, bool temporary)
 {
-	
+	std::vector<Vertex> vertices;
+	vertices.emplace_back(from.x, 0.f, from.y, 0.f, 1.f);
+	vertices.emplace_back(to.x, 0.f, to.y, 1.f, 0.f);
+	vertices.emplace_back(from.x, 0.f, to.y);
+	vertices.emplace_back(to.x, 0.f, from.y, 1.f, 1.f);
+
+
+	DWORD indecies[] =
+	{
+		0,2,1,
+		0,1,3
+	};
+
+	VertexBuffer vb;
+	IndexBuffer ib;
+	UINT offset = 0;
+	pContext->PSSetShaderResources(0, 1, t.GetTextureResourceViewAddr());
+	if(temporary)
+		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	else
+		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
+	pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
+	pContext->IASetIndexBuffer(ib.Get(), DXGI_FORMAT_R32_UINT, 0);
+	pContext->DrawIndexed(6, 0, 0);
+
+}
+//
+//void graphics::CreateWall(DirectX::XMFLOAT3 from, DirectX::XMFLOAT3 to, bool temporary)
+//{
+//	std::vector<Vertex> vertices;
+//	vertices.emplace_back(from.x, 0.f, from.y, 0.f, 1.f);
+//	vertices.emplace_back(to.x, 0.f, to.y, 1.f, 0.f);
+//	vertices.emplace_back(from.x, 0.f, to.y);
+//	vertices.emplace_back(to.x, 0.f, from.y, 1.f, 1.f);
+//
+//
+//	DWORD indecies[] =
+//	{
+//		0,2,1,
+//		0,1,3
+//	};
+//
+//	VertexBuffer vb;
+//	IndexBuffer ib;
+//	UINT offset = 0;
+//	if (temporary)
+//		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+//	else
+//		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//	CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
+//	pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
+//	pContext->IASetIndexBuffer(ib.Get(), DXGI_FORMAT_R32_UINT, 0);
+//	pContext->DrawIndexed(6, 0, 0);
+//
+//}
+
+void graphics::CreateIndexAndVectorBuffers(std::vector<Vertex> vertices, DWORD indecies[], VertexBuffer& vb, IndexBuffer& ib)
+{
+	ib.Init(this->pDevice.Get(), indecies, 6);
+	vb.Init(pDevice.Get(), vertices.data(), vertices.size() + 1);
+}
+
+void graphics::UpdateOrthoProjectionMatrix()
+{
+	RECT r = helper::window::GetRect(m_Window);
+	int height = r.bottom;
+	int width = r.right;
+	aspectRatio = (float)width / (float)height;
+
+	// Create the projection matrix for 3D rendering.
+	m_ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, aspectRatio, screenNear, renderDistance);
+
+	// Create an orthographic projection matrix for 2D rendering.
+	m_OrthoMatrix = DirectX::XMMatrixOrthographicLH((float)width, (float)height, screenNear, renderDistance);
+
 }
 
 void graphics::BeginScene(float red, float green, float blue, float alpha)
 {
-	const float color[] = { red, green, blue, alpha };
-	pContext->ClearRenderTargetView(pTarget.Get(), DirectX::Colors::Black);
-
-	pContext->ClearDepthStencilView(pStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	pContext->RSSetState(pRasterState.Get());
-	pContext->OMSetDepthStencilState(pStencilState.Get(), 1);
-	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
-
 	
-	DirectX::XMMATRIX viewMatrix, projectionMatrix, worldMatrix;
+	const float color[] = { red, green, blue, alpha };
+	pContext->ClearRenderTargetView(pTarget.Get(), color);
+	pContext->ClearDepthStencilView(pStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	pCamera.render();
-	viewMatrix = pCamera.getViewMatrix();
+	pContext->RSSetState(pRasterState.Get());
+	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
+	TurnZBufferOn();
+	m_TextureShader.SetShaders(pContext.Get());
 
-	worldMatrix = pworldMatrix;
-	projectionMatrix = pprojectionMatrix;
+	m_Camera.render(false);
 
-	worldMatrix += DirectX::XMMatrixTranslation(0.f, 0.f, 5.f);
-	//Render our loaded Model
-	pTextureShader.render(pContext.Get(), worldMatrix, viewMatrix, projectionMatrix);
+	m_ViewMatrix = m_Camera.getViewMatrix();
 
-	pModel.Render();
+	m_TextureShader.Render(pContext.Get(),m_WorldMatrix);
 
-	worldMatrix += DirectX::XMMatrixTranslation(0.f, 0.f, 15.f);
-	//Render our loaded Model
-	pTextureShader.render(pContext.Get(), worldMatrix, viewMatrix, projectionMatrix);
-
-	pModel.Render();
-	worldMatrix += DirectX::XMMatrixTranslation(0.f, 0.f, 25.f);
-	//Render our loaded Model
-	pTextureShader.render(pContext.Get(), worldMatrix, viewMatrix, projectionMatrix);
-
-	pModel.Render();
-	worldMatrix += DirectX::XMMatrixTranslation(0.f, 0.f, 35.f);
-	//Render our loaded Model
-	pTextureShader.render(pContext.Get(), worldMatrix, viewMatrix, projectionMatrix);
-
-	pModel.Render();
-	worldMatrix += DirectX::XMMatrixTranslation(0.f, 0.f, 45.f);
-	//Render our loaded Model
-	pTextureShader.render(pContext.Get(), worldMatrix, viewMatrix, projectionMatrix);
-
-	pModel.Render();
-	//pModel.Render();
-
-
-	static std::wstring fpsString = L"FPS: 0";
-	static int fpsCounter = 0;
-	fpsCounter += 1;
-	if (fpsTimer.GetMillisecondsElapsed() > 1000.0f)
-	{
-		fpsString = L"FPS: " + std::to_wstring(fpsCounter);
-		fpsCounter = 0;
-		fpsTimer.restart();
-	}
-
-	pSpriteBatch->Begin();
-	pSpriteFont->DrawString(pSpriteBatch.get(), fpsString.c_str(), DirectX::XMFLOAT2(0.f, 0.f), DirectX::Colors::White, 0.f, DirectX::XMFLOAT2(0.f, 0.f), DirectX::XMFLOAT2(1.0f, 1.f));
-	pSpriteBatch->End();
-
-
+	pContext->OMSetBlendState(pBlendState.Get(), 0, 0xffffffff);
 
 }
 
-void graphics::SetCamera(float x, float y, float z)
+
+
+void graphics::EndScene()
 {
-	pCamera.setPosition(x, y, z);
+
+	if(m_vsync_enabled)
+ 		pSwap->Present(1u, 0u);
+	else
+		pSwap->Present(0u, 0u);
+
 }
 
-void graphics::AdjustCameraPos(camera::movementType type, float amount)
+bool graphics::CreateDepthStencil()
 {
-	pCamera.adjustPosition(type, amount);
-}
 
-void graphics::SetCameraRotation(float x, float y, float z)
-{
-	pCamera.setRotation(x, y, z);
-}
-
-DirectX::XMMATRIX graphics::getViewMatrix()
-{
-	return pCamera.getViewMatrix();
-}
-
-DirectX::XMMATRIX graphics::getProjectionMatrix()
-{
-	return pprojectionMatrix;
-}
-
-DirectX::XMMATRIX graphics::getWorldMatrix()
-{
-	return pworldMatrix;
-}
-
-RECT graphics::GetRect(HWND hWnd) //get exact dementions of certain window. 
-{
-	RECT r = { 0 };
-	GetWindowRect(hWnd, &r);
-	r.right = r.right - r.left;
-	r.left = 0;
-	r.bottom = r.bottom - r.top;
-	r.top = 0;
-	return r;
-}
-
-void graphics::getWindowDimentions()
-{
-	RECT r = GetRect(window);
-	height = r.bottom;
-	width = r.right;
-}
-
-bool graphics::create2DTexture()
-{
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	RECT r = helper::window::GetRect(m_Window);
 
-	depthBufferDesc.Width = width;
-	depthBufferDesc.Height = height;
+	HRESULT hr;
+
+	depthBufferDesc.Width = r.right;
+	depthBufferDesc.Height = r.bottom;
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
 	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -224,7 +282,9 @@ bool graphics::create2DTexture()
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	if(FAILED(pDevice->CreateTexture2D(&depthBufferDesc, nullptr, &pStencil)))
+	hr = pDevice->CreateTexture2D(&depthBufferDesc, nullptr, &pStencil);
+
+	if (FAILED(hr))
 		return false;
 
 	// Initialize the description of the stencil state.
@@ -252,8 +312,17 @@ bool graphics::create2DTexture()
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
 
-	pContext->OMSetDepthStencilState(pStencilState.Get(), 1);
-		
+	hr = pDevice->CreateDepthStencilState(&depthStencilDesc, &pStencilState);
+
+	if (FAILED(hr))
+		return false;
+
+	depthStencilDesc.DepthEnable = false;
+	hr = pDevice->CreateDepthStencilState(&depthStencilDesc, &pDisabledStencilState);
+
+	if (FAILED(hr))
+		return false;
+
 	// Initailze the depth stencil view.
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 
@@ -262,19 +331,45 @@ bool graphics::create2DTexture()
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
-	if (FAILED(pDevice->CreateDepthStencilView(pStencil.Get(), &depthStencilViewDesc, &pStencilView)))
+	hr = pDevice->CreateDepthStencilView(pStencil.Get(), &depthStencilViewDesc, &pStencilView);
+
+	if (FAILED(hr))
 		return false;
 
+	return true;
+
+}
+
+
+bool graphics::CreateBlendState()
+{
+	D3D11_BLEND_DESC blendStateDesc;
+	ZeroMemory(&blendStateDesc, sizeof(D3D11_BLEND_DESC));
+	blendStateDesc.AlphaToCoverageEnable = FALSE;
+	blendStateDesc.IndependentBlendEnable = FALSE;
+	blendStateDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendStateDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendStateDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendStateDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendStateDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+	blendStateDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_DEST_ALPHA;
+	blendStateDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendStateDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	if (FAILED(pDevice->CreateBlendState(&blendStateDesc, &pBlendState))) {
+		return false;
+	}
 
 	return true;
 }
 
-bool graphics::setRasterState()
+
+bool graphics::CreateRasterStates()
 {
 	D3D11_RASTERIZER_DESC rasterDesc;
 
 	// Setup the raster description which will determine how and what polygons will be drawn.
-	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.AntialiasedLineEnable = true;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthBias = 0;
 	rasterDesc.DepthBiasClamp = 0.0f;
@@ -289,28 +384,145 @@ bool graphics::setRasterState()
 	if (FAILED(pDevice->CreateRasterizerState(&rasterDesc, &pRasterState)))
 		return false;
 
-	pContext->RSSetState(pRasterState.Get());
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+
+	if (FAILED(pDevice->CreateRasterizerState(&rasterDesc, &pRasterStateNoCull)))
+		return false;
+
+
 
 	return true;
 }
 
-void graphics::setViewport()
+void graphics::TurnOnCulling()
+{
+	pContext->RSSetState(pRasterState.Get());
+}
+
+void graphics::TurnOffCulling()
+{
+	pContext->RSSetState(pRasterStateNoCull.Get());
+}
+
+void graphics::SetDefaultViewport()
 {
 	D3D11_VIEWPORT viewport;
 
+	RECT r = helper::window::GetRect(m_Window);
 	// Setup the viewport for rendering.
-	viewport.Width = (float)width;
-	viewport.Height = (float)height;
-	viewport.MinDepth = 0.0f;
+	viewport.Width = (float)r.right;
+	viewport.Height = (float)r.bottom;
+	viewport.MinDepth = 0.00f;
 	viewport.MaxDepth = 1.0f;
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
 
 	pContext->RSSetViewports(1, &viewport);
-
 }
 
-void graphics::endFrame()
+void graphics::SetFullScreen()
 {
-	pSwap->Present(1u, 0u);
+	
+	this->fullScreen = !this->fullScreen;
+
+	pSwap->SetFullscreenState(this->fullScreen, NULL);
+
 }
+
+void graphics::TurnZBufferOn()
+{
+	pContext->OMSetDepthStencilState(pStencilState.Get(), 1);
+}
+
+void graphics::TurnZBufferOff()
+{
+	pContext->OMSetDepthStencilState(pDisabledStencilState.Get(), 1);
+}
+
+Microsoft::WRL::ComPtr<ID3D11Device> graphics::GetDevice()
+{
+	if (this == nullptr)
+		return nullptr;
+	return pDevice;
+}
+
+Microsoft::WRL::ComPtr<ID3D11DeviceContext> graphics::GetDeviceContext()
+{ 
+	if (this == nullptr)
+		return nullptr;
+	return pContext;
+}
+
+DirectX::XMMATRIX graphics::GetProjectionMatrix()
+{
+	return m_ProjectionMatrix;
+}
+
+DirectX::XMMATRIX graphics::GetWorldMatrix()
+{
+	return m_WorldMatrix;
+}
+
+DirectX::XMMATRIX graphics::GetOrthoMatrix()
+{
+	return m_OrthoMatrix;
+}
+
+
+DirectX::XMMATRIX graphics::GetViewMatrix()
+{
+	return m_Camera.getViewMatrix();
+}
+void graphics::Begin3DScene()
+{
+	TurnZBufferOn();
+	m_ViewMatrix = m_Camera.getViewMatrix();
+	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_ViewMatrix, m_ProjectionMatrix);
+}
+void graphics::Begin2DScene()
+{
+	TurnZBufferOff();
+	m_ViewMatrix = m_Camera.getViewMatrix();
+	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_ViewMatrix, m_OrthoMatrix);
+}
+
+void graphics::Resize()
+{
+
+	RECT r = helper::window::GetRect(m_Window);
+	if (r.right == 0)
+	{
+		int err = GetLastError();
+		return;
+	}
+	
+
+
+
+	pSwap->ResizeBuffers(1, r.right, r.bottom, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_EFFECT_DISCARD);
+
+	pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
+
+	pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget);
+	pBackBuffer->Release();
+
+	CreateDepthStencil();
+	
+//	SetDefaultViewport();
+	
+	UpdateOrthoProjectionMatrix();
+
+}
+
+void graphics::AdjustCameraPos(camera::movementType type, float amount)
+{
+	m_Camera.adjustPosition(type, amount);
+}
+
+void graphics::SetCamRotation(float x, float y, float z)
+{
+	m_Camera.setRotation(x, y, z);
+}
+
+
+

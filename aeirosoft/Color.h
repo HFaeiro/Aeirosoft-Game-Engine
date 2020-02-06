@@ -1,18 +1,18 @@
 #pragma once
 typedef unsigned char UCHAR;
 
-class Color
+class color
 {
 public:
-	Color();
-	Color(unsigned int val);
-	Color(UCHAR r, UCHAR g, UCHAR b);
-	Color(UCHAR r, UCHAR g, UCHAR b, UCHAR a);
-	Color(const Color& src);
+	color();
+	color(unsigned int val);
+	color(UCHAR r, UCHAR g, UCHAR b);
+	color(UCHAR r, UCHAR g, UCHAR b, UCHAR a);
+	color(const color& src);
 
-	Color& operator = (const Color& src);
-	bool operator == (const Color& rhs) const;
-	bool operator != (const Color& rhs) const;
+	color& operator = (const color& src);
+	bool operator == (const color& rhs) const;
+	bool operator != (const color& rhs) const;
 
 	constexpr UCHAR getR() const;
 	void setR(UCHAR r);
@@ -31,13 +31,13 @@ private:
 	union
 	{
 		UCHAR rgba[4];
-		unsigned int color;
+		unsigned int Color;
 	};
 
 };
 
-namespace Colors
+namespace colors
 {
-	const Color UnloadedTextureColor(100, 100, 100);
-	const Color UnhandledTextureColor(250, 0, 0);
+	const color UnloadedTexturecolor(100, 100, 100);
+	const color UnhandledTexturecolor(250, 0, 0);
 }

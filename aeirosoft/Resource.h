@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by aeirosoft.rc
+// Used by aeirosoft - Clean.rc
 
 #define IDS_APP_TITLE			103
 

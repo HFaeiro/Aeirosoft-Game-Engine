@@ -9,7 +9,7 @@ class VertexBuffer
 	UINT size = 0;
 
 public:
-
+	
 	VertexBuffer() {}
 	VertexBuffer(const VertexBuffer& rhs)
 	{
@@ -17,7 +17,7 @@ public:
 		this->size = rhs.size;
 		this->stride = rhs.stride;
 	}
-	VertexBuffer & operator = (const VertexBuffer& rhs)
+	VertexBuffer& operator = (const VertexBuffer& rhs)
 	{
 		this->buffer = rhs.buffer;
 		this->size = rhs.size;
@@ -25,13 +25,13 @@ public:
 		return *this;
 	}
 
-	ID3D11Buffer*			Get() const				{ return buffer.Get(); }
-	ID3D11Buffer* const*	GetAddressOf() const	{ return buffer.GetAddressOf(); }
-	UINT					Size() const			{ return this->size; }
-	const UINT				GetStride() const		{ return this->stride; }
-	const UINT *			GetStridePtr() const	{ return &this->stride; }
+	ID3D11Buffer* Get() const { return buffer.Get(); }
+	ID3D11Buffer* const* GetAddressOf() const { return buffer.GetAddressOf(); }
+	UINT					Size() const { return this->size; }
+	const UINT				GetStride() const { return this->stride; }
+	const UINT* GetStridePtr() const { return &this->stride; }
 
-	
+
 	HRESULT Init(ID3D11Device* pDevice, Vertex* data, UINT numVert)
 	{
 		this->size = numVert;
@@ -39,7 +39,7 @@ public:
 		D3D11_BUFFER_DESC vertexBuffDesc;
 
 		ZeroMemory(&vertexBuffDesc, sizeof(D3D11_BUFFER_DESC));
-		
+
 		// Set up the description of the static vertex buffer.
 		vertexBuffDesc.Usage = D3D11_USAGE_DEFAULT;
 		vertexBuffDesc.ByteWidth = sizeof(Vertex) * numVert;
@@ -53,7 +53,7 @@ public:
 		// Give the subresource structure a pointer to the vertex data.
 		vertexData.pSysMem = data;
 
-
+		
 		// Now create the vertex buffer.
 
 		return pDevice->CreateBuffer(&vertexBuffDesc, &vertexData, &buffer);

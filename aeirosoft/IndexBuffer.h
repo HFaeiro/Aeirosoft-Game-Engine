@@ -17,11 +17,11 @@ public:
 		ZeroMemory(&indexBuffDesc, sizeof(D3D11_BUFFER_DESC));
 
 		indexBuffDesc.Usage = D3D11_USAGE_DEFAULT;
-		indexBuffDesc.ByteWidth = sizeof(ULONG) * numIndices;
+		indexBuffDesc.ByteWidth = sizeof(DWORD) * numIndices;
 		indexBuffDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 		indexBuffDesc.CPUAccessFlags = 0;
 		indexBuffDesc.MiscFlags = 0;
-		
+
 
 		// Give the subresource structure a pointer to the index data.
 		indexData.pSysMem = data;
@@ -29,7 +29,7 @@ public:
 
 		// Create the index buffer.
 		return pDevice->CreateBuffer(&indexBuffDesc, &indexData, this->buffer.GetAddressOf());
-			
+
 	}
 
 

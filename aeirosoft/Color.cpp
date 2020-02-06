@@ -1,19 +1,19 @@
 
-#include "Color.h"
+#include "color.h"
 
-Color::Color()
-	:color(0)
+color::color()
+	:Color(0)
 {}
 
-Color::Color(unsigned int val):
-	color(val)
+color::color(unsigned int val) :
+	Color(val)
 {}
 
-Color::Color(UCHAR r, UCHAR g, UCHAR b):
-	Color(r,g,b,255)
+color::color(UCHAR r, UCHAR g, UCHAR b) :
+	color(r, g, b, 255)
 {}
 
-Color::Color(UCHAR r, UCHAR g, UCHAR b, UCHAR a)
+color::color(UCHAR r, UCHAR g, UCHAR b, UCHAR a)
 {
 	rgba[0] = r;
 	rgba[1] = g;
@@ -21,62 +21,62 @@ Color::Color(UCHAR r, UCHAR g, UCHAR b, UCHAR a)
 	rgba[3] = a;
 }
 
-Color::Color(const Color& src):
-	color(src.color)
+color::color(const color& src) :
+	color(src.Color)
 {}
 
-Color& Color::operator=(const Color & src)
+color& color::operator=(const color& src)
 {
-	color = src.color;
+	Color = src.Color;
 	return *this;
 }
 
-bool Color::operator==(const Color& rhs) const
+bool color::operator==(const color& rhs) const
 {
-	return (this->color == rhs.color);
+	return (this->Color == rhs.Color);
 }
 
-bool Color::operator!=(const Color& rhs) const
+bool color::operator!=(const color& rhs) const
 {
-	return (this->color != rhs.color);
+	return (this->Color != rhs.Color);
 }
 
-constexpr UCHAR Color::getR() const
+constexpr UCHAR color::getR() const
 {
 	return rgba[0];
 }
 
-void Color::setR(UCHAR r)
+void color::setR(UCHAR r)
 {
 	rgba[0] = r;
 }
 
-constexpr UCHAR Color::getG() const
+constexpr UCHAR color::getG() const
 {
 	return rgba[1];
 }
 
-void Color::setG(UCHAR g)
+void color::setG(UCHAR g)
 {
 	rgba[1] = g;
 }
 
-constexpr UCHAR Color::getB() const
+constexpr UCHAR color::getB() const
 {
 	return rgba[2];
 }
 
-void Color::setB(UCHAR b)
+void color::setB(UCHAR b)
 {
 	rgba[2] = b;
 }
 
-constexpr UCHAR Color::getA() const
+constexpr UCHAR color::getA() const
 {
 	return rgba[3];
 }
 
-void Color::setA(UCHAR a)
+void color::setA(UCHAR a)
 {
 	rgba[3] = a;
 }

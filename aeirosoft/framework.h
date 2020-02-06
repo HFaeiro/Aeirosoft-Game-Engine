@@ -16,8 +16,9 @@
 #include <tchar.h>
 #include <iostream>
 #include <d3d11.h>
-#include <DirectXMath.h>
-#include <wrl.h>
+#include <wrl/client.h>
 #include <memory>
 #include <vector>
+
 #pragma comment(lib, "d3d11.lib")
+#pragma comment (lib, "DirectXTK.lib")

@@ -11,24 +11,29 @@ public:
 	camera();
 	~camera();
 
-	void adjustPosition(movementType,float);
+	void adjustPosition(movementType, float);
+	void setPosition(DirectX::XMFLOAT3 xmfloat);
 	//void adjustRotation(movementType, float, float, float);
 	void setPosition(float, float, float);
 	void setRotation(float, float, float);
 	void setProjection(DirectX::XMMATRIX camProjection);
 	DirectX::XMFLOAT3 getPosition();
-	DirectX::XMFLOAT3 getRoation();
+	DirectX::XMFLOAT3 getRotation();
 
-	void render();
+
+	void render(bool spectate = false);
 	DirectX::XMMATRIX getViewMatrix();
 
 
-	DirectX::BoundingFrustum bFrustum;
+
+	/*DirectX::BoundingFrustum bFrustum;*/
 
 private:
+
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 rot;
 	DirectX::XMMATRIX viewMatrix;
+	//DirectX::XMMATRIX worldMatrix;
 
 	DirectX::XMVECTOR DefaultForward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	DirectX::XMVECTOR DefaultRight = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);

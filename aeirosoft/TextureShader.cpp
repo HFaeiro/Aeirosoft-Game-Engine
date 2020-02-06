@@ -1,16 +1,27 @@
 #include "TextureShader.h"
+
 #pragma comment(lib, "d3dcompiler.lib")
-void TextureShader::init(ID3D11Device* pDevice, HWND)
+
+TextureShader::TextureShader()
 {
-	
+}
+
+TextureShader::~TextureShader()
+{
+}
+
+bool TextureShader::init(ID3D11Device* pDevice, HWND)
+{
+	HRESULT hr;
 	Microsoft::WRL::ComPtr < ID3D10Blob> pBlob;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2] = {};
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
 
-	if (FAILED(D3DReadFileToBlob(L"texturev.cso", &pBlob)))
-		throw;
+	hr = D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
+	if (FAILED(hr))
+		return false;
 
 	pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
 
@@ -35,27 +46,40 @@ void TextureShader::init(ID3D11Device* pDevice, HWND)
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
 	// Create the vertex input layout.
-	if (FAILED(pDevice->CreateInputLayout(polygonLayout, numElements, pBlob->GetBufferPointer(),
-															pBlob->GetBufferSize(), &pLayout)))
-		throw;
+	hr = pDevice->CreateInputLayout(polygonLayout, numElements, pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pLayout);
+	if (FAILED(hr))
+		return false;
 
-	if (FAILED(D3DReadFileToBlob(L"texturep.cso", &pBlob)))
-		throw;
+	hr = D3DReadFileToBlob(L"PixelShader.cso", &pBlob);
+	if (FAILED(hr))
+		return false;
 
 	pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = static_cast<UINT>(sizeof(MatrixBufferType) + (16 - (sizeof(MatrixBufferType)) % 16 ));
+	matrixBufferDesc.ByteWidth = static_cast<UINT>(sizeof(WorldMatrixBufferType) + (16 - (sizeof(WorldMatrixBufferType)) % 16));
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	if (FAILED(pDevice->CreateBuffer(&matrixBufferDesc, NULL, &pMatrixBuffer)))
-		throw;
+	hr = pDevice->CreateBuffer(&matrixBufferDesc, NULL, &pWorldMatrixBuffer);
+	if (FAILED(hr))
+		return false;
 
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+
+	matrixBufferDesc.ByteWidth = static_cast<UINT>(sizeof(ViewProjectionBuffer) + (16 - (sizeof(ViewProjectionBuffer)) % 16));
+
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	hr = pDevice->CreateBuffer(&matrixBufferDesc, NULL, &pViewProjectionMatrixBuffer);
+	if (FAILED(hr))
+		return false;
+
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
 	// Create a texture sampler state description.
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -63,7 +87,7 @@ void TextureShader::init(ID3D11Device* pDevice, HWND)
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.MipLODBias = 0.0f;
 	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	samplerDesc.BorderColor[0] = 0;
 	samplerDesc.BorderColor[1] = 0;
 	samplerDesc.BorderColor[2] = 0;
@@ -72,27 +96,14 @@ void TextureShader::init(ID3D11Device* pDevice, HWND)
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	// Create the texture sampler state.
-	if (FAILED(pDevice->CreateSamplerState(&samplerDesc, &pSampleState)))
-		throw;
+	hr = pDevice->CreateSamplerState(&samplerDesc, &pSampleState);
+	if (FAILED(hr))
+		return false;
 
-
-
+	return true;
 }
-
-
-TextureShader::TextureShader()
+void TextureShader::SetShaders(ID3D11DeviceContext* pDeviceContext)
 {
-}
-
-TextureShader::~TextureShader()
-{
-}
-
-void TextureShader::render(ID3D11DeviceContext* pDeviceContext, DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix)
-{
-	SetShaderParameters(pDeviceContext, worldMatrix, viewMatrix, projectionMatrix);
-
-
 	// Set the vertex input layout.
 	pDeviceContext->IASetInputLayout(pLayout.Get());
 
@@ -100,45 +111,67 @@ void TextureShader::render(ID3D11DeviceContext* pDeviceContext, DirectX::XMMATRI
 	pDeviceContext->VSSetShader(pVertexShader.Get(), NULL, 0);
 	pDeviceContext->PSSetShader(pPixelShader.Get(), NULL, 0);
 	pDeviceContext->PSSetSamplers(0, 1, pSampleState.GetAddressOf());
-
-
-	return;
-
 }
 
 
 
-bool TextureShader::SetShaderParameters(ID3D11DeviceContext* pDeviceContext, DirectX::XMMATRIX worldMatrix, DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix)
+void TextureShader::Render(ID3D11DeviceContext* pDeviceContext, DirectX::XMMATRIX worldMatrix)
 {
-	
+	UpdateWorldMatrixBuffer(pDeviceContext, worldMatrix);
+
+}
+
+void TextureShader::UpdateWorldMatrixBuffer(ID3D11DeviceContext* pDeviceContext, DirectX::XMMATRIX worldMatrix)
+{
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* dataPtr;
+	WorldMatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+	HRESULT hr;
+
+	worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+
+
+	if (FAILED(pDeviceContext->Map(pWorldMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+				return ;
+
+	dataPtr = (WorldMatrixBufferType*)mappedResource.pData;
+	dataPtr->world = worldMatrix;
+
+	pDeviceContext->Unmap(pWorldMatrixBuffer.Get(), 0);
+
+	//pDeviceContext->UpdateSubresource(pWorldMatrixBuffer.GetAddressOf(), 0, nullptr, &worldMatrix, 0, 0);
+
+	pDeviceContext->VSSetConstantBuffers(0, 1, pWorldMatrixBuffer.GetAddressOf());
+
+}
+
+void TextureShader::UpdateViewProjectionMatrixBuffer(ID3D11DeviceContext* pDeviceContext, DirectX::XMMATRIX viewMatrix, DirectX::XMMATRIX projectionMatrix)
+{
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ViewProjectionBuffer* dataPtr;
 	unsigned int bufferNumber;
 
 	//worldMatrix = worldMatrix* projectionMatrix;
 	// Transpose the matrices to prepare them for the shader.
-	worldMatrix		= DirectX::XMMatrixTranspose(worldMatrix);
-	viewMatrix		= DirectX::XMMatrixTranspose(viewMatrix);
+	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
 	projectionMatrix = DirectX::XMMatrixTranspose(projectionMatrix);
 
-	if (FAILED(pDeviceContext->Map(pMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
-		return false;
+	if (FAILED(pDeviceContext->Map(pViewProjectionMatrixBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource)))
+		return;
 
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	dataPtr->world = worldMatrix;
+	dataPtr = (ViewProjectionBuffer*)mappedResource.pData;
+
 	dataPtr->view = viewMatrix;
 	dataPtr->projection = projectionMatrix;
 
-	pDeviceContext->Unmap(pMatrixBuffer.Get(), 0);
+	pDeviceContext->Unmap(pViewProjectionMatrixBuffer.Get(), 0);
 
-	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 0;
 
-	// Finanly set the constant buffer in the vertex shader with the updated values.
-	pDeviceContext->VSSetConstantBuffers(bufferNumber, 1, pMatrixBuffer.GetAddressOf());
 
-	//pDeviceContext->PSSetShaderResources(0, 1, &pTexture);
+	pDeviceContext->VSSetConstantBuffers(1, 1, pViewProjectionMatrixBuffer.GetAddressOf());
 
-	return true;
+
 }
+
+

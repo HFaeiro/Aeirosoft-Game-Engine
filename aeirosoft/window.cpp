@@ -16,13 +16,16 @@ window::window(HINSTANCE hInstance, const std::wstring windowName, POINT p)
     if (!InitInstance())
         this->~window();
 
-
-
 }
 
 window::~window()
 {
-    DestroyWindow(myhWnd);
+    DestroyWindow(getHWND());
+}
+
+void window::updateTitle(std::wstring title)
+{
+    SetWindowText(this->myhWnd, title.c_str());
 }
 
 std::optional<int> window::processMessages()
@@ -54,7 +57,7 @@ void window::MyRegisterClass()
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInst;
     wcex.hIcon = nullptr;
-    wcex.hCursor = nullptr;
+    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground = nullptr;
     wcex.lpszMenuName = nullptr;
     wcex.lpszClassName = sWindowName.c_str();
@@ -66,15 +69,20 @@ void window::MyRegisterClass()
 BOOL window::InitInstance()
 {
 
-    myhWnd = CreateWindowW(sWindowName.c_str(), sWindowName.c_str(), WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, width, height, nullptr, nullptr, hInst, nullptr);
+    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, width, height, nullptr, nullptr, hInst, this);
 
     if (!myhWnd)
     {
         return FALSE;
     }
 
-    SetWindowLongPtr(myhWnd, GWLP_USERDATA, reinterpret_cast<LONG>(this));
+    if (SetWindowLongPtr(myhWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this)) == 0)
+    {
+        int er = GetLastError();
+        if (er)
+            return false;
+    }
 
 
     ShowWindow(myhWnd, SW_SHOW);
@@ -91,14 +99,66 @@ LRESULT window::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 LRESULT window::tWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    window* wthis = reinterpret_cast<window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
     switch (message)
     {
+    case WM_SETCURSOR:
+        if (LOWORD(lParam) == HTCLIENT && this->active) {
+            SetCursor(nullptr);
+            return true;
+        }
+            break;
+    case WM_SETFOCUS:
+        this->active = true;
+        break;
+    case WM_KILLFOCUS:
+        this->active = false;
+        break;
     case WM_CLOSE:
     {
         PostQuitMessage(0);
         return 0;
     }
+    case WM_SIZE:
+    {
+        wthis->sizeChange = true;
+        break;
+    }
+    
+    case WM_LBUTTONUP:
+         this->LeftClick = false;
+         break;
+    case WM_LBUTTONDOWN:
+        this->LeftClick = true;
+        break;
+    case WM_RBUTTONDOWN:
+        this->RightClick = true;
+        break;
+    case WM_RBUTTONUP:
+        this->RightClick = false;
+        break;
+    case WM_MBUTTONDOWN:
+        this->MiddleClick = true;
+        break;
+    case WM_MBUTTONUP:
+        this->MiddleClick = false;
+        break;
+    case WM_MOUSEMOVE:
+    {
+        p.x = GET_X_LPARAM(lParam);
+        p.y = GET_Y_LPARAM(lParam);
+        if (this->active)
+        {
+            RECT r = helper::window::GetRect(hWnd);
+            POINT P;
+            P.y = r.bottom * .5;
+            P.x = r.right * .5;
+            ClientToScreen(hWnd, &P);
+            SetCursorPos(P.x, P.y);
+        }
+    }
     break;
+
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

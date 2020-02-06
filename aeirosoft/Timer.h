@@ -5,8 +5,10 @@
 class Timer
 {
 public:
+
 	Timer();
 	double GetMillisecondsElapsed();
+	double GetSecondsElapsed();
 	void restart();
 	bool Stop();
 	bool Start();

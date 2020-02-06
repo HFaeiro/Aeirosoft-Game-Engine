@@ -6,6 +6,17 @@ Timer::Timer()
 	stop = std::chrono::high_resolution_clock::now();
 }
 
+
+double Timer::GetSecondsElapsed()
+{
+	if (isOn)
+	{
+		auto elapsed = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - start);
+		return elapsed.count() * .001;
+	}
+	return 0;
+}
+
 double Timer::GetMillisecondsElapsed()
 {
 	if (isOn)
@@ -15,8 +26,9 @@ double Timer::GetMillisecondsElapsed()
 	}
 	else
 	{
-		auto elapsed = std::chrono::duration<double, std::milli>(stop - start);
-		return elapsed.count();
+		//auto elapsed = std::chrono::duration<double, std::milli>(stop - start);
+		//return elapsed.count();
+		return 0;
 	}
 }
 
