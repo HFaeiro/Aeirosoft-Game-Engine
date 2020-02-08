@@ -5,7 +5,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+
 *.iobj
 *.pdb
 *.ipdb
@@ -46,3 +46,4 @@
 *.app
 .vs/aeirosoft/v16/.suo
 .vs/aeirosoft/v16/Browse.VC.db
+aeirosoft/x64
