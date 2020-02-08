@@ -44,6 +44,7 @@ public:
 	
 	
 	bool isLeftClick();
+	bool isRightClick();
 	bool isKey(UCHAR);
 	std::wstring fpsString = L"";
 	void GetMouse(DirectX::XMFLOAT2& m);
@@ -73,7 +74,7 @@ private:
 
 
 	
-	bool isRightClick();
+
 	
 
 	bool ReadKeyboard();

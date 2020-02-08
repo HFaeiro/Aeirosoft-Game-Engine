@@ -47,8 +47,20 @@ int app::begin()
 	//Gui gui(&m_Graphics, &i);
 	//StartupGui(gui);
 
-	Player p(&m_Graphics, &i, L"Data\\Guns\\DesertEagle.obj", { 2.5f, -2.50f, 3.f }, { 0.f, 4.5f, 0.f },
-						L"");
+	//Player p(&m_Graphics, &i, L"Data\\Guns\\DesertEagle.obj", { 2.5f, -2.50f, 3.f }, { 0.f, 4.5f, 0.f },
+	//					L"");
+
+	//Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { 3.93f, -4.05f, 12.8215f }, { 0.f, 4.7f, 0.0017f },
+	//	L"");
+
+		//Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { .063f, -4.12517f, 12.8215f }, { 0.00518461f, 4.70958f, 0.0017f },
+		//L"");
+
+
+	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 3.93f, -4.05f, 12.8215f }, { 0.f, 4.7f, 0.0017f } },
+															{ { .0115558f, -2.87861f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
+															L"");
+
 	Collision C;
 	Scenes s(&m_Graphics, &C);
 	CreateScenes(s);

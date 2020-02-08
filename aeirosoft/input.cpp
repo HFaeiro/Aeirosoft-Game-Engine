@@ -90,17 +90,17 @@ void input::KeyboardInputs()
 			fsDelta.restart();
 		}
 	}
-	if (isKey(DIK_UP) || isKey(DIK_W))
+	if (/*isKey(DIK_UP) || */isKey(DIK_W))
 		c->adjustPosition(camera::movementType::forward, moveSpeed);
-	if (isKey(DIK_DOWN) || isKey(DIK_S))
+	if (/*isKey(DIK_DOWN) ||*/ isKey(DIK_S))
 		c->adjustPosition(camera::movementType::backward, moveSpeed);
 
-	if (isKey(DIK_LEFT) || isKey(DIK_A))
+	if (/*isKey(DIK_LEFT) ||*/ isKey(DIK_A))
 	{
 		c->adjustPosition(camera::movementType::left, moveSpeed);
 
 	}
-	if (isKey(DIK_RIGHT) || isKey(DIK_D))
+	if (/*isKey(DIK_RIGHT) ||*/ isKey(DIK_D))
 	{
 		c->adjustPosition(camera::movementType::right, moveSpeed);
 	}

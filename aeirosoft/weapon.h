@@ -3,6 +3,13 @@
 #include "model.h"
 #include "Events.h"
 #include "graphics.h"
+
+struct PR
+{
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 rot;
+};
+
 struct weaponStats
 {
 	float recoil;
@@ -11,6 +18,9 @@ struct weaponStats
 	float recoverRate;
 	float damage;
 	float bulletSpeed;
+
+	PR ADS;
+	PR hip;
 	model Bullet;
 	model Flash;
 };

@@ -20,7 +20,7 @@ static bool _compare_max_z(Vertex const& p1, Vertex const& p2) { return p1.posit
 void model::init(const std::wstring& filename, graphics* g, float scale) 
 {
 	*((Collidable*)this) = Collidable(g);
-
+	this->g = g;
 	this->scale = scale;
 	this->directory = helper::strings::GetDirectoryFromPath(filename);
 	this->pDevice = g->GetDevice();
@@ -30,7 +30,7 @@ void model::init(const std::wstring& filename, graphics* g, float scale)
 }
 
 
-model::model(const std::wstring& filename, graphics* g, float scale): Collidable(g)
+model::model(const std::wstring& filename, graphics* g, float scale): Collidable(g) , g(g)
 {
 
 	this->scale = scale;
@@ -58,7 +58,9 @@ model::~model()
 void model::adjustPosition(DirectX::XMFLOAT3 pos)
 {
 
-	this->pos = pos;
+	this->pos.x += pos.x;
+	this->pos.y += pos.y;
+	this->pos.z += pos.z;
 	UpdateWorldMatrix();
 
 }

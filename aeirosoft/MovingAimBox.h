@@ -156,7 +156,7 @@ public:
 private:
 	void SetRandomMove()
 	{
-		m_moveSpeed = (rand() % 100 + 10);
+		m_moveSpeed = ((float)(rand() % 125) + 10.f);
 		direction = (rand() / static_cast <float> (RAND_MAX / 11));
 		moveTime = (rand() / static_cast <double> (RAND_MAX / 1));
 		m_moveSpeed += direction;

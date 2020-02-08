@@ -475,9 +475,14 @@ DirectX::XMMATRIX graphics::GetViewMatrix()
 }
 void graphics::Begin3DScene()
 {
-	TurnZBufferOn();
+	
 	m_ViewMatrix = m_Camera.getViewMatrix();
 	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_ViewMatrix, m_ProjectionMatrix);
+	//pContext->RSSetState(pRasterState.Get());
+	//pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
+	TurnZBufferOn();
+	m_TextureShader.SetShaders(pContext.Get());
+
 }
 void graphics::Begin2DScene()
 {

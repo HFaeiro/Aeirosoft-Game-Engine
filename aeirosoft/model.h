@@ -64,7 +64,7 @@ private:
 	void ReleaseTexture();
 	bool initBuffers(const std::wstring& filename);
 	float scale;
-
+	graphics* g;
 	
 
 
