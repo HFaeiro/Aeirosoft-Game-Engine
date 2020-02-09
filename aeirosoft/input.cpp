@@ -52,12 +52,12 @@ void input::ProcessMouse()
 	if (y < -1.5f)
 	{
 		y = -1.4f;
-		my = -301.f;
+		my = -601.f;
 	}
 	if (y > 1.5f)
 	{
 		y = 1.4f;
-		my = 300.f;
+		my = 601.f;
 		
 	}
 	g->SetCamRotation(y, x, 0.f);

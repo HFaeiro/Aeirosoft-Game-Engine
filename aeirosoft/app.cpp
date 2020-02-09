@@ -57,7 +57,7 @@ int app::begin()
 		//L"");
 
 
-	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 4.92289f, -4.37262f, 12.8215f }, { 0.f, 4.61236f, 0.0771501f } },
+	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 5.38699f, -4.29565f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
 															{ { .0115558f, -2.87861f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
 															L"");
 
@@ -135,7 +135,7 @@ void app::CreateScenes(Scenes& s)
 	s.AddEntity(L"Data\\Objects\\Wall\\Wall.obj");
 	s.AddEntity(L"Data\\Objects\\Floor\\floor.obj");
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
-	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,50,0 }, { 0,0,0 });
+	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,3.1416f,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,1.5708f,0 });
