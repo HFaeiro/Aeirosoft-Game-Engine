@@ -19,7 +19,9 @@ texture::texture(ID3D11Device* pDevice, std::wstring filepath, aiTextureType typ
 	this->type = type;
 	if (helper::strings::GetFileExtention(filepath) == L".dds")
 	{
-		hr = DirectX::CreateDDSTextureFromFile(pDevice, filepath.c_str(), &pTexture, &pTextureView);
+		ID3D11DeviceContext* pContext;
+		pDevice->GetImmediateContext(&pContext);
+		hr = DirectX::CreateDDSTextureFromFile(pDevice,pContext, filepath.c_str(), &pTexture, &pTextureView);
 		if(FAILED(hr))
 			Initialize1x1colorTexture(pDevice, colors::UnloadedTexturecolor, type);
 		return;
@@ -27,8 +29,9 @@ texture::texture(ID3D11Device* pDevice, std::wstring filepath, aiTextureType typ
 	}
 	else
 	{
-		
-		hr = DirectX::CreateWICTextureFromFile(pDevice, filepath.c_str(), pTexture.GetAddressOf(), pTextureView.GetAddressOf());
+		ID3D11DeviceContext* pContext;
+		pDevice->GetImmediateContext(&pContext);
+		hr = DirectX::CreateWICTextureFromFile(pDevice, pContext, filepath.c_str(), pTexture.GetAddressOf(), pTextureView.GetAddressOf());
 		if (FAILED(hr))
 			Initialize1x1colorTexture(pDevice, colors::UnloadedTexturecolor, type);
 

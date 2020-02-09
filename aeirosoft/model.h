@@ -4,11 +4,11 @@
 #include "Inc/Assimp/postprocess.h"
 #include "Inc/Assimp/scene.h"
 #include <algorithm>
-#include "Collision.h"
+#include "graphics.h"
 #include "Mesh.h"
 #include "TextureShader.h"
 
-class model :public Collidable
+class model
 {
 public:
 
@@ -31,9 +31,18 @@ public:
 	virtual void setRotation(float x, float y);
 	DirectX::XMFLOAT3 getPosition() { return pos; }
 	DirectX::XMFLOAT3 getRotation() { return rot; }
-
+	DirectX::XMMATRIX getWorld() { return world; }
+	void revertWorld() { world = prevWorld; }
 	void Render(TextureShader);
-
+	std::vector<std::vector<Vertex>> getVertices()
+	{
+		std::vector<std::vector<Vertex>> vertices;
+		for (const auto& m : meshes)
+		{
+			vertices.push_back(m.getVertices());
+		}
+		return vertices;
+	}
 
 	void UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix);
 
@@ -47,6 +56,7 @@ private:
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 rot;
 	DirectX::XMMATRIX world;
+	DirectX::XMMATRIX prevWorld;
 	Microsoft::WRL::ComPtr < ID3D11Device			> pDevice = nullptr;
 	Microsoft::WRL::ComPtr < ID3D11DeviceContext	> pContext = nullptr;
 	

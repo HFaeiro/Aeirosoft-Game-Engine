@@ -22,19 +22,42 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 {
 	this->currentMatrix = m;
 	vTransbBox.clear();
-	DirectX::BoundingBox tmpBox;
+	DirectX::BoundingOrientedBox tmpBox;
 	if (vOGbBox.empty())
 	{
 		return;
 	}
 	for (auto& v : vOGbBox) {
-		v.Transform(tmpBox, m);
+		DirectX::XMFLOAT3 corners[8];
+		DirectX::XMVECTOR vCorners[8];
+		DirectX::XMFLOAT3 minVertex = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+		DirectX::XMFLOAT3 maxVertex = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+		v.GetCorners(corners);
+		for (int i = 0; i < 8; i++)
+		{
+			vCorners[i] = DirectX::XMLoadFloat3(&corners[i]);
+			vCorners[i] = DirectX::XMVector3Transform(vCorners[i], m);
+			DirectX::XMStoreFloat3(&corners[i] ,vCorners[i]);
+
+		}
+		for (const auto c : corners)
+		{
+
+			minVertex.x = std::min(minVertex.x, c.x);
+			minVertex.y = std::min(minVertex.y, c.y);
+			minVertex.z = std::min(minVertex.z, c.z);
+
+			maxVertex.x = std::max(maxVertex.x, c.x);
+			maxVertex.y = std::max(maxVertex.y, c.y);
+			maxVertex.z = std::max(maxVertex.z, c.z);
+		}
+		v.CreateFromPoints(tmpBox, 8, corners, sizeof(DirectX::XMFLOAT3));
 		vTransbBox.push_back(tmpBox);
 	}
 
 }
 
-void Collidable::DrawBoundingBox()
+void Collidable::DrawBoundingOrientedBox()
 {
 
 	UINT offset = 0;
@@ -62,7 +85,7 @@ void Collidable::DrawBoundingBox()
 	}
 }
 
-void Collidable::CreateBoundingBox(std::vector<Vertex> v)
+void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
 {
 
 	DirectX::XMFLOAT3 minVertex = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -82,7 +105,7 @@ void Collidable::CreateBoundingBox(std::vector<Vertex> v)
 	if (vMin.empty()) {
 		vMin.push_back(minVertex);
 		vMax.push_back(maxVertex);
-		CreateBoundingBox(minVertex, maxVertex);
+		CreateBoundingOrientedBox(minVertex, maxVertex);
 	}
 	else
 	{
@@ -101,7 +124,7 @@ void Collidable::CreateBoundingBox(std::vector<Vertex> v)
 			maxVertex.z = std::max(maxVertex.z, vMax[i].z);
 		}
 		vOGbBox.clear();
-		CreateBoundingBox(minVertex, maxVertex);
+		CreateBoundingOrientedBox(minVertex, maxVertex);
 		
 
 	}
@@ -109,34 +132,34 @@ void Collidable::CreateBoundingBox(std::vector<Vertex> v)
 }
 
 
-void Collidable::CreateBoundingBox(DirectX::XMFLOAT3& size)
+void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& size)
 {
 	DirectX::XMFLOAT3 minVertex = { .5f * -size.x, 0, .5f * -size.z };
 	DirectX::XMFLOAT3 maxVertex = { .5f * size.x, size.y, .5f * size.z };
 
-	CreateBoundingBox(minVertex, maxVertex);
+	CreateBoundingOrientedBox(minVertex, maxVertex);
 
 }
-void Collidable::CreateBoundingBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max)
+void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max)
 {
 	DirectX::XMFLOAT3 centerOffset = { .5f * (min.x + max.x), .5f * (min.y + max.y) , .5f * (min.z + max.z) };
 	DirectX::XMFLOAT3 Extents = { .5f * (min.x - max.x), .5f * (min.y - max.y) , .5f * (min.z - max.z) };
 
-	vOGbBox.push_back(DirectX::BoundingBox(centerOffset, Extents));
+	vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
 
 
 }
 
-void Collidable::AddBoundingBox(DirectX::BoundingBox& bBox)
+void Collidable::AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox)
 {
 	vOGbBox.push_back(bBox);
 }
 
-void Collidable::AddBoundingBox(DirectX::XMFLOAT3 size)
+void Collidable::AddBoundingOrientedBox(DirectX::XMFLOAT3 size)
 {
 
 	if (vOGbBox.empty())
-		CreateBoundingBox(size);
+		CreateBoundingOrientedBox(size);
 	else
 	{
 		DirectX::XMFLOAT3 minVertex = { .5f * -size.x, 0, .5f * -size.z };
@@ -145,7 +168,7 @@ void Collidable::AddBoundingBox(DirectX::XMFLOAT3 size)
 		DirectX::XMFLOAT3 centerOffset = { .5f * (minVertex.x + maxVertex.x), .5f * (minVertex.y + maxVertex.y) , .5f * (minVertex.z + maxVertex.z) };
 		DirectX::XMFLOAT3 Extents = { .5f * (minVertex.x - maxVertex.x), .5f * (minVertex.y - maxVertex.y) , .5f * (minVertex.z - maxVertex.z) };
 
-		vOGbBox.push_back(DirectX::BoundingBox(centerOffset, Extents));
+		vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
 	}
 
 }

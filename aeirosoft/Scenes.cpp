@@ -6,9 +6,9 @@ bool Scenes::SetActiveScene(const std::wstring& sceneName)
 		if (s.sceneName == sceneName)
 		{
 			ActiveScene = &s;
-			for (auto& m : ActiveScene->vModels)
+			for (auto& e : ActiveScene->entities)
 			{
-				C->AddCollidable(&m.m);
+				C->AddCollidable(&e);
 			}
 
 			return true;
@@ -16,28 +16,28 @@ bool Scenes::SetActiveScene(const std::wstring& sceneName)
 	return false;
 }
 
-bool Scenes::AddModelToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)
+bool Scenes::AddEntityToScene(const std::wstring& sceneName, const std::wstring& entName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)
 {
-	Model tmpModel;
-	for (const auto& m : vModels)
+	Entity* entModel = nullptr;
+	for (auto& e : entities)
 	{
-		if (m.modelName == modelName)
+		if (e.getName() == entName)
 		{
-			tmpModel = m;
+			entModel = &e;
 			break;
 		}
 	}
 
-	if (tmpModel.modelName.empty())
+	if (entModel == nullptr)
 		return false;
 
-	tmpModel.m.setPositionAndRotation(pos, rot);
-
+	entModel->setPositionAndRotation(pos, rot);
+	entModel->TransformBounds(entModel->getWorld());
 	for (auto& s : vScenes)
 	{
 		if (s.sceneName == sceneName)
 		{
-			s.vModels.push_back(tmpModel);
+			s.entities.push_back(*entModel);
 			return true;
 		}
 	}

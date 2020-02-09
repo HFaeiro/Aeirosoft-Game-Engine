@@ -91,7 +91,7 @@ int app::begin()
 				return *optional;
 
 		m_Graphics.BeginScene(0.f, 0.f, 0.f, 1.f);
-		m_Graphics.CreateFloor({ -200,-200 }, { 200, 200 }, t);
+		//m_Graphics.CreateFloor({ -200,-200 }, { 200, 200 }, t);
 		// start of event que
 		std::vector<Events*> queued;
 
@@ -132,8 +132,14 @@ int app::begin()
 void app::CreateScenes(Scenes& s)
 {
 	s.CreateScene(L"Scene1");
-	//s.AddModel(L"Data\\Objects\\Target\\target.obj");
-	//s.AddModelToScene(L"Scene1", L"target.obj", { 0,10,10 }, { 0,0,0 });
+	s.AddEntity(L"Data\\Objects\\Wall\\Wall.obj");
+	s.AddEntity(L"Data\\Objects\\Floor\\floor.obj");
+	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
+	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,50,0 }, { 0,0,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,3.1416f,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,1.5708f,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,4.7124f,0 });
 	s.SetActiveScene(L"Scene1");
 }
 

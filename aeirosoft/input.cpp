@@ -39,7 +39,7 @@ void input::ProcessMouse()
 {
 
 	float clicksPerSecond = 5;
-	float mouseSensitivity = .005f;
+	float mouseSensitivity = .0025f;
 
 	
 

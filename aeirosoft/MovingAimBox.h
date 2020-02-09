@@ -1,15 +1,14 @@
 #pragma once
 #include "Events.h"
-#include "model.h"
-#include "Collision.h"
+#include "Entity.h"
 #include <time.h>
 #include "timer.h"
 #include <sstream>
-class MovingAimBox : public Events , public model 
+class MovingAimBox : public Events , public Entity
 
 {
 public:
-	MovingAimBox(graphics* g): g(g) , model(L"Data\\Objects\\Target\\target.obj", g, 5) { srand(static_cast <unsigned> (time(0))); };
+	MovingAimBox(graphics* g): g(g) ,Entity(g, L"Data\\Objects\\Target\\target.obj", 5) { srand(static_cast <unsigned> (time(0))); };
 	~MovingAimBox() {};
 
 	virtual bool Initialize()
@@ -23,105 +22,9 @@ public:
 	virtual void Update()
 	{
 
-		//direction = prevDirection;
-		//float rando;
-		//if((rando = (rand() / static_cast <float> (RAND_MAX / 10))) <= 2)
-		//{
-		//	
-		//		SetRandomMove();
-		//		/*if (rando >= 8)
-		//			moveSpeed = -moveSpeed;*/
-
-		//}
-		DirectX::XMFLOAT3 pos = getPosition();
-		double elap = delta.GetSecondsElapsed();
-		double moveSpeed = m_moveSpeed * elap;
-
-
-		if (pos.y < 5 && (direction == 3 || direction == 9 || direction == 11))
-		{
-			direction = 2;
-			//moveSpeed *= 2;
-		}
-		if (pos.y > 60 && (direction == 2 || direction == 8 || direction == 10))
-		{
-			direction = 3;
-			//moveSpeed *= 2;
-		}
-		//if (pos.z < -100 && direction == 5)
-		//{
-		//	direction = 4;
-		//	//moveSpeed *= 2;
-		//}
-		//if (pos.z > 100 && direction == 4)
-		//{
-		//	direction = 5;
-		//	//moveSpeed *= 2;
-		//}
-		//if (pos.x < -100 && direction == 1)
-		//{
-		//	direction = 0;
-		//	//moveSpeed *= 2;
-		//}
-		//if (pos.x > 100 && direction == 0)
-		//{
-		//	direction = 1;
-		//	//moveSpeed *= 2;
-		//}
-		//if (pos.x > 100 && pos.z > 100)
-		//{
-		//	direction = 7;
-		//	//moveSpeed *= 2;
-		//}
-		//if (pos.x < -100 && pos.z < -100)
-		//{
-		//	direction = 6;
-		//	//moveSpeed *= 2;
-		//}
-		switch (direction)
-		{
-		case 0:
-			adjustPosition(moveSpeed, 0, 0);
-			break;
-		case 1:
-			adjustPosition(-moveSpeed, 0, 0);
-			break;
-		case 2:
-			adjustPosition(0,moveSpeed, 0);
-			break;
-		case 3:
-			adjustPosition(0,-moveSpeed, 0);
-			break;
-		case 4:
-			adjustPosition( 0, 0,moveSpeed);
-			break;
-		case 5:
-			adjustPosition(0, 0,-moveSpeed);
-			break;
-		case 6:
-			adjustPosition(moveSpeed,0, moveSpeed);
-			break;
-		case 7: 
-			adjustPosition(-moveSpeed, 0, -moveSpeed);
-			break;
-		case 8:
-			adjustPosition(moveSpeed, moveSpeed ,0);
-			break;
-		case 9:
-			adjustPosition(-moveSpeed,-moveSpeed ,0);
-			break;
-		case 10:
-			adjustPosition(0,moveSpeed, moveSpeed);
-			break;
-		case 11:
-			adjustPosition(0, -moveSpeed,-moveSpeed);
-			break;
-		default:
-			break;
-		}
-		timeMoving += delta.GetSecondsElapsed();
-		delta.restart();
+		g->TurnOffCulling();
 		Render(g->m_TextureShader);
+		g->TurnOnCulling();
 		prevDirection = direction;
 		return;
 	}
@@ -137,7 +40,8 @@ public:
 			
 		}
 		if (collision) {
-			Initialize();
+			revertWorld();
+			m_moveSpeed = -m_moveSpeed;
 			collision = false;
 			
 		}
@@ -146,7 +50,8 @@ public:
 			SetRandomMove();
 			timeMoving = 0.f;
 		}
-
+		UpdateMove();
+		TransformBounds(getWorld());
 		return this;
 	}
 	int GetHits()
@@ -154,9 +59,59 @@ public:
 		return hits;
 	}
 private:
+	void UpdateMove()
+	{
+		DirectX::XMFLOAT3 pos = getPosition();
+		double elap = delta.GetSecondsElapsed();
+		double moveSpeed = m_moveSpeed * elap;
+
+		switch (direction)
+		{
+		case 0:
+			adjustPosition(moveSpeed, 0, 0);
+			break;
+		case 1:
+			adjustPosition(-moveSpeed, 0, 0);
+			break;
+		case 2:
+			adjustPosition(0, moveSpeed, 0);
+			break;
+		case 3:
+			adjustPosition(0, -moveSpeed, 0);
+			break;
+		case 4:
+			adjustPosition(0, 0, moveSpeed);
+			break;
+		case 5:
+			adjustPosition(0, 0, -moveSpeed);
+			break;
+		case 6:
+			adjustPosition(moveSpeed, 0, moveSpeed);
+			break;
+		case 7:
+			adjustPosition(-moveSpeed, 0, -moveSpeed);
+			break;
+		case 8:
+			adjustPosition(moveSpeed, moveSpeed, 0);
+			break;
+		case 9:
+			adjustPosition(-moveSpeed, -moveSpeed, 0);
+			break;
+		case 10:
+			adjustPosition(0, moveSpeed, moveSpeed);
+			break;
+		case 11:
+			adjustPosition(0, -moveSpeed, -moveSpeed);
+			break;
+		default:
+			break;
+		}
+		timeMoving += delta.GetSecondsElapsed();
+		delta.restart();
+	}
 	void SetRandomMove()
 	{
-		m_moveSpeed = ((float)(rand() % 125) + 10.f);
+		m_moveSpeed = ((float)(rand() % 100) + 10.f);
 		direction = (rand() / static_cast <float> (RAND_MAX / 11));
 		moveTime = (rand() / static_cast <double> (RAND_MAX / 1));
 		m_moveSpeed += direction;
@@ -166,9 +121,9 @@ private:
 	{
 		double delt = delta.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
 		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
-		float x = (rand() % 20 + playerpos.x);
-		float y = (rand() % 20 + playerpos.y);
-		float z = (rand() % 20 + playerpos.z);
+		float x = (rand() % 300 + (-150));
+		float y = (rand() % 40 + 5);
+		float z = (rand() % 300 + (-150));
 
 		float rando;
 		//if ((rando = (rand() / static_cast <float> (RAND_MAX / 5))) <= 2.5)

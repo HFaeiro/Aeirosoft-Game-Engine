@@ -1,10 +1,10 @@
 #pragma once
 #include "framework.h"
 #include "Events.h"
-#include "model.h"
+#include "Entity.h"
 #include "Gui.h"
 #include "helper.h"
-#include "Collision.h"
+
 #include "Player.h"
 
 class Scenes :public Events
@@ -37,9 +37,9 @@ public:
 	virtual void Update()
 	{
 		g->Begin3DScene();
-			for ( auto& m : ActiveScene->vModels)
+			for ( auto& e : ActiveScene->entities)
 			{
-				m.m.Render(g->m_TextureShader);
+				e.Render(g->m_TextureShader);
 			}
 			if (ActiveScene->player->Queue())
 				ActiveScene->player->Update();
@@ -61,7 +61,7 @@ public:
 
 	}
 	bool SetActiveScene(const std::wstring& sceneName);
-	bool AddModelToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
+	bool AddEntityToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
 	bool AddPlayerToScene(std::wstring sceneName, Player* player)
 	{
 		for (auto& s : vScenes)
@@ -75,19 +75,19 @@ public:
 		return false;
 	}
 
-	bool AddModel(std::wstring filePath)
+	bool AddEntity(std::wstring filePath)
 	{
 
-		std::wstring modelName = helper::strings::GetNameFromPath(filePath);
+		std::wstring entName = helper::strings::GetNameFromPath(filePath);
 		
-		for (const auto& m : vModels)
+		for (const auto& e : entities)
 		{
-			if (m.modelName == modelName)
+			if (e.getName() == entName)
 				return false;
 
 		}
 		
-		vModels.push_back(Model(g, modelName, filePath));
+		entities.push_back(Entity(g, filePath));
 		return true;
 	}
 
@@ -97,23 +97,12 @@ private:
 	//*/input* i;
 	graphics* g;
 	
-	struct Model
-	{
-		std::wstring modelName;
-		model m;
-		Model(graphics* g,std::wstring modelName, std::wstring filePath)
-		{
-			this->modelName = modelName;
-			m = model(filePath, g);
-		}
-		Model() {};
-
-	};
+	
 	struct Scene
 	{
 		std::wstring sceneName;
 		//Gui gui;
-		std::vector<Model> vModels;
+		std::vector<Entity> entities;
 		Player* player;
 		Scene(std::wstring n, /*input* i,*/ graphics* g) :sceneName(n)//, gui(g, i)
 		{}
@@ -122,7 +111,7 @@ private:
 
 	Scene* ActiveScene = nullptr;
 	
-	std::vector<Model> vModels;
+	std::vector<Entity> entities;
 	std::vector<Scene> vScenes;
 	Collision* C;
 };

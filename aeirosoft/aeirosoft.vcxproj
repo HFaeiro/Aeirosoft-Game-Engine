@@ -161,6 +161,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="Events.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="graphics.h" />
@@ -190,6 +191,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="Gui.cpp" />

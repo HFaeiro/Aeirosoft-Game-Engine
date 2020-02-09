@@ -11,14 +11,14 @@ class Collidable
 public:
 	Collidable(graphics* g);;
 	~Collidable() {};
-
-protected:
 	void TransformBounds(DirectX::XMMATRIX m);
-	void CreateBoundingBox(std::vector<Vertex> v);
-	void CreateBoundingBox(DirectX::XMFLOAT3& size);
-	void CreateBoundingBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max);
-	void AddBoundingBox(DirectX::BoundingBox& bBox);
-	void AddBoundingBox(DirectX::XMFLOAT3 size);
+protected:
+
+	void CreateBoundingOrientedBox(std::vector<Vertex> v);
+	void CreateBoundingOrientedBox(DirectX::XMFLOAT3& size);
+	void CreateBoundingOrientedBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max);
+	void AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox);
+	void AddBoundingOrientedBox(DirectX::XMFLOAT3 size);
 	void AddRay()
 	{
 		RECT r = helper::window::GetRect(g->GetWindow());
@@ -59,8 +59,8 @@ protected:
 private:
 	friend class Collision;
 	void CreateTexture();
-	void DrawBoundingBox();
-	DirectX::BoundingBox GetBounds()
+	void DrawBoundingOrientedBox();
+	DirectX::BoundingOrientedBox GetBounds()
 	{
 		if (vTransbBox.empty())
 			return vOGbBox[0];
@@ -75,11 +75,11 @@ private:
 
 	texture redTexture;
 	IndexBuffer ib;
-	DirectX::BoundingBox MainBox;
-	//DirectX::BoundingBox TransbBox;
+	DirectX::BoundingOrientedBox MainBox;
+	//DirectX::BoundingOrientedBox TransbBox;
 
-	std::vector<DirectX::BoundingBox> vOGbBox;
-	std::vector<DirectX::BoundingBox> vTransbBox;
+	std::vector<DirectX::BoundingOrientedBox> vOGbBox;
+	std::vector<DirectX::BoundingOrientedBox> vTransbBox;
 	std::vector < DirectX::XMFLOAT3> vMin;
 	std::vector < DirectX::XMFLOAT3> vMax;
 	graphics* g;
@@ -102,7 +102,7 @@ public:
 	{
 		for (const auto& C : collidable)
 		{
-			//C->DrawBoundingBox();
+			//C->DrawBoundingOrientedBox();
 			if (C->CheckRay)
 			{
 				float f = 0.f;
@@ -110,7 +110,7 @@ public:
 				{
 					if (c != C)
 					{
-						DirectX::BoundingBox box = c->GetBounds();
+						DirectX::BoundingOrientedBox box = c->GetBounds();
 						if (box.Intersects(C->clickOrigin, C->clickDestination, f))
 						{
 							c->hit = true;

@@ -34,9 +34,8 @@
 //}
 
 Mesh::Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, std::vector<Vertex>& vertices, std::vector<ULONG>& indices, std::vector<texture> vTexture)
+	: vertices(vertices), vTexture(vTexture), pContext(pContext)
 {
-	this->vTexture = vTexture;
-	this->pContext = pContext;
 	if (FAILED(this->vertexBuffer.Init(pDevice, vertices.data(), vertices.size()/* + 1*/)))
 		throw;
 	if (FAILED(this->indexBuffer.Init(pDevice, indices.data(), indices.size())))
@@ -46,6 +45,7 @@ Mesh::Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, std::vector<Ver
 
 Mesh::Mesh(const Mesh& mesh)
 {
+	this->vertices = mesh.vertices;
 	this->pContext = mesh.pContext;
 	this->indexBuffer = mesh.indexBuffer;
 	this->vertexBuffer = mesh.vertexBuffer;

@@ -19,7 +19,7 @@ static bool _compare_max_z(Vertex const& p1, Vertex const& p2) { return p1.posit
 
 void model::init(const std::wstring& filename, graphics* g, float scale) 
 {
-	*((Collidable*)this) = Collidable(g);
+	
 	this->g = g;
 	this->scale = scale;
 	this->directory = helper::strings::GetDirectoryFromPath(filename);
@@ -30,7 +30,7 @@ void model::init(const std::wstring& filename, graphics* g, float scale)
 }
 
 
-model::model(const std::wstring& filename, graphics* g, float scale): Collidable(g) , g(g)
+model::model(const std::wstring& filename, graphics* g, float scale): g(g)
 {
 
 	this->scale = scale;
@@ -42,7 +42,7 @@ model::model(const std::wstring& filename, graphics* g, float scale): Collidable
 	initBuffers(filename);
 }
 
-model::model() : Collidable(nullptr)
+model::model()
 {
 
 	this->pos = DirectX::XMFLOAT3(0, 0, 0);
@@ -153,19 +153,19 @@ void model::Render(TextureShader pTextureShader)
 
 void model::UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix)
 {
-
+	prevWorld = world;
 	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) * viewMatrix;
 
-	TransformBounds(world);
+	//TransformBounds(world);
 
 }
 
 void model::UpdateWorldMatrix()
 {
-
+	prevWorld = world;
 	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
-	TransformBounds(world);
+	//TransformBounds(world);
 
 
 
@@ -244,7 +244,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<texture> diffuseTextures = LoadTextures(material, aiTextureType::aiTextureType_DIFFUSE, scene);
 
 
-	CreateBoundingBox(vertices);
+	//CreateBoundingBox(vertices);
 
 	return Mesh(pDevice.Get(), pContext.Get(), vertices, indices, diffuseTextures);
 

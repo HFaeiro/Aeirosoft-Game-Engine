@@ -84,7 +84,7 @@ public:
 
 		deltaTimer.Start();
 		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerZWidth);
-		CreateBoundingBox(playerSize);
+		CreateBoundingOrientedBox(playerSize);
 		return true;
 	}
 	virtual void Update()
