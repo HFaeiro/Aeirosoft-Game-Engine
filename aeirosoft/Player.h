@@ -74,7 +74,7 @@ public:
 	{
 		main.setPosition(hip.pos);
 		main.setRotation(hip.rot);
-		c->setPosition(0, 12.f, -5);
+		c->setPosition(0, playerHeight - 2, -5);
 		//playerModel.init(filename, pDevice, pContext);
 	}
 	~Player() { };
@@ -97,7 +97,7 @@ public:
 		if (jumping && !falling)
 		{
 
-			if (pos.y < 20)
+			if (pos.y < playerHeight + 10)
 				c->adjustPosition(camera::movementType::up, 45 * GetDeltaTime());
 			else
 			{
@@ -120,14 +120,12 @@ public:
 		}
 		else
 			falling = false;
-		if (i->isLeftClick() && !Shooting)
+		if (i->isLeftClick())
 		{
-			Shooting = true;
-			if (shootTimer.GetSecondsElapsed() == 0 || shootTimer.GetSecondsElapsed() >= .2)
+			if (main.shoot())
 			{
-				shootTimer.restart();
+				++shots;
 				AddRay();
-				shots += 1;
 			}
 		}
 		if (i->isRightClick())
@@ -191,7 +189,7 @@ private:
 	bool Shooting = false;
 	bool aiming = false;
 	int shots = 0;
-	float playerHeight = 14.0f;
+	float playerHeight = 20.0f;
 	float playerWidth = 5.0f;
 	float playerZWidth = 2.5f;
 	float hangTime = .075f;

@@ -57,7 +57,7 @@ int app::begin()
 		//L"");
 
 
-	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 3.93f, -4.05f, 12.8215f }, { 0.f, 4.7f, 0.0017f } },
+	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 4.92289f, -4.37262f, 12.8215f }, { 0.f, 4.61236f, 0.0771501f } },
 															{ { .0115558f, -2.87861f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
 															L"");
 

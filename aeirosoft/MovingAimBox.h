@@ -122,7 +122,7 @@ private:
 		double delt = delta.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
 		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
 		float x = (rand() % 300 + (-150));
-		float y = (rand() % 40 + 5);
+		float y = (rand() % 30 + 15);
 		float z = (rand() % 300 + (-150));
 
 		float rando;
