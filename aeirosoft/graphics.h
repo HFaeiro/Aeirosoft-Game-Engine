@@ -11,6 +11,7 @@
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "texture.h"
+//#include "Inc/DirectX/Audio.h"
 
 class graphics
 {
@@ -66,7 +67,7 @@ public:
 protected:
 
 	bool m_vsync_enabled = false;
-	int m_videoCardMemory = 0;
+	//int m_videoCardMemory = 0;
 	bool fullScreen = false;
 
 	Microsoft::WRL::ComPtr < ID3D11Device			> pDevice = nullptr;
@@ -81,6 +82,8 @@ protected:
 	Microsoft::WRL::ComPtr < ID3D11RasterizerState	> pRasterStateNoCull = nullptr;
 	Microsoft::WRL::ComPtr < ID3D11BlendState		> pBlendState = nullptr;
 	Microsoft::WRL::ComPtr < ID3D11Resource			> pBackBuffer = nullptr;
+
+	//std::unique_ptr			< DirectX::AudioEngine	> pAudio = nullptr;
 
 	DirectX::XMMATRIX m_ProjectionMatrix;
 	DirectX::XMMATRIX m_WorldMatrix;

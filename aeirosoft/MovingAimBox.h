@@ -4,11 +4,11 @@
 #include <time.h>
 #include "timer.h"
 #include <sstream>
-class MovingAimBox : public Events , public Entity
+class MovingAimBox : public Events , public EntityAi
 
 {
 public:
-	MovingAimBox(graphics* g): g(g) ,Entity(g, L"Data\\Objects\\Target\\target.obj", 5) { srand(static_cast <unsigned> (time(0))); };
+	MovingAimBox(graphics* g): g(g) ,EntityAi(g, L"Data\\Objects\\Target\\target.obj", 5) { srand(static_cast <unsigned> (time(0))); };
 	~MovingAimBox() {};
 
 	virtual bool Initialize()
@@ -41,6 +41,11 @@ public:
 		}
 		if (collision) {
 			revertWorld();
+			if (prevDirection == -1)
+			{
+				Initialize();
+				return {};
+			}
 			m_moveSpeed = -m_moveSpeed;
 			collision = false;
 			
@@ -64,7 +69,6 @@ private:
 		DirectX::XMFLOAT3 pos = getPosition();
 		double elap = delta.GetSecondsElapsed();
 		double moveSpeed = m_moveSpeed * elap;
-
 		switch (direction)
 		{
 		case 0:
@@ -140,7 +144,7 @@ private:
 	double timeMoving = 0.f;
 	Timer aliveTime;
 	int hits = 0;
-	DWORD prevDirection;
+	DWORD prevDirection = -1;
 	double m_moveSpeed;
 	DWORD direction;
 	graphics* g;

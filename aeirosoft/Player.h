@@ -1,15 +1,10 @@
 #pragma once
 #include "framework.h"
-#include "model.h"
-#include "camera.h"
-#include "Events.h"
-#include "input.h"
+#include "Entity.h"
 #include "weapon.h"
-#include "graphics.h"
-#include "Collision.h"
-#include <DirectXCollision.h>
 #include <sstream>
-class Player : public Events , public Collidable
+
+class Player : public Events , public Entity
 {
 public:
 
@@ -17,27 +12,27 @@ public:
 	{
 		double delt = deltaTimer.GetSecondsElapsed();
 		float moveSpeed = 1 * delt;
-		bool shift = i->isKey(DIK_LSHIFT);
-		if (i->isKey(DIK_UP)) {
+		bool shift = Entity::i->isKey(DIK_LSHIFT);
+		if (Entity::i->isKey(DIK_UP)) {
 			if (!shift)
 				main.adjustPosition({ 0,moveSpeed, 0 });
 			else
 				main.adjustRotation(0,0, moveSpeed);
 		}
-		if (i->isKey(DIK_DOWN)) {
+		if (Entity::i->isKey(DIK_DOWN)) {
 			if (!shift)
 				main.adjustPosition({ 0,-moveSpeed, 0 });
 			else
 				main.adjustRotation(0, 0,-moveSpeed);
 		}
-		if (i->isKey(DIK_LEFT))
+		if (Entity::i->isKey(DIK_LEFT))
 		{
 			if (!shift)
 				main.adjustPosition({ moveSpeed,0, 0 });
 			else
 				main.adjustRotation(0, moveSpeed,0 );
 		}
-		if (i->isKey(DIK_RIGHT))
+		if (Entity::i->isKey(DIK_RIGHT))
 		{
 			if (!shift)
 				main.adjustPosition({ -moveSpeed, 0 ,0 });
@@ -69,8 +64,8 @@ public:
 
 	Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS,
 		const std::wstring& filename) :
-										g(g), c(&g->m_Camera), main(g, startingGun, .75f),
-										i(i), Collidable(g), hip(hip), ADS(ADS)
+										g(g), main(g, startingGun, .75f),
+										Entity(g, i, filename),c(&g->m_Camera), hip(hip), ADS(ADS)
 	{
 		main.setPosition(hip.pos);
 		main.setRotation(hip.rot);
@@ -89,10 +84,13 @@ public:
 	}
 	virtual void Update()
 	{
-		//test();
+#ifdef _DEBUG
+		test();
+#endif
+
 		DirectX::XMFLOAT3 pos = c->getPosition();
 		
-		if (i->isKey(DIK_SPACE) && !jumping && !falling)
+		if (Entity::i->isKey(DIK_SPACE) && !jumping && !falling)
 			jumping = true;
 		if (jumping && !falling)
 		{
@@ -120,7 +118,7 @@ public:
 		}
 		else
 			falling = false;
-		if (i->isLeftClick())
+		if (Entity::i->isLeftClick())
 		{
 			if (main.shoot())
 			{
@@ -128,7 +126,7 @@ public:
 				AddRay();
 			}
 		}
-		if (i->isRightClick())
+		if (Entity::i->isRightClick())
 		{
 			if (clickTimer.GetSecondsElapsed() == 0 || clickTimer.GetSecondsElapsed() >= .2)
 			{
@@ -147,9 +145,29 @@ public:
 
 			}
 		}
-		else if (!i->isLeftClick())
+		else if (Entity::i->isLeftClick())
 			Shooting = false;
+		//if (/*isKey(DIK_UP) || */isKey(DIK_W))
+//	c->adjustPosition(camera::movementType::forward, moveSpeed);
+//if (/*isKey(DIK_DOWN) ||*/ isKey(DIK_S))
+//	c->adjustPosition(camera::movementType::backward, moveSpeed);
 
+//if (/*isKey(DIK_LEFT) ||*/ isKey(DIK_A))
+//{
+//	c->adjustPosition(camera::movementType::left, moveSpeed);
+
+//}
+//if (/*isKey(DIK_RIGHT) ||*/ isKey(DIK_D))
+//{
+//	c->adjustPosition(camera::movementType::right, moveSpeed);
+//}
+
+//if (isKey(DIK_SPACE))
+//	c->adjustPosition(camera::movementType::up, moveSpeed);
+
+//if (isKey(DIK_LSHIFT))
+//	c->adjustPosition(camera::movementType::up, -moveSpeed);
+//
 
 		main.Render();
 		//DrawBoundingBox();
@@ -201,12 +219,11 @@ private:
 	bool jumping = false;
 	bool falling = false;
 	std::vector<Events*> events;
-	camera* c;
 	float health = 100.f;
-	model playerModel;
 	//std::vector<weapons> equippedWeapons;
+	camera* c;
 	weapon main;
-	input *i;
+
 	//weapon second;
 	DirectX::XMMATRIX viewInverse;
 

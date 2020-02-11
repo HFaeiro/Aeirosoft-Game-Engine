@@ -4,14 +4,15 @@
 #include "graphics.h"
 #include <DirectXCollision.h>
 
-
 class Collidable
 {
-
+	
 public:
 	Collidable(graphics* g);;
 	~Collidable() {};
 	void TransformBounds(DirectX::XMMATRIX m);
+	enum Type { Entity, EntityAi, Object };
+	Type type;
 protected:
 
 	void CreateBoundingOrientedBox(std::vector<Vertex> v);
@@ -57,6 +58,7 @@ protected:
 	bool hit = false;
 	bool collision = false;
 private:
+
 	friend class Collision;
 	void CreateTexture();
 	void DrawBoundingOrientedBox();
@@ -102,39 +104,41 @@ public:
 	{
 		for (const auto& C : collidable)
 		{
-			//C->DrawBoundingOrientedBox();
-			if (C->CheckRay)
+#ifdef _DEBUG
+			C->DrawBoundingOrientedBox();
+#endif
+			if (C->type != Collidable::Type::Object)
 			{
-				float f = 0.f;
+				if (C->CheckRay)
+				{
+					float f = 0.f;
+					for (const auto& c : collidable)
+					{
+						if (c != C)
+						{
+							DirectX::BoundingOrientedBox box = c->GetBounds();
+							if (box.Intersects(C->clickOrigin, C->clickDestination, f))
+							{
+								c->hit = true;
+							}
+						}
+					}
+					C->CheckRay = false;
+				}
+
 				for (const auto& c : collidable)
 				{
 					if (c != C)
 					{
-						DirectX::BoundingOrientedBox box = c->GetBounds();
-						if (box.Intersects(C->clickOrigin, C->clickDestination, f))
-						{
-							c->hit = true;
-						}
-					}
-				}
-				C->CheckRay = false;
-			}
-			for (const auto& c : collidable)
-			{
-				if (c != C)
-				{
-					if (!c->hit && !c->collision)
-					{
-						if (C->GetBounds().Contains(c->GetBounds()))
-						{
-							c->collision = C->collision = true;
-						}
-
+							if (C->GetBounds().Contains(c->GetBounds()))
+							{
+								c->collision = C->collision = true;
+							}
 					}
 				}
 			}
 		}
-		return this;
+		return {};
 	}
 	void Clear()
 	{

@@ -44,7 +44,9 @@
 *.exe
 *.out
 *.app
-.vs/aeirosoft/v16/.suo
-.vs/aeirosoft/v16/Browse.VC.db
-aeirosoft/x64
+.suo
+Browse.VC.db
+.vs/aeirosoft/v16/
+.vs/aeirosoft/v16/
+aeirosoft/x64/
 x64/

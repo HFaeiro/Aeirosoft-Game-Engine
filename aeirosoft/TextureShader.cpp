@@ -1,6 +1,9 @@
 #include "TextureShader.h"
-
+#ifdef _DEBUG
 #pragma comment(lib, "d3dcompiler.lib")
+#endif // DEBUG
+#include <fstream>
+
 
 TextureShader::TextureShader()
 {
@@ -18,13 +21,38 @@ bool TextureShader::init(ID3D11Device* pDevice, HWND)
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_SAMPLER_DESC samplerDesc;
+#ifdef _DEBUG
+
+
 
 	hr = D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
 	if (FAILED(hr))
 		return false;
+	hr = D3DWriteBlobToFile(pBlob.Get(), L"vs", true);
+	if (FAILED(hr))
+		return false;
+	hr = pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
+#else
+	std::ifstream ifs(L"vs", std::ios::in | std::ios::binary);
+	if (!ifs.is_open())
+	{
 
-	pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
+		MessageBox(NULL, L"Failed To find file 'vs' please make sure its with this file", L"Error Can't load vertex shaders!", MB_OK);
+		return false;
 
+	}
+	ifs.seekg(0, std::ios::end);
+	size_t size = ifs.tellg();
+	
+	char* buffer = new char[size];
+	ifs.seekg(0, std::ios::beg);
+	ifs.read(buffer, size);
+	ifs.close();
+	hr = pDevice->CreateVertexShader(buffer, size, nullptr, &pVertexShader);
+#endif // DEBUG	
+	
+	if (FAILED(hr))
+		return false;
 
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
@@ -46,6 +74,8 @@ bool TextureShader::init(ID3D11Device* pDevice, HWND)
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
 	// Create the vertex input layout.
+#ifdef _DEBUG
+
 	hr = pDevice->CreateInputLayout(polygonLayout, numElements, pBlob->GetBufferPointer(), pBlob->GetBufferSize(), &pLayout);
 	if (FAILED(hr))
 		return false;
@@ -53,8 +83,35 @@ bool TextureShader::init(ID3D11Device* pDevice, HWND)
 	hr = D3DReadFileToBlob(L"PixelShader.cso", &pBlob);
 	if (FAILED(hr))
 		return false;
+	hr = D3DWriteBlobToFile(pBlob.Get(), L"ps", true);
+	if (FAILED(hr))
+		return false;
+	hr = pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
+#else
 
-	pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
+	hr = pDevice->CreateInputLayout(polygonLayout, numElements, buffer, size, &pLayout);
+	if (FAILED(hr))
+		return false;
+
+
+	ifs.open(L"ps", std::ios::in | std::ios::binary);
+	if (!ifs.is_open())
+	{
+
+		MessageBox(NULL, L"Failed To find file 'ps' please make sure its with this file", L"Error Can't load pixel shaders!", MB_OK);
+			return false;
+
+	}
+	ifs.seekg(0, std::ios::end);
+	size = ifs.tellg();
+	ifs.seekg(0, std::ios::beg);
+	ifs.read(buffer, size);
+	ifs.close();
+	hr = pDevice->CreatePixelShader(buffer, size, nullptr, &pPixelShader);
+	free(buffer);
+#endif // DEBUG	
+	if (FAILED(hr))
+		return false;
 
 	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;

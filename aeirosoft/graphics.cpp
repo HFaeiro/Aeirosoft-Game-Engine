@@ -4,6 +4,7 @@ graphics::graphics(const graphics& g)
 {
 	if (this != &g)
 	{
+		//this->pAudio = g.pAudio;
 		this->pContext = g.pContext;
 		this->pDevice = g.pDevice;
 		this->pSwap = g.pSwap;
@@ -27,7 +28,8 @@ graphics::graphics(HWND hWnd, bool fullscreen, bool vSync)
 }
 graphics::~graphics()
 {
-
+	/*if (pAudio)
+		pAudio->Suspend();*/
 	pSwap->SetFullscreenState(false, NULL);
 
 }
@@ -80,7 +82,11 @@ bool graphics::Initialize()
 	this->fovDegrees = 90.f;
 	FOV = (fovDegrees / 360) * DirectX::XM_PI;
 
-
+//	DirectX::AUDIO_ENGINE_FLAGS eflags = DirectX::AudioEngine_Default;
+//#ifdef _DEBUG
+//	eflags = eflags | DirectX::AudioEngine_Debug;
+//#endif
+//	pAudio = std::make_unique<DirectX::AudioEngine>(eflags);
 
 
 	HRESULT hr;
@@ -245,7 +251,10 @@ void graphics::BeginScene(float red, float green, float blue, float alpha)
 	m_TextureShader.Render(pContext.Get(),m_WorldMatrix);
 
 	pContext->OMSetBlendState(pBlendState.Get(), 0, 0xffffffff);
+	//if (!pAudio->Update())
+	//{
 
+	//}
 }
 
 

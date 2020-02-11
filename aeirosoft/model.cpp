@@ -369,9 +369,7 @@ TextureStorageType model::GetStorageType(const aiScene* pScene, aiMaterial* pMat
 
 
 
-void model::ReleaseTexture()
-{
-}
+
 
 bool model::initBuffers(const std::wstring& filename)
 {

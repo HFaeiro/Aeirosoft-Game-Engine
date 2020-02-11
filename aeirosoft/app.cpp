@@ -57,9 +57,14 @@ int app::begin()
 		//L"");
 
 
-	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 5.38699f, -4.29565f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
-															{ { .0115558f, -2.87861f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
-															L"");
+	//Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 5.38699f, -4.29565f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
+	//														{ { .0115558f, -2.87861f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
+	//														L"");
+
+	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
+		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
+		L"");
+
 
 	Collision C;
 	Scenes s(&m_Graphics, &C);
@@ -113,7 +118,7 @@ int app::begin()
 		float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
 		wss << L"Hits: " << hits;
 		wsshots << L"Shots: " << shots;
-		wssAcc << L"Accuracy: " << Accuracy;
+		wssAcc << L"Accuracy: " << (int)(Accuracy * 100) << L"%";
 		m_Graphics.pSpriteBatch->Begin();
 		m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
 		m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wsshots.str().c_str(), DirectX::XMFLOAT2(0, 0));
@@ -132,8 +137,8 @@ int app::begin()
 void app::CreateScenes(Scenes& s)
 {
 	s.CreateScene(L"Scene1");
-	s.AddEntity(L"Data\\Objects\\Wall\\Wall.obj");
-	s.AddEntity(L"Data\\Objects\\Floor\\floor.obj");
+	s.CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
+	s.CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });

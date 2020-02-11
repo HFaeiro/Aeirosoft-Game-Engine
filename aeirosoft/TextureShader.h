@@ -1,7 +1,11 @@
 #pragma once
 #include "framework.h"
 #include "inc\DirectX\SimpleMath.h"
-#include <d3dcompiler.h>
+#ifdef _DEBUG
+	#include <d3dcompiler.h>
+#endif // DEBUG
+
+
 
 
 class TextureShader

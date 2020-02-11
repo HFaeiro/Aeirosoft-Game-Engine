@@ -12,10 +12,12 @@ class model
 {
 public:
 
-
+	enum class movementType { forward, backward, up, left, right };
 	model( const std::wstring& filename, graphics *g, float scale = 1.f);
 	model();
 	~model();
+
+
 
 	void init(const std::wstring& filename, graphics *g, float scale = 1.f);
 
@@ -71,12 +73,23 @@ private:
 	std::vector<std::vector<DWORD>> vBIndecies;
 	std::wstring directory = L"";
 	
-	void ReleaseTexture();
+
 	bool initBuffers(const std::wstring& filename);
 	float scale;
 	graphics* g;
 	
+	DirectX::XMVECTOR vPos;
+	DirectX::XMVECTOR DefaultForward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	DirectX::XMVECTOR DefaultRight = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+	DirectX::XMVECTOR DefaultBackward = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
+	DirectX::XMVECTOR DefaultLeft = DirectX::XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
+	DirectX::XMVECTOR DefaultUp = DirectX::XMVectorSet(0.0f, 1.0f, .0f, 0.0f);
 
-
+	DirectX::XMVECTOR camForward;
+	DirectX::XMVECTOR camBackward;
+	DirectX::XMVECTOR camLeft;
+	DirectX::XMVECTOR camRight;
+	DirectX::XMVECTOR camUp;
+	DirectX::XMMATRIX camProjection;
 };
 

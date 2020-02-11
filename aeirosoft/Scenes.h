@@ -75,7 +75,7 @@ public:
 		return false;
 	}
 
-	bool AddEntity(std::wstring filePath)
+	bool CreateEntityObject(std::wstring filePath)
 	{
 
 		std::wstring entName = helper::strings::GetNameFromPath(filePath);
@@ -87,7 +87,7 @@ public:
 
 		}
 		
-		entities.push_back(Entity(g, filePath));
+		entities.push_back(EntityObject(g, filePath));
 		return true;
 	}
 
@@ -102,7 +102,8 @@ private:
 	{
 		std::wstring sceneName;
 		//Gui gui;
-		std::vector<Entity> entities;
+
+		std::vector<EntityObject> entities;
 		Player* player;
 		Scene(std::wstring n, /*input* i,*/ graphics* g) :sceneName(n)//, gui(g, i)
 		{}
@@ -110,8 +111,7 @@ private:
 	};
 
 	Scene* ActiveScene = nullptr;
-	
-	std::vector<Entity> entities;
+	std::vector<EntityObject> entities;
 	std::vector<Scene> vScenes;
 	Collision* C;
 };

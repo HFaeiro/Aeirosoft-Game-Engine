@@ -18,7 +18,7 @@ bool Scenes::SetActiveScene(const std::wstring& sceneName)
 
 bool Scenes::AddEntityToScene(const std::wstring& sceneName, const std::wstring& entName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot)
 {
-	Entity* entModel = nullptr;
+	EntityObject* entModel = nullptr;
 	for (auto& e : entities)
 	{
 		if (e.getName() == entName)

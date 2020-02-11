@@ -10,6 +10,11 @@ public:
 	Mesh(aiMesh*);
 	Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, std::vector<Vertex>& vertices, std::vector<ULONG>& indices, std::vector<texture>vTexture);
 	Mesh(const Mesh& mesh);
+	~Mesh()
+	{
+		for (auto& t : vTexture)
+			t.GetTexture()->Release();
+	}
 	void Draw();
 	std::vector<Vertex> getVertices()const{ return vertices; }
 private:
@@ -20,6 +25,7 @@ private:
 	VertexBuffer vertexBuffer;
 	IndexBuffer indexBuffer;
 	std::vector<texture> vTexture;
+
 };
 
 

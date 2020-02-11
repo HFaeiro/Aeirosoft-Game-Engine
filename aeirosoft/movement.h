@@ -14,6 +14,7 @@ public:
 	virtual void setRotation(float, float, float) = 0;
 	virtual DirectX::XMFLOAT3 getPosition() = 0;
 	virtual DirectX::XMFLOAT3 getRotation() = 0;
+private:
 
 
 

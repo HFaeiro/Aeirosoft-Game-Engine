@@ -15,6 +15,7 @@ Collidable::Collidable(graphics* g) : g(g), pDevice(g->GetDevice().Get()), pCont
 		ib.Init(g->GetDevice().Get(), Indecies, 24);
 
 		CreateTexture();
+
 	}
 }
 
@@ -51,6 +52,7 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 			maxVertex.y = std::max(maxVertex.y, c.y);
 			maxVertex.z = std::max(maxVertex.z, c.z);
 		}
+		//v.Transform(tmpBox, m);
 		v.CreateFromPoints(tmpBox, 8, corners, sizeof(DirectX::XMFLOAT3));
 		vTransbBox.push_back(tmpBox);
 	}

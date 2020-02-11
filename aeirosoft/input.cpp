@@ -110,7 +110,7 @@ void input::KeyboardInputs()
 
 	//if (isKey(DIK_LSHIFT))
 	//	c->adjustPosition(camera::movementType::up, -moveSpeed);
-	//
+	
 
 }
 
