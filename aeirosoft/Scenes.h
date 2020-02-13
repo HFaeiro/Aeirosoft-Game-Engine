@@ -32,6 +32,7 @@ public:
 	}
 	virtual std::optional<Events*> Queue()
 	{
+		ActiveScene->player->Queue();
 		return this;
 	}
 	virtual void Update()
@@ -41,8 +42,8 @@ public:
 			{
 				e.Render(g->m_TextureShader);
 			}
-			if (ActiveScene->player->Queue())
-				ActiveScene->player->Update();
+			
+		ActiveScene->player->Update();
 	}
 
 	bool CreateScene(const std::wstring& sceneName)
@@ -102,7 +103,7 @@ private:
 	{
 		std::wstring sceneName;
 		//Gui gui;
-
+		std::vector<Events> events;
 		std::vector<EntityObject> entities;
 		Player* player;
 		Scene(std::wstring n, /*input* i,*/ graphics* g) :sceneName(n)//, gui(g, i)

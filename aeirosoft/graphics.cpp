@@ -480,12 +480,11 @@ DirectX::XMMATRIX graphics::GetOrthoMatrix()
 
 DirectX::XMMATRIX graphics::GetViewMatrix()
 {
-	return m_Camera.getViewMatrix();
+	return m_ViewMatrix;
 }
 void graphics::Begin3DScene()
 {
 	
-	m_ViewMatrix = m_Camera.getViewMatrix();
 	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_ViewMatrix, m_ProjectionMatrix);
 	//pContext->RSSetState(pRasterState.Get());
 	//pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
@@ -496,7 +495,6 @@ void graphics::Begin3DScene()
 void graphics::Begin2DScene()
 {
 	TurnZBufferOff();
-	m_ViewMatrix = m_Camera.getViewMatrix();
 	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_ViewMatrix, m_OrthoMatrix);
 }
 

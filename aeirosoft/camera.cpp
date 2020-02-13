@@ -18,9 +18,29 @@ camera::~camera()
 }
 void camera::adjustPosition(movementType Type, float amount)
 {
-
+	prevPos = pos;
 	switch (Type)
 	{
+	case movementType::forwardRight:
+	{
+		vPos += (camForward + camRight) * amount;
+		DirectX::XMStoreFloat3(&pos, vPos);
+		break;
+
+	}
+	case movementType::forwardLeft:
+		vPos += (camForward + camLeft) * amount;
+		DirectX::XMStoreFloat3(&pos, vPos);
+		break;
+	case movementType::backRight:
+		vPos += (camBackward + camRight) * amount;
+		DirectX::XMStoreFloat3(&pos, vPos);
+		break;
+	case movementType::backLeft:
+		vPos += (camBackward + camLeft) * amount;
+		DirectX::XMStoreFloat3(&pos, vPos);
+		break;
+		break;
 	case movementType::forward:
 	{
 		vPos += camForward * amount;
@@ -54,7 +74,7 @@ void camera::adjustPosition(movementType Type, float amount)
 
 
 	}
-
+	render();
 }
 //void camera::adjustRotation(float, float, float)
 //{
@@ -148,7 +168,7 @@ void camera::render(bool spectate)
 	}
 	camTarget += camPosition;
 
-
+	prevView = viewMatrix;
 	viewMatrix = XMMatrixLookAtLH(camPosition, camTarget, camUp);
 
 

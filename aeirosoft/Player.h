@@ -1,6 +1,7 @@
 #pragma once
 #include "framework.h"
 #include "Entity.h"
+#include "input.h"
 #include "weapon.h"
 #include <sstream>
 
@@ -12,27 +13,27 @@ public:
 	{
 		double delt = deltaTimer.GetSecondsElapsed();
 		float moveSpeed = 1 * delt;
-		bool shift = Entity::i->isKey(DIK_LSHIFT);
-		if (Entity::i->isKey(DIK_UP)) {
+		bool shift = isKey(DIK_LSHIFT);
+		if (isKey(DIK_UP)) {
 			if (!shift)
 				main.adjustPosition({ 0,moveSpeed, 0 });
 			else
 				main.adjustRotation(0,0, moveSpeed);
 		}
-		if (Entity::i->isKey(DIK_DOWN)) {
+		if (isKey(DIK_DOWN)) {
 			if (!shift)
 				main.adjustPosition({ 0,-moveSpeed, 0 });
 			else
 				main.adjustRotation(0, 0,-moveSpeed);
 		}
-		if (Entity::i->isKey(DIK_LEFT))
+		if (isKey(DIK_LEFT))
 		{
 			if (!shift)
 				main.adjustPosition({ moveSpeed,0, 0 });
 			else
 				main.adjustRotation(0, moveSpeed,0 );
 		}
-		if (Entity::i->isKey(DIK_RIGHT))
+		if (isKey(DIK_RIGHT))
 		{
 			if (!shift)
 				main.adjustPosition({ -moveSpeed, 0 ,0 });
@@ -65,11 +66,11 @@ public:
 	Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS,
 		const std::wstring& filename) :
 										g(g), main(g, startingGun, .75f),
-										Entity(g, i, filename),c(&g->m_Camera), hip(hip), ADS(ADS)
+										Entity(g, i, filename), hip(hip), ADS(ADS)
 	{
 		main.setPosition(hip.pos);
 		main.setRotation(hip.rot);
-		c->setPosition(0, playerHeight - 2, -5);
+		setPosition(0, playerHeight, 0);
 		//playerModel.init(filename, pDevice, pContext);
 	}
 	~Player() { };
@@ -78,7 +79,7 @@ public:
 	{
 
 		deltaTimer.Start();
-		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerZWidth);
+		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
 		CreateBoundingOrientedBox(playerSize);
 		return true;
 	}
@@ -88,37 +89,8 @@ public:
 		test();
 #endif
 
-		DirectX::XMFLOAT3 pos = c->getPosition();
-		
-		if (Entity::i->isKey(DIK_SPACE) && !jumping && !falling)
-			jumping = true;
-		if (jumping && !falling)
-		{
-
-			if (pos.y < playerHeight + 10)
-				c->adjustPosition(camera::movementType::up, 45 * GetDeltaTime());
-			else
-			{
-				
-				if (hangTimer.GetMillisecondsElapsed() == 0)
-					hangTimer.Start();
-				if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
-				{
-					jumping = false;
-					falling = true;
-					hangTimer.Stop();
-				}
-			}
-		}
-		else if (pos.y > playerHeight - 2)
-		{
-
-			c->adjustPosition(camera::movementType::up, -55 * GetDeltaTime());
-
-		}
-		else
-			falling = false;
-		if (Entity::i->isLeftClick())
+		Entity::Update();
+		if (isLeftClick())
 		{
 			if (main.shoot())
 			{
@@ -126,7 +98,7 @@ public:
 				AddRay();
 			}
 		}
-		if (Entity::i->isRightClick())
+		if (isRightClick())
 		{
 			if (clickTimer.GetSecondsElapsed() == 0 || clickTimer.GetSecondsElapsed() >= .2)
 			{
@@ -145,30 +117,11 @@ public:
 
 			}
 		}
-		else if (Entity::i->isLeftClick())
+		else if (isLeftClick())
 			Shooting = false;
-		//if (/*isKey(DIK_UP) || */isKey(DIK_W))
-//	c->adjustPosition(camera::movementType::forward, moveSpeed);
-//if (/*isKey(DIK_DOWN) ||*/ isKey(DIK_S))
-//	c->adjustPosition(camera::movementType::backward, moveSpeed);
 
-//if (/*isKey(DIK_LEFT) ||*/ isKey(DIK_A))
-//{
-//	c->adjustPosition(camera::movementType::left, moveSpeed);
-
-//}
-//if (/*isKey(DIK_RIGHT) ||*/ isKey(DIK_D))
-//{
-//	c->adjustPosition(camera::movementType::right, moveSpeed);
-//}
-
-//if (isKey(DIK_SPACE))
-//	c->adjustPosition(camera::movementType::up, moveSpeed);
-
-//if (isKey(DIK_LSHIFT))
-//	c->adjustPosition(camera::movementType::up, -moveSpeed);
-//
-
+		viewInverse = DirectX::XMMatrixInverse(NULL, getViewMatrix());
+		main.UpdateWorldMatrixWithViewMatrix(viewInverse);
 		main.Render();
 		//DrawBoundingBox();
 		//playerModel.Render(g->m_TextureShader);
@@ -178,10 +131,69 @@ public:
 	virtual std::optional<Events*> Queue() 
 	{ 
 		
-		viewInverse = DirectX::XMMatrixInverse(NULL, c->getViewMatrix());
-		main.UpdateWorldMatrixWithViewMatrix(viewInverse);
+
 		//playerModel.UpdateWorldMatrixWithViewMatrix(viewInverse);
-		TransformBounds(getWorldAtViewMatrix());
+		if (isKey(DIK_W) && !isKey(DIK_S) && !isKey(DIK_D) && !isKey(DIK_A))
+			adjustPosition(camera::movementType::forward, moveSpeed * GetDeltaTime());
+		else if (!isKey(DIK_W) && isKey(DIK_S) && !isKey(DIK_D) && !isKey(DIK_A))
+			adjustPosition(camera::movementType::backward, moveSpeed * GetDeltaTime());
+
+		else if (!isKey(DIK_W) && !isKey(DIK_S) && !isKey(DIK_D) && isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::left, moveSpeed * GetDeltaTime());
+
+		}
+		else if (!isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D) && !isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::right, moveSpeed * GetDeltaTime());
+		}
+		else if (isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D) && !isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::forwardRight, moveSpeed * GetDeltaTime());
+		}
+		else if (isKey(DIK_W) && !isKey(DIK_S) && !isKey(DIK_D) && isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::forwardLeft, moveSpeed * GetDeltaTime());
+		}
+		else if (!isKey(DIK_W) && isKey(DIK_S) && !isKey(DIK_D) && isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::backLeft, moveSpeed * GetDeltaTime());
+		}
+		else if (!isKey(DIK_W) && isKey(DIK_S) && isKey(DIK_D) && !isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::backRight, moveSpeed * GetDeltaTime());
+		}
+		DirectX::XMFLOAT3 pos = getPosition();
+
+		/*if (isKey(DIK_SPACE) && !jumping && !falling)
+			jumping = true;
+		if (jumping && !falling)
+		{
+
+			if (pos.y < playerHeight + 10)
+				adjustPosition(camera::movementType::up, 45 * GetDeltaTime());
+			else
+			{
+
+				if (hangTimer.GetMillisecondsElapsed() == 0)
+					hangTimer.Start();
+				if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
+				{
+					jumping = false;
+					falling = true;
+					hangTimer.Stop();
+				}
+			}
+		}
+		else if (pos.y > playerHeight)
+		{
+
+			adjustPosition(camera::movementType::up, -55 * GetDeltaTime());
+
+		}
+		else
+			falling = false;*/
+
 
 		return this;
 	};
@@ -196,12 +208,7 @@ public:
 
 
 private:
-	DirectX::XMMATRIX getWorldAtViewMatrix()
-	{
-		DirectX::XMFLOAT3 rot = c->getRotation();
-		DirectX::XMFLOAT3 pos = c->getPosition();
-		return  DirectX::XMMatrixRotationRollPitchYaw(0, rot.y, 0) * DirectX::XMMatrixTranslation(pos.x, pos.y - playerHeight + 2, pos.z);
-	}
+
 	
 	graphics* g;
 	bool Shooting = false;
@@ -211,6 +218,7 @@ private:
 	float playerWidth = 5.0f;
 	float playerZWidth = 2.5f;
 	float hangTime = .075f;
+	float moveSpeed = 100;
 	Timer hangTimer;
 	float GetDeltaTime() { return deltaTimer.GetMillisecondsElapsed() * .001f; }
 	Timer deltaTimer;
@@ -221,7 +229,7 @@ private:
 	std::vector<Events*> events;
 	float health = 100.f;
 	//std::vector<weapons> equippedWeapons;
-	camera* c;
+
 	weapon main;
 
 	//weapon second;

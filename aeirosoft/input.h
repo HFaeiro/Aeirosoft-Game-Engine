@@ -43,9 +43,9 @@ public:
 	}
 	
 	
-	bool isLeftClick();
-	bool isRightClick();
-	bool isKey(UCHAR);
+	virtual bool isLeftClick();
+	virtual bool isRightClick();
+	virtual bool isKey(UCHAR);
 	std::wstring fpsString = L"";
 	void GetMouse(DirectX::XMFLOAT2& m);
 	float GetDeltaTime();
@@ -89,7 +89,7 @@ private:
 
 	UCHAR keyState[256];
 	DIMOUSESTATE mouseState;
-	
+	float prevx, prevy;
 	float x, y;
 	float mx, my;
 	//BYTE    rgbButtons[4];

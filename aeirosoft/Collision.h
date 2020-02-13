@@ -3,7 +3,7 @@
 #include "Events.h"
 #include "graphics.h"
 #include <DirectXCollision.h>
-
+#include <variant>
 class Collidable
 {
 	
@@ -62,17 +62,26 @@ private:
 	friend class Collision;
 	void CreateTexture();
 	void DrawBoundingOrientedBox();
+
+
+	
 	DirectX::BoundingOrientedBox GetBounds()
 	{
-		if (vTransbBox.empty())
-			return vOGbBox[0];
-		return vTransbBox[0];
+			if (vTransbBox.empty())
+				return vOGbBox[0];
+			return vTransbBox[0];
 	}
+
+	DirectX::BoundingSphere GetBoundSphere()
+	{
+		return bSphere;
+	}
+
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pContext;
-	DirectX::XMMATRIX currentMatrix;
-	DirectX::XMVECTOR clickOrigin;
-	DirectX::XMVECTOR clickDestination;
+	DirectX::XMMATRIX currentMatrix = {};
+	DirectX::XMVECTOR clickOrigin = {};
+	DirectX::XMVECTOR clickDestination = {};
 	bool CheckRay = false;
 
 	texture redTexture;
@@ -82,9 +91,12 @@ private:
 
 	std::vector<DirectX::BoundingOrientedBox> vOGbBox;
 	std::vector<DirectX::BoundingOrientedBox> vTransbBox;
+	DirectX::BoundingSphere bSphere;
 	std::vector < DirectX::XMFLOAT3> vMin;
 	std::vector < DirectX::XMFLOAT3> vMax;
 	graphics* g;
+protected:
+	Collision* Cthis;
 };
 
 class Collision : public Events
@@ -116,6 +128,7 @@ public:
 					{
 						if (c != C)
 						{
+							
 							DirectX::BoundingOrientedBox box = c->GetBounds();
 							if (box.Intersects(C->clickOrigin, C->clickDestination, f))
 							{
@@ -125,15 +138,25 @@ public:
 					}
 					C->CheckRay = false;
 				}
-
 				for (const auto& c : collidable)
 				{
 					if (c != C)
 					{
-							if (C->GetBounds().Contains(c->GetBounds()))
+						if (C->type == Collidable::Type::Entity) {
+							auto box = C->GetBoundSphere();
+							if (box.Contains(c->GetBounds()))
 							{
-								c->collision = C->collision = true;
+								C->collision = true;
 							}
+						}
+						else {
+							auto box = C->GetBounds();
+
+							if (box.Contains(c->GetBounds()))
+							{
+								C->collision = true;
+							}
+						}
 					}
 				}
 			}
@@ -146,10 +169,39 @@ public:
 	}
 	void AddCollidable(Collidable* c)
 	{
+		if (c->Cthis != this)
+			c->Cthis = this;
 		collidable.push_back(c);
 	}
+	void Check(Collidable* C)
+	{
+		for (const auto& c : collidable)
+		{
+			if (c != C)
+			{
+				if (C->type == Collidable::Type::Entity) {
+					auto box = C->GetBoundSphere();
+					if (box.Contains(c->GetBounds()))
+					{
+						C->collision = true;
+					}
+				}
+				else {
+					auto box = C->GetBounds();
+
+					if (box.Contains(c->GetBounds()))
+					{
+						C->collision = true;
+					}
+				}
+			}
+		}
+	}
+
+
 	std::vector<Collidable*> collidable;
 	
+private:
 
 
 };

@@ -37,7 +37,8 @@ bool input::frame()
 
 void input::ProcessMouse()
 {
-
+	prevx = x;
+	prevy = y;
 	float clicksPerSecond = 5;
 	float mouseSensitivity = .0025f;
 
@@ -60,7 +61,8 @@ void input::ProcessMouse()
 		my = 601.f;
 		
 	}
-	g->SetCamRotation(y, x, 0.f);
+	if(prevx != x || prevy != y)
+		g->SetCamRotation(y, x, 0.f);
 
 }
 void input::GetMouse(POINT& m)
@@ -90,20 +92,20 @@ void input::KeyboardInputs()
 			fsDelta.restart();
 		}
 	}
-	if (/*isKey(DIK_UP) || */isKey(DIK_W))
-		c->adjustPosition(camera::movementType::forward, moveSpeed);
-	if (/*isKey(DIK_DOWN) ||*/ isKey(DIK_S))
-		c->adjustPosition(camera::movementType::backward, moveSpeed);
+	//if (/*isKey(DIK_UP) || */isKey(DIK_W))
+	//	c->adjustPosition(camera::movementType::forward, moveSpeed);
+	//if (/*isKey(DIK_DOWN) ||*/ isKey(DIK_S))
+	//	c->adjustPosition(camera::movementType::backward, moveSpeed);
 
-	if (/*isKey(DIK_LEFT) ||*/ isKey(DIK_A))
-	{
-		c->adjustPosition(camera::movementType::left, moveSpeed);
+	//if (/*isKey(DIK_LEFT) ||*/ isKey(DIK_A))
+	//{
+	//	c->adjustPosition(camera::movementType::left, moveSpeed);
 
-	}
-	if (/*isKey(DIK_RIGHT) ||*/ isKey(DIK_D))
-	{
-		c->adjustPosition(camera::movementType::right, moveSpeed);
-	}
+	//}
+	//if (/*isKey(DIK_RIGHT) ||*/ isKey(DIK_D))
+	//{
+	//	c->adjustPosition(camera::movementType::right, moveSpeed);
+	//}
 
 	//if (isKey(DIK_SPACE))
 	//	c->adjustPosition(camera::movementType::up, moveSpeed);

@@ -55,8 +55,11 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 		//v.Transform(tmpBox, m);
 		v.CreateFromPoints(tmpBox, 8, corners, sizeof(DirectX::XMFLOAT3));
 		vTransbBox.push_back(tmpBox);
-	}
 
+	}
+	if (type == Type::Entity)
+		bSphere = DirectX::BoundingSphere(tmpBox.Center, tmpBox.Extents.z);
+	
 }
 
 void Collidable::DrawBoundingOrientedBox()
@@ -148,8 +151,9 @@ void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& min, DirectX::XMFL
 	DirectX::XMFLOAT3 Extents = { .5f * (min.x - max.x), .5f * (min.y - max.y) , .5f * (min.z - max.z) };
 
 	vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
-
-
+	//bSphere.CreateFromBoundingBox(vOGbBox[0]);
+	if(type == Type::Entity)
+		bSphere = DirectX::BoundingSphere(centerOffset, Extents.z);
 }
 
 void Collidable::AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox)
