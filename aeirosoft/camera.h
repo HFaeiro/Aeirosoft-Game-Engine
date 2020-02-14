@@ -12,6 +12,7 @@ public:
 	~camera();
 
 	virtual void adjustPosition(movementType, float);
+	void adjustPosition(DirectX::XMFLOAT3 xmfloat);
 	virtual void setPosition(DirectX::XMFLOAT3 xmfloat);
 	//void adjustRotation(movementType, float, float, float);
 	virtual void setPosition(float, float, float);

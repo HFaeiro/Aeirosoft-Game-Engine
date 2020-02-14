@@ -36,15 +36,35 @@ public:
 		if (loop == 0)
 			prevVelocity = recentVelocity;
 		if (collision) {
-			c->adjustPosition(prevMove, -recentVelocity);
-			collision = false;
-			if (loop > 15)
+			/*for (const auto& cWith : collidedWith)
+			{
+				DirectX::XMFLOAT3 corners[8];
+				if (cWith.type == Collidable::Object)
+				{
+					cWith.GetBounds().GetCorners(corners);
+				}*/
+
+			
+			DirectX::XMFLOAT3 movedPos = c->getPosition();
+			//c->adjustPosition(prevMove, -recentVelocity);
+			c->revertView();
+			DirectX::XMFLOAT3 prevPos = c->getPosition();
+			c->setPosition(prevPos);
+			//DirectX::XMFLOAT3 posDifference = { movedPos.x - prevPos.x, movedPos.y - prevPos.y, movedPos.z - prevPos.z };
+			DirectX::XMFLOAT3 posDifference = {prevPos.x - movedPos.x,prevPos.y - movedPos.y,prevPos.z - movedPos.z };
+			c->adjustPosition({posDifference.x * .005f, posDifference.y * .005f, posDifference.z * .005f});
+			
+			if (loop > 50)
 			{
 				loop = 0;
+
+
+
+
 				return;
 
 			}
-			if (loop < 5) {
+			/*if (loop < 5) {
 				prevVelocity *= .5;
 				c->adjustPosition(prevMove, prevVelocity);
 			}
@@ -55,26 +75,30 @@ public:
 				else
 					prevVelocity *= 1.5;
 				c->adjustPosition(prevMove, -prevVelocity);
-			}
-
+			}*/
+			collision = false;
 			TransformBounds(getWorldAtViewMatrix());
 			Collidable::Cthis->Check(this);
 			++loop;
+			
+			//}
 			Update();
+			
 		}
 		else
 			loop = 0;
+		
 	}
 
 	void adjustPosition(camera::movementType type, float velocity) 
 	{
-		//if (!collision) {
+		if (!collision) {
 			prevMove = type;
 			recentVelocity = velocity;
-
+		
 			c->adjustPosition(type, velocity);
 			TransformBounds(getWorldAtViewMatrix());
-		//}
+		}
 		return;
 	}
 
@@ -87,7 +111,6 @@ public:
 private:
 	DirectX::XMMATRIX getWorldAtViewMatrix()
 	{
-
 		DirectX::XMFLOAT3 rot = c->getRotation();
 		DirectX::XMFLOAT3 pos = c->getPosition();
 		return  DirectX::XMMatrixRotationRollPitchYaw(0, rot.y, 0) * DirectX::XMMatrixTranslation(pos.x, pos.y - playerHeight + 4, pos.z);
@@ -98,6 +121,7 @@ private:
 	camera* c;
 	std::wstring name;
 	graphics* _g;
+
 
 };
 class EntityAi : public Collidable, public model

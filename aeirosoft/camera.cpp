@@ -87,9 +87,17 @@ DirectX::XMFLOAT3 operator+(DirectX::XMFLOAT3 l, DirectX::XMFLOAT3 r)
 	n.z = l.z + r.z;
 	return n;
 }
+void camera::adjustPosition(DirectX::XMFLOAT3 xmfloat)
+{
+	prevPos = pos;
+	pos.x += xmfloat.x;
+	pos.y += xmfloat.y;
+	pos.z += xmfloat.z;
+	vPos = XMLoadFloat3(&this->pos);
+	render();
+}
 void camera::setPosition(DirectX::XMFLOAT3 xmfloat)
 {
-
 	pos.x = xmfloat.x;
 	pos.y = xmfloat.y;
 	pos.z = xmfloat.z;

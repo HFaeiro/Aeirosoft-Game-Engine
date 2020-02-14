@@ -13,6 +13,17 @@ public:
 	void TransformBounds(DirectX::XMMATRIX m);
 	enum Type { Entity, EntityAi, Object };
 	Type type;
+	DirectX::BoundingOrientedBox GetBounds()const
+	{
+		if (vTransbBox.empty())
+			return vOGbBox[0];
+		return vTransbBox[0];
+	}
+
+	DirectX::BoundingSphere GetBoundSphere()const
+	{
+		return bSphere;
+	}
 protected:
 
 	void CreateBoundingOrientedBox(std::vector<Vertex> v);
@@ -65,17 +76,7 @@ private:
 
 
 	
-	DirectX::BoundingOrientedBox GetBounds()
-	{
-			if (vTransbBox.empty())
-				return vOGbBox[0];
-			return vTransbBox[0];
-	}
-
-	DirectX::BoundingSphere GetBoundSphere()
-	{
-		return bSphere;
-	}
+	
 
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pContext;
@@ -88,15 +89,18 @@ private:
 	IndexBuffer ib;
 	DirectX::BoundingOrientedBox MainBox;
 	//DirectX::BoundingOrientedBox TransbBox;
-
-	std::vector<DirectX::BoundingOrientedBox> vOGbBox;
-	std::vector<DirectX::BoundingOrientedBox> vTransbBox;
-	DirectX::BoundingSphere bSphere;
 	std::vector < DirectX::XMFLOAT3> vMin;
 	std::vector < DirectX::XMFLOAT3> vMax;
 	graphics* g;
 protected:
+
+	std::vector<DirectX::BoundingOrientedBox> vOGbBox;
+	std::vector<DirectX::BoundingOrientedBox> vTransbBox;
+	DirectX::BoundingSphere bSphere;
+
+
 	Collision* Cthis;
+	std::vector<Collidable> collidedWith;
 };
 
 class Collision : public Events
@@ -138,27 +142,7 @@ public:
 					}
 					C->CheckRay = false;
 				}
-				for (const auto& c : collidable)
-				{
-					if (c != C)
-					{
-						if (C->type == Collidable::Type::Entity) {
-							auto box = C->GetBoundSphere();
-							if (box.Contains(c->GetBounds()))
-							{
-								C->collision = true;
-							}
-						}
-						else {
-							auto box = C->GetBounds();
-
-							if (box.Contains(c->GetBounds()))
-							{
-								C->collision = true;
-							}
-						}
-					}
-				}
+				Check(C);
 			}
 		}
 		return {};

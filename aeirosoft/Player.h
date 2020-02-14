@@ -165,34 +165,34 @@ public:
 		}
 		DirectX::XMFLOAT3 pos = getPosition();
 
-		/*if (isKey(DIK_SPACE) && !jumping && !falling)
-			jumping = true;
-		if (jumping && !falling)
-		{
+		//if (isKey(DIK_SPACE) && !jumping && !falling)
+		//	jumping = true;
+		//if (jumping && !falling)
+		//{
 
-			if (pos.y < playerHeight + 10)
-				adjustPosition(camera::movementType::up, 45 * GetDeltaTime());
-			else
-			{
+		//	if (pos.y < playerHeight + 10)
+		//		adjustPosition(camera::movementType::up, 45 * GetDeltaTime());
+		//	else
+		//	{
 
-				if (hangTimer.GetMillisecondsElapsed() == 0)
-					hangTimer.Start();
-				if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
-				{
-					jumping = false;
-					falling = true;
-					hangTimer.Stop();
-				}
-			}
-		}
-		else if (pos.y > playerHeight)
-		{
+		//		if (hangTimer.GetMillisecondsElapsed() == 0)
+		//			hangTimer.Start();
+		//		if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
+		//		{
+		//			jumping = false;
+		//			falling = true;
+		//			hangTimer.Stop();
+		//		}
+		//	}
+		//}
+		//else if (pos.y > playerHeight)
+		//{
 
-			adjustPosition(camera::movementType::up, -55 * GetDeltaTime());
+		//	adjustPosition(camera::movementType::up, -55 * GetDeltaTime());
 
-		}
-		else
-			falling = false;*/
+		//}
+		//else
+		//	falling = false;
 
 
 		return this;

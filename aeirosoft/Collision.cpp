@@ -24,6 +24,7 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 	this->currentMatrix = m;
 	vTransbBox.clear();
 	DirectX::BoundingOrientedBox tmpBox;
+	float extents;
 	if (vOGbBox.empty())
 	{
 		return;
@@ -31,8 +32,8 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 	for (auto& v : vOGbBox) {
 		DirectX::XMFLOAT3 corners[8];
 		DirectX::XMVECTOR vCorners[8];
-		DirectX::XMFLOAT3 minVertex = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
-		DirectX::XMFLOAT3 maxVertex = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+		//DirectX::XMFLOAT3 minVertex = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
+		//DirectX::XMFLOAT3 maxVertex = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 		v.GetCorners(corners);
 		for (int i = 0; i < 8; i++)
 		{
@@ -41,24 +42,25 @@ void Collidable::TransformBounds(DirectX::XMMATRIX m)
 			DirectX::XMStoreFloat3(&corners[i] ,vCorners[i]);
 
 		}
-		for (const auto c : corners)
-		{
+		//for (const auto c : corners)
+		//{
 
-			minVertex.x = std::min(minVertex.x, c.x);
-			minVertex.y = std::min(minVertex.y, c.y);
-			minVertex.z = std::min(minVertex.z, c.z);
+		//	minVertex.x = std::min(minVertex.x, c.x);
+		//	minVertex.y = std::min(minVertex.y, c.y);
+		//	minVertex.z = std::min(minVertex.z, c.z);
 
-			maxVertex.x = std::max(maxVertex.x, c.x);
-			maxVertex.y = std::max(maxVertex.y, c.y);
-			maxVertex.z = std::max(maxVertex.z, c.z);
-		}
-		//v.Transform(tmpBox, m);
+		//	maxVertex.x = std::max(maxVertex.x, c.x);
+		//	maxVertex.y = std::max(maxVertex.y, c.y);
+		//	maxVertex.z = std::max(maxVertex.z, c.z);
+		//}
+		v.Transform(tmpBox, m);
+		extents = tmpBox.Extents.z;
 		v.CreateFromPoints(tmpBox, 8, corners, sizeof(DirectX::XMFLOAT3));
 		vTransbBox.push_back(tmpBox);
 
 	}
 	if (type == Type::Entity)
-		bSphere = DirectX::BoundingSphere(tmpBox.Center, tmpBox.Extents.z);
+		bSphere = DirectX::BoundingSphere(tmpBox.Center, extents);
 	
 }
 
