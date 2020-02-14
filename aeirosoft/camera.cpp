@@ -98,6 +98,7 @@ void camera::adjustPosition(DirectX::XMFLOAT3 xmfloat)
 }
 void camera::setPosition(DirectX::XMFLOAT3 xmfloat)
 {
+	prevPos = pos;
 	pos.x = xmfloat.x;
 	pos.y = xmfloat.y;
 	pos.z = xmfloat.z;

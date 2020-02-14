@@ -78,9 +78,8 @@ int app::begin()
 	C.AddCollidable(&M1);
 	C.AddCollidable(&M2);
 	events.push_back(&i);
-	events.push_back(&s);
 	events.push_back(&C);
-
+	events.push_back(&s);
 	events.push_back(&M);
 	events.push_back(&M1);
 	events.push_back(&M2);

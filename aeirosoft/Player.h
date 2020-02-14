@@ -70,7 +70,7 @@ public:
 	{
 		main.setPosition(hip.pos);
 		main.setRotation(hip.rot);
-		setPosition(0, playerHeight, 0);
+		setPosition(95, playerHeight, 95);
 		//playerModel.init(filename, pDevice, pContext);
 	}
 	~Player() { };
