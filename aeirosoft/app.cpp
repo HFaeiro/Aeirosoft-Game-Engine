@@ -141,7 +141,7 @@ void app::CreateScenes(Scenes& s)
 	s.CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
+	//s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });

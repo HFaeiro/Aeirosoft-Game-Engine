@@ -24,7 +24,7 @@ public:
 	{
 		
 		pos = prevPos;
-		render();
+		//render();
 
 	}
 

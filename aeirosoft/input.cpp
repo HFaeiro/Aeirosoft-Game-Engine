@@ -49,16 +49,16 @@ void input::ProcessMouse()
 	//if (y)
 	y = my * mouseSensitivity;
 
-
-	if (y < -1.5f)
+	float halfPi = DirectX::XM_PI * .5;
+	if (y < -halfPi)
 	{
-		y = -1.4f;
-		my = -601.f;
+		y = -halfPi + .0001f;
+		my = -628.f;
 	}
-	if (y > 1.5f)
+	if (y > halfPi)
 	{
-		y = 1.4f;
-		my = 601.f;
+		y = halfPi - .0001f;
+		my = 628.f;
 		
 	}
 	if(prevx != x || prevy != y)

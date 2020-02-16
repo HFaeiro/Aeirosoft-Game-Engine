@@ -101,24 +101,26 @@ public:
 					c->setPosition(prevPos);
 			}
 
-			//if (posDifference.x == 0 && posDifference.y == 0 && posDifference.z == 0)
-			//{
-			//	loop = 0;
+			if (posDifference.x == 0 && posDifference.y == 0 && posDifference.z == 0)
+			{
+				loop = 0;
 
-
-			//	c->setPosition(lastResort);
-			//	return;
-			//}
-			if (loop > 15)
+				movedPos.y += .5f;
+				c->setPosition(movedPos);
+				collision = false;
+				return;
+			}
+			if (loop > 7)
 			{
 				loop = 0;
 
 
 				c->setPosition(lastResort);
+				collision = false;
 				return;
 
 			}
-			float newPosMult = .5f * (loop == 0 ? 1 : loop * .05f);
+			float newPosMult = .1f * (loop == 0 ? 1 : loop * .1f);
 
 
 			DirectX::XMFLOAT3 newPos = { posDifference.x * newPosMult,  posDifference.y * newPosMult ,  posDifference.z * newPosMult };

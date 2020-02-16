@@ -94,7 +94,7 @@ void camera::adjustPosition(DirectX::XMFLOAT3 xmfloat)
 	pos.y += xmfloat.y;
 	pos.z += xmfloat.z;
 	vPos = XMLoadFloat3(&this->pos);
-	render();
+	//render();
 }
 void camera::setPosition(DirectX::XMFLOAT3 xmfloat)
 {
@@ -103,7 +103,7 @@ void camera::setPosition(DirectX::XMFLOAT3 xmfloat)
 	pos.y = xmfloat.y;
 	pos.z = xmfloat.z;
 	vPos = XMLoadFloat3(&this->pos);
-	render();
+	//render();
 
 }
 void camera::setPosition(float x, float y, float z)
@@ -113,7 +113,7 @@ void camera::setPosition(float x, float y, float z)
 	pos.y = y;
 	pos.z = z;
 	vPos = XMLoadFloat3(&this->pos);
-	render();
+	//render();
 
 }
 
@@ -122,7 +122,7 @@ void camera::setRotation(float x, float y, float z)
 	rot.x = x;
 	rot.y = y;
 	rot.z = z;
-	render();
+	//render();
 }
 
 void camera::setProjection(XMMATRIX camProjection)

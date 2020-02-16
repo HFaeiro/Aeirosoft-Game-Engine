@@ -193,7 +193,7 @@ public:
 		}
 		else
 			falling = false;*/
-
+		adjustPosition(camera::movementType::up, -50.f * GetDeltaTime());
 
 		return this;
 	};
