@@ -34,8 +34,7 @@ public:
 	{
 		static int loop = 0;
 		static DirectX::XMFLOAT3 lastResort;
-		if (loop == 0)
-			prevVelocity = recentVelocity;
+
 		if (collision) {
 			collision = false;
 			/*for (const auto& cWith : collidedWith)
@@ -46,7 +45,7 @@ public:
 					cWith.GetBounds().GetCorners(corners);
 				}*/
 
-			
+
 			DirectX::XMFLOAT3 movedPos = c->getPosition();
 			//c->adjustPosition(prevMove, -recentVelocity);
 			c->revertView();
@@ -56,14 +55,15 @@ public:
 			c->setPosition(prevPos);
 			DirectX::XMFLOAT3 posDifference = { movedPos.x - prevPos.x, movedPos.y - prevPos.y, movedPos.z - prevPos.z };
 			//DirectX::XMFLOAT3 posDifference = {prevPos.x - movedPos.x,prevPos.y - movedPos.y,prevPos.z - movedPos.z };
-			//TransformBounds(getWorldAtViewMatrix());
-			//Collidable::Cthis->Check(this);
+
+
 			if (posDifference.x) {
-				c->adjustPosition({ posDifference.x, 0, 0});
+				c->adjustPosition({ posDifference.x, 0, 0 });
 				TransformBounds(getWorldAtViewMatrix());
 				Collidable::Cthis->Check(this);
 				if (!collision) {
-					c->adjustPosition({ 0, posDifference.y * .005f, posDifference.z * .005f });
+
+					c->adjustPosition({ 0, posDifference.y * .5f, posDifference.z * .5f });
 					TransformBounds(getWorldAtViewMatrix());
 					Collidable::Cthis->Check(this);
 					Update();
@@ -73,11 +73,11 @@ public:
 					c->setPosition(prevPos);
 			}
 			if (posDifference.y) {
-				c->adjustPosition({0, posDifference.y, 0 });
+				c->adjustPosition({ 0, posDifference.y, 0 });
 				TransformBounds(getWorldAtViewMatrix());
 				Collidable::Cthis->Check(this);
 				if (!collision) {
-					c->adjustPosition({ posDifference.x * .005f, 0, posDifference.z * .005f });
+					c->adjustPosition({ posDifference.x * .5f, 0, posDifference.z * .5f });
 					TransformBounds(getWorldAtViewMatrix());
 					Collidable::Cthis->Check(this);
 					Update();
@@ -87,11 +87,11 @@ public:
 					c->setPosition(prevPos);
 			}
 			if (posDifference.z) {
-				c->adjustPosition({ 0,0, posDifference.z});
+				c->adjustPosition({ 0,0, posDifference.z });
 				TransformBounds(getWorldAtViewMatrix());
 				Collidable::Cthis->Check(this);
 				if (!collision) {
-					c->adjustPosition({ posDifference.x * .005f, posDifference.y * .005f, 0});
+					c->adjustPosition({ posDifference.x * .5f, posDifference.y * .5f, 0 });
 					TransformBounds(getWorldAtViewMatrix());
 					Collidable::Cthis->Check(this);
 					Update();
@@ -100,7 +100,16 @@ public:
 				else
 					c->setPosition(prevPos);
 			}
-			if (loop > 50)
+
+			//if (posDifference.x == 0 && posDifference.y == 0 && posDifference.z == 0)
+			//{
+			//	loop = 0;
+
+
+			//	c->setPosition(lastResort);
+			//	return;
+			//}
+			if (loop > 15)
 			{
 				loop = 0;
 
@@ -109,30 +118,22 @@ public:
 				return;
 
 			}
-			/*if (loop < 5) {
-				prevVelocity *= .5;
-				c->adjustPosition(prevMove, prevVelocity);
-			}
-			else
-			{
-				if (loop == 5)
-					prevVelocity = recentVelocity;
-				else
-					prevVelocity *= 1.5;
-				c->adjustPosition(prevMove, -prevVelocity);
-			}*/
+			float newPosMult = .5f * (loop == 0 ? 1 : loop * .05f);
+
+
+			DirectX::XMFLOAT3 newPos = { posDifference.x * newPosMult,  posDifference.y * newPosMult ,  posDifference.z * newPosMult };
+			c->adjustPosition(newPos);
 			collision = false;
 			TransformBounds(getWorldAtViewMatrix());
 			Collidable::Cthis->Check(this);
 			++loop;
-			
-			//}
+
 			Update();
-			
+
 		}
 		else
 			loop = 0;
-		
+
 	}
 
 	void adjustPosition(camera::movementType type, float velocity) 

@@ -37,7 +37,7 @@ app::~app()
 
 int app::begin()
 {
-	graphics m_Graphics(m_Window, false, false);
+	graphics m_Graphics(m_Window, false, FALSE);
 	if (!m_Graphics.Initialize())
 		return false;
 
@@ -142,9 +142,9 @@ void app::CreateScenes(Scenes& s)
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,3.1416f,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,1.5708f,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,4.7124f,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
 	s.SetActiveScene(L"Scene1");
 }
 
