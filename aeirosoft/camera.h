@@ -22,9 +22,8 @@ public:
 	virtual DirectX::XMFLOAT3 getRotation();
 	void revertView()
 	{
-		
 		pos = prevPos;
-		//render();
+		viewMatrix = prevView;
 
 	}
 
@@ -52,7 +51,7 @@ private:
 	DirectX::XMVECTOR DefaultUp = DirectX::XMVectorSet(0.0f, 1.0f, .0f, 0.0f);
 
 
-
+	DirectX::XMVECTOR camPosition;
 	DirectX::XMVECTOR camForward = {};
 	DirectX::XMVECTOR camForwardRight;
 	DirectX::XMVECTOR camBackward;

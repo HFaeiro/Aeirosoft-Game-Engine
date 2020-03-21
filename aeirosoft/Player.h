@@ -126,7 +126,7 @@ public:
 		//DrawBoundingBox();
 		//playerModel.Render(g->m_TextureShader);
 
-		deltaTimer.restart();
+		
 	};
 	virtual std::optional<Events*> Queue() 
 	{ 
@@ -194,7 +194,7 @@ public:
 		else
 			falling = false;*/
 		adjustPosition(camera::movementType::up, -50.f * GetDeltaTime());
-
+		deltaTimer.restart();
 		return this;
 	};
 

@@ -20,24 +20,9 @@ app::~app()
 	DestroyWindow(getHWND());
 }
 
-//template <typename ...args>
-//std::function<void(Gui*, args...)> function;
-
-//void setRandomFloat3(float& r, float& g, float& b, int d, float x)
-//{
-//	srand(static_cast <unsigned> (time(0)));
-//
-//	r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / d)* x;
-//	g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / d)* x;
-//	b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX / d)* x;
-//}
-
-
-
-
 int app::begin()
 {
-	graphics m_Graphics(m_Window, false, FALSE);
+	graphics m_Graphics(m_Window, false, true);
 	if (!m_Graphics.Initialize())
 		return false;
 
@@ -46,20 +31,6 @@ int app::begin()
 
 	//Gui gui(&m_Graphics, &i);
 	//StartupGui(gui);
-
-	//Player p(&m_Graphics, &i, L"Data\\Guns\\DesertEagle.obj", { 2.5f, -2.50f, 3.f }, { 0.f, 4.5f, 0.f },
-	//					L"");
-
-	//Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { 3.93f, -4.05f, 12.8215f }, { 0.f, 4.7f, 0.0017f },
-	//	L"");
-
-		//Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { .063f, -4.12517f, 12.8215f }, { 0.00518461f, 4.70958f, 0.0017f },
-		//L"");
-
-
-	//Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj",{ { 5.38699f, -4.29565f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
-	//														{ { .0115558f, -2.87861f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
-	//														L"");
 
 	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
 		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
@@ -78,12 +49,14 @@ int app::begin()
 	C.AddCollidable(&M1);
 	C.AddCollidable(&M2);
 	events.push_back(&i);
-	events.push_back(&C);
+
 	events.push_back(&s);
+
+	events.push_back(&C);
 	events.push_back(&M);
 	events.push_back(&M1);
 	events.push_back(&M2);
-	//LoadModel(L"Data\\Objects\\nanosuit\\nanosuit.obj", m_Graphics.GetDevice(), m_Graphics.GetDeviceContext());
+
 	texture t(m_Graphics.GetDevice().Get(), L"Data\\Textures\\RustyPaint.dds", aiTextureType::aiTextureType_DIFFUSE);
 
 	for (const auto& E : events)
@@ -141,7 +114,7 @@ void app::CreateScenes(Scenes& s)
 	s.CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
-	//s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
+	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
 	s.AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
