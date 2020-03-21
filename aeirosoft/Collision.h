@@ -8,7 +8,7 @@ class Collidable
 {
 	
 public:
-	Collidable(graphics* g);;
+	Collidable(graphics* g);
 	~Collidable() {};
 	void TransformBounds(DirectX::XMMATRIX m);
 	enum Type { Entity, EntityAi, Object };

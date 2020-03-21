@@ -1,8 +1,6 @@
 #include "app.h"
 #include "Inc/DirectX/SimpleMath.h"
 #include "Player.h"
-#include "MovingAimBox.h"
-
 #include <fstream>
 #include <sstream>
 app::app(HINSTANCE hinst, const std::wstring windowName, POINT p) :
@@ -19,54 +17,60 @@ app::~app()
 {
 	DestroyWindow(getHWND());
 }
+bool app::SetupApplication(graphics* m_Graphics, int boxes = 3)
+{
+	events.clear();
+	vBoxes.clear();
+	C = new Collision();
+	s = new Scenes(m_Graphics, C);
+	CreateScenes(*s);
+	s->AddPlayerToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
+		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
+		L""));
 
+
+	
+	
+	events.push_back(i);
+
+	events.push_back(s);
+
+	events.push_back(C);
+	for (int i = 0; i < boxes; i++)
+	{
+		MovingAimBox* M = new MovingAimBox(m_Graphics);
+		C->AddCollidable(M);
+		events.push_back(M);
+		vBoxes.push_back(M);
+	}
+
+	/*texture t(m_Graphics->GetDevice().Get(), L"Data\\Textures\\RustyPaint.dds", aiTextureType::aiTextureType_DIFFUSE);*/
+
+	for (const auto& E : events)
+		if (!E->Initialize())
+			return false;
+
+}
 int app::begin()
 {
 	graphics m_Graphics(m_Window, false, true);
 	if (!m_Graphics.Initialize())
 		return false;
 
-	std::vector<Events*> events;
-	input i(&m_Graphics, static_cast<window*>(this), &m_Graphics.m_Camera, &m_Timer);
+
+	i = new input(&m_Graphics, static_cast<window*>(this), &m_Graphics.m_Camera, &m_Timer);
 
 	//Gui gui(&m_Graphics, &i);
 	//StartupGui(gui);
 
-	Player p(&m_Graphics, &i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
-		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
-		L"");
+	if (!SetupApplication(&m_Graphics))
+		return false;
 
 
-	Collision C;
-	Scenes s(&m_Graphics, &C);
-	CreateScenes(s);
-	s.AddPlayerToScene(L"Scene1", &p);
-
-	MovingAimBox M(&m_Graphics);
-	MovingAimBox M1(&m_Graphics);
-	MovingAimBox M2(&m_Graphics);
-	C.AddCollidable(&M);
-	C.AddCollidable(&M1);
-	C.AddCollidable(&M2);
-	events.push_back(&i);
-
-	events.push_back(&s);
-
-	events.push_back(&C);
-	events.push_back(&M);
-	events.push_back(&M1);
-	events.push_back(&M2);
-
-	texture t(m_Graphics.GetDevice().Get(), L"Data\\Textures\\RustyPaint.dds", aiTextureType::aiTextureType_DIFFUSE);
-
-	for (const auto& E : events)
-		if (!E->Initialize())
-			return false;
-
-	while (true) 
-	{		
+	while (true)
+	{
 		if (const auto optional = processMessages())
-				return *optional;
+			return *optional;
 
 		m_Graphics.BeginScene(0.f, 0.f, 0.f, 1.f);
 		//m_Graphics.CreateFloor({ -200,-200 }, { 200, 200 }, t);
@@ -79,15 +83,19 @@ int app::begin()
 
 		for (const auto& E : queued)
 			E->Update();
-		
+
 		queued.clear();
 		//end of event que
 
 		std::wstringstream wss;
 		std::wstringstream wsshots;
 		std::wstringstream wssAcc;
-		int hits = M.GetHits() + M1.GetHits() + M2.GetHits();
-		int shots = p.GetShots();
+
+		int hits = 0;
+		for (const auto& b : vBoxes)
+			hits += b->GetHits();
+		
+		int shots = s->GetActivePlayer().GetShots();
 		float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
 		wss << L"Hits: " << hits;
 		wsshots << L"Shots: " << shots;
@@ -101,6 +109,8 @@ int app::begin()
 
 
 		m_Graphics.EndScene();
+		if (i->isKey(DIK_ESCAPE))
+			SetupApplication(&m_Graphics);
 
 	}
 }

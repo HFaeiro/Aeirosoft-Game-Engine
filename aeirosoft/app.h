@@ -7,7 +7,7 @@
 #include "Timer.h"
 #include "Gui.h"
 #include "Scenes.h"
-
+#include "MovingAimBox.h"
 class app :
 	public window
 {
@@ -31,6 +31,12 @@ class app :
 	std::wstring intersecting = L"Intersecting: FALSE";
 	void CreateScenes(Scenes& s);
 	void StartupGui(Gui&);
+	bool SetupApplication(graphics*, int boxes);
+	std::vector<Events*> events;
+	std::vector<MovingAimBox*> vBoxes;
+	Collision* C;
+	input *i;
+	Scenes* s;
 public:
 	app(HINSTANCE h, const std::wstring s, POINT p);
 	HWND hWnd;

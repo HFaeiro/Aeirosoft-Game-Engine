@@ -92,7 +92,11 @@ public:
 		entities.push_back(EntityObject(g, filePath));
 		return true;
 	}
-
+	Player GetActivePlayer()
+	{
+		if (!ActiveScene->sceneName.empty())
+			return *ActiveScene->player;
+	}
 
 private:
 
@@ -116,5 +120,6 @@ private:
 	std::vector<EntityObject> entities;
 	std::vector<Scene> vScenes;
 	Collision* C;
+
 };
 

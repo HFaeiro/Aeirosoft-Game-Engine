@@ -4,7 +4,7 @@ Collidable::Collidable(graphics* g) : g(g), pDevice(g->GetDevice().Get()), pCont
 {
 	if (g != nullptr)
 	{
-
+#ifdef _DEBUG
 		DWORD Indecies[24] =
 		{
 			0,1,1,2,2,3,3,0,
@@ -15,7 +15,7 @@ Collidable::Collidable(graphics* g) : g(g), pDevice(g->GetDevice().Get()), pCont
 		ib.Init(g->GetDevice().Get(), Indecies, 24);
 
 		CreateTexture();
-
+#endif
 	}
 }
 
