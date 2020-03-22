@@ -50,6 +50,19 @@ public:
 	void GetMouse(DirectX::XMFLOAT2& m);
 	float GetDeltaTime();
 	void GetMouse(POINT& m);
+	void AddPitch(const float& pitch)
+	{
+		my += pitch;
+	}
+	void AddYaw(const float& yaw)
+	{
+		mx += yaw;
+	}
+	void AdjustInputs(const float& pitch, const float& yaw)
+	{
+		my += pitch;
+		mx += yaw;
+	}
 private:
 	bool frame();
 	int fps = 0;

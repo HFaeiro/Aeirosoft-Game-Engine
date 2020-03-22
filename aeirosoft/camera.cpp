@@ -124,6 +124,13 @@ void camera::setRotation(float x, float y, float z)
 	rot.z = z;
 	//render();
 }
+void camera::adjustRotation(float x, float y, float z)
+{
+	rot.x += x;
+	rot.y += y;
+	rot.z += z;
+	//render();
+}
 
 void camera::setProjection(XMMATRIX camProjection)
 {

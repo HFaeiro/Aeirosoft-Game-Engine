@@ -61,7 +61,8 @@ void input::ProcessMouse()
 		my = 628.f;
 		
 	}
-	if(prevx != x || prevy != y)
+	if (prevx != x || prevy != y)
+		/*g->m_Camera.adjustRotation(y, x, 0.f);adds weird camera effect at certain sens*/
 		g->SetCamRotation(y, x, 0.f);
 
 }
@@ -71,8 +72,8 @@ void input::GetMouse(POINT& m)
 }
 void input::GetMouse(DirectX::XMFLOAT2& m)
 {
-	m.x = x;
-	m.y = y;
+	m.x = mx;
+	m.y = my;
 }
 float input::GetDeltaTime()
 {

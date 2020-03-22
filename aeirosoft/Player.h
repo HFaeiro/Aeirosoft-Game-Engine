@@ -66,7 +66,7 @@ public:
 	Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS,
 		const std::wstring& filename) :
 										g(g), main(g, startingGun, .75f),
-										Entity(g, i, filename), hip(hip), ADS(ADS)
+										Entity(g, i, filename), hip(hip), ADS(ADS), i(i)
 	{
 		main.setPosition(hip.pos);
 		main.setRotation(hip.rot);
@@ -88,7 +88,12 @@ public:
 #ifdef _DEBUG
 		test();
 #endif
-
+		double recoilDelta = recoilTimer.GetSecondsElapsed();
+		if (recoilDelta > main.stats.recoverRate)
+		{
+			i->AdjustInputs(prevAimDif.x * recoilDelta * 2, prevAimDif.y * recoilDelta * 2);
+			recoilTimer.Stop();
+		}
 		Entity::Update();
 		if (isLeftClick())
 		{
@@ -96,7 +101,14 @@ public:
 			{
 				++shots;
 				AddRay();
+				DirectX::XMFLOAT2 recoil = main.recoil();
+				DirectX::XMFLOAT2 prevAim;
+				i->GetMouse(prevAim);
+				i->AdjustInputs(-recoil.x, recoil.y);
+				prevAimDif = { recoil.x, -recoil.y };
+				recoilTimer.restart();
 			}
+
 		}
 		if (isRightClick())
 		{
@@ -222,16 +234,17 @@ private:
 	Timer hangTimer;
 	float GetDeltaTime() { return deltaTimer.GetMillisecondsElapsed() * .001f; }
 	Timer deltaTimer;
-	Timer shootTimer;
+	Timer recoilTimer;
 	Timer clickTimer;
 	bool jumping = false;
 	bool falling = false;
 	std::vector<Events*> events;
 	float health = 100.f;
 	//std::vector<weapons> equippedWeapons;
+	DirectX::XMFLOAT2 prevAimDif;
 
 	weapon main;
-
+	input *i;
 	//weapon second;
 	DirectX::XMMATRIX viewInverse;
 

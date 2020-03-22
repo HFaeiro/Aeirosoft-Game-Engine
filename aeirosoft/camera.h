@@ -17,6 +17,7 @@ public:
 	//void adjustRotation(movementType, float, float, float);
 	virtual void setPosition(float, float, float);
 	virtual void setRotation(float, float, float);
+	void adjustRotation(float x, float y, float z);
 	void setProjection(DirectX::XMMATRIX camProjection);
 	virtual DirectX::XMFLOAT3 getPosition();
 	virtual DirectX::XMFLOAT3 getRotation();

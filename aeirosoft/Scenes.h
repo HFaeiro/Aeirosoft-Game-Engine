@@ -38,12 +38,12 @@ public:
 	virtual void Update()
 	{
 		g->Begin3DScene();
-		ActiveScene->player->Update();
+		
 			for ( auto& e : ActiveScene->entities)
 			{
 				e.Render(g->m_TextureShader);
 			}
-			
+			ActiveScene->player->Update();
 		
 	}
 

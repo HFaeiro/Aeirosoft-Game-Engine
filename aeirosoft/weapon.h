@@ -12,10 +12,11 @@ struct PR
 
 struct weaponStats
 {
-	float recoil = 0.f;
+	int vRecoil = 12.f;
+	int hRecoil = 30.f;
 	float spread =0.f;
-	float fireRate = 0.1f;
-	float recoverRate = 0.f;
+	float fireRate = 0.125f;
+	float recoverRate = .125f;
 	float damage = 0.f;
 	float bulletSpeed = 0.f;
 
@@ -32,6 +33,7 @@ public:
 	weapon(graphics* g, const std::wstring& filename, float scale = 1.f) : g(g)
 	{
 		init(filename, g, scale);
+		srand(static_cast <unsigned> (time(0)));
 	}
 	~weapon() {};
 
@@ -42,31 +44,33 @@ public:
 
 	void Render()
 	{
+
 		model::Render(this->g->m_TextureShader);
 	}
 	bool shoot()
 	{
-		if (!shooting) {
-			shooting = true;
-			if (shotTimer.GetSecondsElapsed() == 0 || shotTimer.GetSecondsElapsed() >= stats.fireRate)
+		if (shotTimer.GetSecondsElapsed() == 0 || shotTimer.GetSecondsElapsed() >= stats.fireRate)
 			{
 				shotTimer.restart();
+				
 				return true;
-				//AddRay();
-				//shots += 1;
+
 			}
-		}
-		shooting = false;
 		return false;
 			
 	}
-
-
+	DirectX::XMFLOAT2 recoil()
+	{
+		return { (float)(rand() % stats.vRecoil + 4 ), (float)(rand() % stats.hRecoil + (-stats.hRecoil * .5)) };
+	}
+	weaponStats stats;
 private:
 	graphics* g;
 	Timer shotTimer;
 	bool shooting = false;
-	weaponStats stats;
+
+	bool bRecoil = false;
+	Timer recoilTimer;
 
 };
 
