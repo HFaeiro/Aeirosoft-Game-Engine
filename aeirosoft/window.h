@@ -18,8 +18,9 @@ class window
 	int height;
 	POINT p;
 	bool active;
-public:
 
+public:
+	bool hideMouse = false;
 	POINT getMousePosition() { return p; }
 
 	int getWidth() { return width; }

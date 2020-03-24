@@ -73,7 +73,10 @@ public:
 		setPosition(95, playerHeight, 95);
 		//playerModel.init(filename, pDevice, pContext);
 	}
-	~Player() { };
+	~Player() {
+		main.~weapon();
+
+	};
 
 	virtual bool Initialize()
 	{
@@ -104,8 +107,16 @@ public:
 				DirectX::XMFLOAT2 recoil = main.recoil();
 				DirectX::XMFLOAT2 prevAim;
 				i->GetMouse(prevAim);
-				i->AdjustInputs(-recoil.x, recoil.y);
-				prevAimDif = { recoil.x, -recoil.y };
+				if (aiming)
+				{
+					i->AdjustInputs(-recoil.x, recoil.y);
+					prevAimDif = { recoil.x, -recoil.y };
+				}
+				else
+				{
+					i->AdjustInputs(-recoil.x * main.stats.hipPenalty, recoil.y );
+					prevAimDif = { recoil.x * main.stats.hipPenalty, -recoil.y };
+				}
 				recoilTimer.restart();
 			}
 

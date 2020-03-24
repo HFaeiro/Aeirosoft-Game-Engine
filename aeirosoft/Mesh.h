@@ -13,7 +13,7 @@ public:
 	~Mesh()
 	{
 		for (auto& t : vTexture)
-			t.GetTexture()->Release();
+			t.~texture();
 	}
 	void Draw();
 	std::vector<Vertex> getVertices()const{ return vertices; }

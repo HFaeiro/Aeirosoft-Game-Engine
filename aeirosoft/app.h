@@ -29,15 +29,23 @@ class app :
 
 	std::wstring mousePos;
 	std::wstring intersecting = L"Intersecting: FALSE";
-	void CreateScenes(Scenes& s);
-	void StartupGui(Gui&);
-	bool SetupApplication(graphics*, int boxes);
+	void CreateScenes(Scenes* s, Gui* gui = nullptr);
+	void StartupGui(Gui*);
+	
+	std::vector<int> GetStartInfo(std::string, std::vector<std::string>, std::vector<int> defaults);
 	std::vector<Events*> events;
 	std::vector<MovingAimBox*> vBoxes;
-	Collision* C;
+	Collision* C = nullptr;
 	input *i;
-	Scenes* s;
+	Scenes* s = nullptr;
+	Gui* gui = nullptr;
+	Player* player = nullptr;
+	graphics* m_Graphics;
+	int Boxes = NULL;
+	bool SetupApplication();
 public:
+	bool restart = false;
+	
 	app(HINSTANCE h, const std::wstring s, POINT p);
 	HWND hWnd;
 	HINSTANCE hInst;

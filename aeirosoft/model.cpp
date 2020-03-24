@@ -52,7 +52,10 @@ model::model()
 
 model::~model()
 {
-
+	for (auto& mesh : meshes)
+	{
+		mesh.~Mesh();
+	}
 }
 
 void model::adjustPosition(DirectX::XMFLOAT3 pos)

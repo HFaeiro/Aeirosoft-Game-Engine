@@ -44,10 +44,11 @@ texture::texture(ID3D11Device* pDevice, std::wstring filepath, aiTextureType typ
 }
 texture::~texture()
 {
-
+	//pTexture->Release();
+	//pTextureView->Release();
 }
 
-aiTextureType texture::GetType()
+aiTextureType texture::GetType() const
 {
 	return this->type;
 }

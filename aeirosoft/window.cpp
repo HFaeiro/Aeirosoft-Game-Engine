@@ -69,7 +69,7 @@ void window::MyRegisterClass()
 BOOL window::InitInstance()
 {
 
-    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_OVERLAPPEDWINDOW,
+    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_OVERLAPPEDWINDOW | WS_EX_LAYERED,
         CW_USEDEFAULT, 0, width, height, nullptr, nullptr, hInst, this);
 
     if (!myhWnd)
@@ -103,7 +103,7 @@ LRESULT window::tWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_SETCURSOR:
-        if (LOWORD(lParam) == HTCLIENT && this->active) {
+        if (LOWORD(lParam) == HTCLIENT && this->active && this->hideMouse) {
             SetCursor(nullptr);
             return true;
         }
@@ -147,7 +147,7 @@ LRESULT window::tWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         p.x = GET_X_LPARAM(lParam);
         p.y = GET_Y_LPARAM(lParam);
-        if (this->active)
+        if (this->active && this->hideMouse)
         {
             RECT r = helper::window::GetRect(hWnd);
             POINT P;

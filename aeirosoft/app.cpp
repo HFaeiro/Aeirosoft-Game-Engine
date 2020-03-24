@@ -17,53 +17,118 @@ app::~app()
 {
 	DestroyWindow(getHWND());
 }
-bool app::SetupApplication(graphics* m_Graphics, int boxes = 3)
+bool app::SetupApplication()
 {
+
+	
 	events.clear();
 	vBoxes.clear();
+	if (C != nullptr)
+	{
+		delete C;
+	}
 	C = new Collision();
-	s = new Scenes(m_Graphics, C);
-	CreateScenes(*s);
+	if (s != nullptr) {
+		delete s;
+	}
+	s = new Scenes(m_Graphics, C, (window*)this);
+	if (gui != nullptr)
+		delete gui;
+	gui = new Gui(m_Graphics, i, (window*)this);
+	StartupGui(gui);
+
+	CreateScenes(s, gui);
 	s->AddPlayerToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
 		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
 		L""));
 
 
-	
-	
 	events.push_back(i);
-
 	events.push_back(s);
+	
+	
+	//for (int i = 0; i < boxes; i++)
+	//{
+	//	MovingAimBox* M = new MovingAimBox(m_Graphics);
+	//	C->AddCollidable(M);
+	//	events.push_back(M);
+	//	vBoxes.push_back(M);
+	//
 
 	events.push_back(C);
-	for (int i = 0; i < boxes; i++)
-	{
-		MovingAimBox* M = new MovingAimBox(m_Graphics);
-		C->AddCollidable(M);
-		events.push_back(M);
-		vBoxes.push_back(M);
-	}
 
-	/*texture t(m_Graphics->GetDevice().Get(), L"Data\\Textures\\RustyPaint.dds", aiTextureType::aiTextureType_DIFFUSE);*/
 
 	for (const auto& E : events)
 		if (!E->Initialize())
 			return false;
 
 }
+std::vector<int> app::GetStartInfo(std::string filename, std::vector<std::string> vsfind, std::vector<int> defaults)
+{
+	FILE* file = nullptr;
+	errno_t err =  fopen_s(&file, filename.c_str(), "r");
+	std::vector<int> vDat;
+	if (!err)
+	{
+		std::string buffer;
+		buffer.resize(200);
+		if (fread(buffer.data(), sizeof(char), 200, file))
+		{
+			int count = 0;
+			for (const auto& find : vsfind)
+			{
+				std::size_t found = buffer.find(find);
+				if (found != std::string::npos)
+				{
+					found += find.length();
+					vDat.push_back(atoi(&buffer[found]));
+				}
+				else
+				{
+
+					vDat.push_back(defaults[count]);
+				}
+				count++;
+			}
+		}
+
+	}
+	else
+	{
+
+		err = fopen_s(&file, filename.c_str(), "a+");
+		if (!err)
+		{
+			int count = 0;
+			for (auto& find : vsfind)
+			{
+
+				find += std::to_string(defaults[count]) + "\n";
+				fwrite(find.c_str(), sizeof(char), find.length(), file);
+				vDat.push_back(defaults[count]);
+				count++;
+			}
+		}
+	}
+	if(file)
+		fclose(file);
+	return vDat;
+}
 int app::begin()
 {
-	graphics m_Graphics(m_Window, false, true);
-	if (!m_Graphics.Initialize())
+	std::vector<int> settings = GetStartInfo("settings.txt", { "FullScreen:", "VSYNC:", "BOXES:" }, { 0, 1, 3 });
+	
+	m_Graphics = new graphics(m_Window, settings[0], settings[1]);
+
+	if (!m_Graphics->Initialize())
 		return false;
 
 
-	i = new input(&m_Graphics, static_cast<window*>(this), &m_Graphics.m_Camera, &m_Timer);
+	i = new input(m_Graphics, static_cast<window*>(this), &m_Graphics->m_Camera, &m_Timer);
 
-	//Gui gui(&m_Graphics, &i);
-	//StartupGui(gui);
 
-	if (!SetupApplication(&m_Graphics))
+	Boxes = settings[2];
+	if (!SetupApplication())
 		return false;
 
 
@@ -72,8 +137,8 @@ int app::begin()
 		if (const auto optional = processMessages())
 			return *optional;
 
-		m_Graphics.BeginScene(0.f, 0.f, 0.f, 1.f);
-		//m_Graphics.CreateFloor({ -200,-200 }, { 200, 200 }, t);
+		m_Graphics->BeginScene(0.f, 0.f, 0.f, 1.f);
+
 		// start of event que
 		std::vector<Events*> queued;
 
@@ -91,47 +156,57 @@ int app::begin()
 		std::wstringstream wsshots;
 		std::wstringstream wssAcc;
 
-		int hits = 0;
-		for (const auto& b : vBoxes)
-			hits += b->GetHits();
+		//int hits = 0;
+		//for (const auto& b : vBoxes)
+		//	hits += b->GetHits();
+		//
+		//int shots = s->GetActivePlayer().GetShots();
+		//float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
+		//wss << L"Hits: " << hits;
+		//wsshots << L"Shots: " << shots;
+		//wssAcc << L"Accuracy: " << (int)(Accuracy * 100) << L"%";
+		//m_Graphics.pSpriteBatch->Begin();
+		//m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
+		//m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wsshots.str().c_str(), DirectX::XMFLOAT2(0, 0));
+		//m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
+		//m_Graphics.pSpriteBatch->End();
+
+
+
+		m_Graphics->EndScene();
+
+		if (restart)
+		{
+			if (SetupApplication())
+				restart = false;
+			else
+				return false;
+		}
+		//if (i->isKey(DIK_ESCAPE))
+		//	SetupApplication(&m_Graphics);
 		
-		int shots = s->GetActivePlayer().GetShots();
-		float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
-		wss << L"Hits: " << hits;
-		wsshots << L"Shots: " << shots;
-		wssAcc << L"Accuracy: " << (int)(Accuracy * 100) << L"%";
-		m_Graphics.pSpriteBatch->Begin();
-		m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
-		m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wsshots.str().c_str(), DirectX::XMFLOAT2(0, 0));
-		m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
-		m_Graphics.pSpriteBatch->End();
-
-
-
-		m_Graphics.EndScene();
-		if (i->isKey(DIK_ESCAPE))
-			SetupApplication(&m_Graphics);
-
 	}
 }
 
 
 
-void app::CreateScenes(Scenes& s)
+void app::CreateScenes(Scenes* s, Gui* gui)
 {
-	s.CreateScene(L"Scene1");
-	s.CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
-	s.CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
-	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
-	s.AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
-	s.AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
-	s.SetActiveScene(L"Scene1");
+	s->CreateScene(L"Scene1", gui, false);
+	s->CreateScene(L"MainMenu", gui, true);
+	s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
+	s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
+	s->AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
+	s->AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
+	s->AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
+	s->AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
+	s->AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
+	s->AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	s->SetActiveScene(L"MainMenu");
+	
 }
 
-void app::StartupGui(Gui& gui)
+void app::StartupGui(Gui* gui)
 {
 	RECT r;
 
@@ -145,49 +220,43 @@ void app::StartupGui(Gui& gui)
 	r.bottom = -r.top;
 	r.right = -r.left;
 
-	gui.AddImage(L"Main", L"Data\\Menu\\Backgrounds\\4.png", { (float)r.left, (float)r.bottom }, { (float)r.right, (float)r.top });
+	float middleX = r.left * .5f;
+	float middleY = r.bottom * .5f;
 
-	gui.AddImage(L"GirlMenu", L"Data\\Menu\\Backgrounds\\4.png", { (float)r.left, (float)r.bottom }, { (float)r.right, (float)r.top });
-	gui.AddImage(L"GuyMenu", L"Data\\Menu\\Backgrounds\\4.png", { (float)r.left, (float)r.bottom }, { (float)r.right, (float)r.top });
-	gui.AddImage(L"Main", L"Data\\Menu\\Menu\\Elites.png", { -300.f, 200.f }, { 300.f, 300.f });
-
-	std::function<void(Gui*)> funcGuy = [](Gui* g) { g->ActivateMenu(L"GuyMenu"); };
-
-	gui.AddButton(funcGuy, L"Main", L"Data\\Menu\\Characters\\Guy.png", L"Data\\Menu\\Characters\\Male Glow.png",
-		{ 200.f, -350.f }, { 450.f, 200.f });
-
-	std::function<void(Gui*)> funcGirl = [](Gui* g) { g->ActivateMenu(L"GirlMenu"); };
-
-	gui.AddButton(funcGirl, L"Main", L"Data\\Menu\\Characters\\Girl.png", L"Data\\Menu\\Characters\\Female Glow.png",
-		{ -470.f, -325.f }, { -110.f, 25.f });
+	float sizeMult = .5f;
 
 
-	gui.AddButton(funcGirl, L"GirlMenu", L"Data\\Menu\\Menu\\World.png", L"Data\\Menu\\Menu\\World Glow.png",
-		{ -80.f, 0.f }, { 188.f, 68.f });
-
-	gui.AddButton(funcGirl, L"GirlMenu", L"Data\\Menu\\Menu\\Invite.png", L"Data\\Menu\\Menu\\Invite Glow.png",
-		{ -80.f, -86.f }, { 188.f, -16.f });
-
-	gui.AddButton(funcGirl, L"GirlMenu", L"Data\\Menu\\Menu\\Stash.png", L"Data\\Menu\\Menu\\Stash Glow.png",
-		{ -80.f, -170.f }, { 188.f, -102.f });
-
-	gui.AddImage(L"GirlMenu", L"Data\\Menu\\Characters\\Girl.png",
-		{ 200.f, -325.f }, { 450.f, 25.f });
-
-	gui.AddButton(funcGuy, L"GuyMenu", L"Data\\Menu\\Menu\\World.png", L"Data\\Menu\\Menu\\World Glow.png",
-		{ -80.f, 0.f }, { 188.f, 68.f });
-
-	gui.AddButton(funcGuy, L"GuyMenu", L"Data\\Menu\\Menu\\Invite.png", L"Data\\Menu\\Menu\\Invite Glow.png",
-		{ -80.f, -86.f }, { 188.f, -16.f });
-
-	gui.AddButton(funcGuy, L"GuyMenu", L"Data\\Menu\\Menu\\Stash.png", L"Data\\Menu\\Menu\\Stash Glow.png",
-		{ -80.f, -170.f }, { 188.f, -102.f });
-
-	gui.AddImage(L"GuyMenu", L"Data\\Menu\\Characters\\Guy.png",
-		{ 200.f, -350.f }, { 450.f, 200.f });
+	float stBWit = 424 * sizeMult;
+	float stBHei = 113 * sizeMult;
+	float offset = 50;
+	std::function<void(void*)> startfunc = [](void* s) { ((Scenes*)s)->SetActiveScene(L"Scene1");  };
+	gui->AddButton(startfunc, s, L"Main", L"Data\\Menu\\Main\\Start.png", L"Data\\Menu\\Main\\Start_Selected.png",
+		{ -stBWit, -stBHei + offset }, { stBWit, stBHei + offset});
 
 
-	gui.SetMainMenu(L"Main");
+	float setBWit = 408 * sizeMult;
+	float setBHei = 67 * sizeMult;
+	
+	std::function<void(void*)> setfunc = [](void* g) { ((Gui*)g)->ActivateMenu(L"settingsMenu"); };
+	gui->AddButton(setfunc, gui, L"Main", L"Data\\Menu\\Main\\settings.png", L"Data\\Menu\\Main\\Settings_Selected.png",
+		{ -setBWit, -setBHei - stBHei}, { setBWit, setBHei - stBHei });
+
+	float qBWit = 211 * sizeMult;
+	float qBHei = 69 * sizeMult;
+	offset = -((-setBHei - stBHei) - 50);
+	std::function<void(void*)> quitfunc = [](void* g) { SendMessage(((window*)g)->getHWND(), WM_CLOSE, NULL, NULL); };
+	gui->AddButton(quitfunc, (window*)this, L"Main", L"Data\\Menu\\Main\\quit.png", L"Data\\Menu\\Main\\quit_Selected.png",
+		{ -qBWit, -qBHei - offset }, { qBWit, qBHei - offset });
+
+
+	std::function<void(void*)> refunc = [](void* g) { ((app*)g)->restart = true; };
+	gui->AddButton(refunc, (window*)this, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
+		{ -stBWit, -stBHei + 50 }, { stBWit, stBHei + 50 });
+	gui->AddExistingButton(L"Pause", L"settings.png");
+	gui->AddExistingButton(L"Pause", L"quit.png");
+
+
+	gui->SetMainMenu(L"Main");
 
 }
 

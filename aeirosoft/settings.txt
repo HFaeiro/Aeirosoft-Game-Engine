@@ -1,0 +1,3 @@
+FullScreen:0
+VSYNC:1
+BOXES:3

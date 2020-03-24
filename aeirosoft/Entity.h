@@ -19,6 +19,11 @@ public:
 		}
 
 	}
+
+	~Entity() 
+	{
+		((model*)this)->~model();
+	}
 	DirectX::XMMATRIX getViewMatrix() { return _g->GetViewMatrix(); }
 	DirectX::XMFLOAT3 getPosition()  { return c->getPosition(); }
 	DirectX::XMFLOAT3 getRotation()  { return c->getRotation(); }
@@ -37,13 +42,7 @@ public:
 
 		if (collision) {
 			collision = false;
-			/*for (const auto& cWith : collidedWith)
-			{
-				DirectX::XMFLOAT3 corners[8];
-				if (cWith.type == Collidable::Object)
-				{
-					cWith.GetBounds().GetCorners(corners);
-				}*/
+
 
 
 			DirectX::XMFLOAT3 movedPos = c->getPosition();
@@ -55,7 +54,7 @@ public:
 			c->setPosition(prevPos);
 			DirectX::XMFLOAT3 posDifference = { movedPos.x - prevPos.x, movedPos.y - prevPos.y, movedPos.z - prevPos.z };
 			//DirectX::XMFLOAT3 posDifference = {prevPos.x - movedPos.x,prevPos.y - movedPos.y,prevPos.z - movedPos.z };
-			float newPosMult = .1999f * (loop == 0 ? 1 : loop * .099f);
+			float newPosMult = .1999f * (loop == 0 ? 1 : loop * .0099f);
 
 			if (posDifference.x) {
 				c->adjustPosition({ posDifference.x, 0, 0 });
@@ -106,6 +105,27 @@ public:
 			{
 				loop = 0;
 				c->setPosition(movedPos);
+				//DirectX::XMFLOAT3 center = Entity::Collidable::GetBoundSphere().Center;
+				//float radius = Entity::Collidable::GetBoundSphere().Radius;
+				//for (const auto& cWith : collidedWith)
+				//{
+				//	DirectX::XMFLOAT3 corners[8];
+				//	if (cWith.type == Collidable::Object)
+				//	{
+				//		cWith.GetBounds().GetCorners(corners);
+				//		for (int i = 0; i < 8; i++)
+				//		{
+				//			if (center.x - radius < corners[i].x)
+				//			{
+
+				//			}
+
+				//		}
+				//		
+				//	}
+				//}
+
+
 				c->adjustPosition({ 0,.01f,0 });
 				collision = false;
 				return;
@@ -140,7 +160,7 @@ public:
 
 	void adjustPosition(camera::movementType type, float velocity) 
 	{
-		if (!collision) {
+		if (!collision && velocity < 5) {
 			prevMove = type;
 			recentVelocity = velocity;
 		
@@ -150,7 +170,6 @@ public:
 		return;
 	}
 
-	~Entity() {}
 	camera::movementType prevMove;
 	float recentVelocity;
 	float prevVelocity;
@@ -206,7 +225,9 @@ public:
 			CreateBoundingOrientedBox(v);
 		}
 	}
-	~EntityObject() {}
+	~EntityObject() {
+		((model*)this)->~model();
+	}
 
 	const std::wstring getName() const { return name; }
 

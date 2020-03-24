@@ -13,13 +13,13 @@ struct PR
 struct weaponStats
 {
 	int vRecoil = 12.f;
-	int hRecoil = 30.f;
+	int hRecoil = 20.f;
 	float spread =0.f;
 	float fireRate = 0.125f;
-	float recoverRate = .125f;
+	float recoverRate = .0925f;
 	float damage = 0.f;
 	float bulletSpeed = 0.f;
-
+	float hipPenalty = 1.2f;
 	PR ADS;
 	PR hip;
 	model Bullet;

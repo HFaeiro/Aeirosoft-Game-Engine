@@ -51,6 +51,7 @@ public:
 
 
 	DirectX::XMMATRIX GetViewMatrix();
+	DirectX::XMMATRIX Get2DViewMatrix();
 	void Begin3DScene();
 	void Begin2DScene();
 	DirectX::XMMATRIX GetProjectionMatrix();
@@ -89,7 +90,7 @@ protected:
 	DirectX::XMMATRIX m_WorldMatrix;
 	DirectX::XMMATRIX m_OrthoMatrix;
 	DirectX::XMMATRIX m_ViewMatrix;
-
+	DirectX::XMMATRIX m_DefaultViewMatrix;
 	HWND m_Window;
 
 	float screenNear = .01f;

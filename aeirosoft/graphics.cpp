@@ -133,8 +133,9 @@ bool graphics::Initialize()
 
 
 	m_Camera.setPosition(0.f, 0.f, -.1f);
-	
+	m_DefaultViewMatrix = m_Camera.getViewMatrix();
 	m_Camera.setProjection(m_ProjectionMatrix);
+
 
 
 	
@@ -482,6 +483,10 @@ DirectX::XMMATRIX graphics::GetViewMatrix()
 {
 	return m_ViewMatrix;
 }
+DirectX::XMMATRIX graphics::Get2DViewMatrix()
+{
+	return m_DefaultViewMatrix;
+}
 void graphics::Begin3DScene()
 {
 	
@@ -495,7 +500,8 @@ void graphics::Begin3DScene()
 void graphics::Begin2DScene()
 {
 	TurnZBufferOff();
-	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_ViewMatrix, m_OrthoMatrix);
+	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_DefaultViewMatrix, m_OrthoMatrix);
+	m_TextureShader.Render(pContext.Get(), DirectX::XMMatrixIdentity());
 }
 
 void graphics::Resize()

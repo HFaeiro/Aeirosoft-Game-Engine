@@ -1,7 +1,26 @@
 #include "Scenes.h"
 
+bool Scenes::CreateScene(const std::wstring& sceneName, Gui* gui, bool _guiStart)
+{
+	if (/*this->i == nullptr || */this->g == nullptr)
+		return false;
+
+	for (const auto& scene : vScenes)
+	{
+		if (scene.sceneName == sceneName)
+			return false;
+	}
+	if (gui)
+		vScenes.push_back(Scene(sceneName, gui, g, _guiStart));
+	else
+		vScenes.push_back(Scene(sceneName, g));
+	return true;
+
+}
+
 bool Scenes::SetActiveScene(const std::wstring& sceneName)
 {
+	C->Clear();
 	for (auto& s : vScenes)
 		if (s.sceneName == sceneName)
 		{
@@ -11,7 +30,7 @@ bool Scenes::SetActiveScene(const std::wstring& sceneName)
 				C->AddCollidable(&e);
 			}
 
-			return true;
+			return this->Initialize();
 		}
 	return false;
 }

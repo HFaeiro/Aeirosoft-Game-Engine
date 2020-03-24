@@ -2,11 +2,11 @@
 #include <sstream>
 void Gui::Button::Collision(DirectX::XMFLOAT2 p)
 {
-
-	//need to fix from and to points on window resize.
-	//thinks they're always in the same place. 
-	//multiply points by difference in old window size to new?
-	//do i have to do this on 3d as well?
+	//////fixed?
+	//////need to fix from and to points on window resize.
+	//////thinks they're always in the same place. 
+	//////multiply points by difference in old window size to new?
+	//think window border is causing this problem?
 
 	if (p.x > from.x && p.y > from.y) {
 		if (p.x < to.x && p.y < to.y)
@@ -47,13 +47,13 @@ void Gui::Menu::Add( DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to)
 
 
 
-	CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
+	g->CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
 
 }
 
 void Gui::Button::Draw()
 {
-	Begin2DScene();
+	g->Begin2DScene();
 	UINT offset = 0;
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -72,7 +72,7 @@ void Gui::Button::Draw()
 void Gui::Image::Draw()
 {
 	
-	Begin2DScene();
+	g->Begin2DScene();
 	UINT offset = 0;
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pContext->PSSetShaderResources(0, 1, t.GetTextureResourceViewAddr());
@@ -83,10 +83,10 @@ void Gui::Image::Draw()
 
 void Gui::Update()
 {
+	
+	
 	DirectX::XMFLOAT2 mouse = GetCursorToWorldOrtho();
-	if (i->isKey(DIK_ESCAPE))
-		if (activeMenu != mainMenu)
-			ActivateMenu(mainMenu);
+
 
 	for (const auto& m : vActive)
 	{
@@ -97,7 +97,7 @@ void Gui::Update()
 		m->Collision({ mouse.x, mouse.y });
 		if (i->isLeftClick())
 		{
-			if (m->OnClick(this, { mouse.x, mouse.y }))
+			if (m->OnClick({ mouse.x, mouse.y }))
 				break;
 		}
 

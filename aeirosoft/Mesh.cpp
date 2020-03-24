@@ -56,11 +56,11 @@ void Mesh::Draw()
 {
 	UINT offset = 0;
 
-	for (int i = 0; i < vTexture.size(); i++)
+	for (auto& texture: vTexture)
 	{
-		if (vTexture[i].GetType() == aiTextureType::aiTextureType_DIFFUSE)
+		if (texture.GetType() == aiTextureType::aiTextureType_DIFFUSE)
 		{
-			this->pContext->PSSetShaderResources(0, 1, vTexture[i].GetTextureResourceViewAddr());
+			this->pContext->PSSetShaderResources(0, 1, texture.GetTextureResourceViewAddr());
 			break;
 		}
 	}

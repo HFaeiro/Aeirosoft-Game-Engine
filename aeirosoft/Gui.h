@@ -12,11 +12,15 @@
 class Gui : public Events
 {
 public:
-	Gui(graphics* g, input* i) :g(g), i(i), view(g->GetViewMatrix())
+	Gui(graphics* g, input* i, window* w) :g(g), i(i), w(w)
 	{};
 	//Gui(graphics* g) :g(g) {};
 	~Gui() 
 	{
+		for (auto m : vMenu)
+		{
+			m->~Menu();
+		}
 	}
 	input* i;
 	virtual bool Initialize()
@@ -38,8 +42,9 @@ public:
 	{
 		mainMenu = activeMenu = menuName;
 	}
-	void ActivateMenu(std::wstring menuName)
+	void ActivateMenu(std::wstring menuName)  
 	{
+		
 		activeMenu = menuName;
 		vActive.clear();
 		for (const auto& m : vMenu)
@@ -49,14 +54,31 @@ public:
 		}
 
 	}
-	void AddButton( std::function<void(Gui*)> onClick, std::wstring MenuName, std::wstring fileName, std::wstring highLightFile, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
+	bool AddExistingButton(std::wstring MenuName, std::wstring buttonName)
 	{
-		vMenu.push_back(new Button(*g, onClick, MenuName, fileName, highLightFile, bottomLeft, topRight));
+		for (const auto& m : vMenu)
+		{
+			if (m->type == eButton)
+			{
+				if (m->objName == buttonName) {
+					
+					
+					vMenu.push_back(new Button(*(Button*)m));
+					vMenu[vMenu.size() - 1]->menuName = MenuName;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	void AddButton( std::function<void(void*)> onClick, void* objptr, std::wstring MenuName, std::wstring fileName, std::wstring highLightFile, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
+	{
+		vMenu.push_back(new Button(g, onClick, objptr, MenuName, fileName, highLightFile, bottomLeft, topRight));
 
 	}
 	void AddImage(std::wstring MenuName, std::wstring fileName, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
 	{
-		vMenu.push_back(new Image(*g, MenuName, fileName, bottomLeft, topRight));
+		vMenu.push_back(new Image(g, MenuName, fileName, bottomLeft, topRight));
 	}
 
 	virtual void Update();
@@ -66,78 +88,94 @@ public:
 		return this;
 	}
 
+	window* w;
 private:
-	DirectX::XMMATRIX view;
 	std::wstring mainMenu = L"";
 	std::wstring activeMenu = L"";
 	HWND m_Window;
 	graphics* g;
-
-	class Menu : protected graphics
+	enum MenuType { eUndefinedType, eButton, eImage};
+	DirectX::XMMATRIX view = g->Get2DViewMatrix();
+	class Menu
 	{
 	public:
-		Menu(const graphics& g, texture t, std::wstring menuName, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight) :graphics(g), t(t)
+		Menu(graphics* g, texture t, std::wstring _menuName, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight) :g(g), t(t)
 		{
-			name = menuName;
+			menuName = _menuName;
 			Add(bottomLeft, topRight);
 		};
-		Menu( const graphics& g, std::wstring filename, std::wstring menuName ,DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight) :graphics(g), t(pDevice.Get(), filename, aiTextureType::aiTextureType_DIFFUSE)
+		Menu(graphics* g, std::wstring filePath, std::wstring _menuName ,DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight) :g(g), t(g->GetDevice().Get(), filePath, aiTextureType::aiTextureType_DIFFUSE)
 		{
-			name = menuName;
+			menuName = _menuName;
+			objName = helper::strings::GetNameFromPath(filePath);
 			Add( bottomLeft, topRight);
 		};
-		virtual ~Menu() {};
+		virtual ~Menu() 
+		{
+			this->t.~texture();
+		};
 
 		virtual void Collision(DirectX::XMFLOAT2) = 0;
 		void Add(DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to);
-		virtual bool OnClick(Gui*, DirectX::XMFLOAT2) = 0;
+		virtual bool OnClick(DirectX::XMFLOAT2) = 0;
 		virtual void Draw() = 0;
 		std::wstring MenuName()
 		{
-			return name;
+			return menuName;
 		}
+		friend Gui;
 	protected:
-		std::wstring name;
+		std::wstring menuName;
+		std::wstring objName;
 		std::vector<Vertex> vertices;
 		IndexBuffer ib;
 		VertexBuffer vb;
 		texture t;
 		bool collision = false;
 		DirectX::XMFLOAT2 from, to;
-
+		graphics* g;
+		Microsoft::WRL::ComPtr < ID3D11DeviceContext	> pContext = g->GetDeviceContext();
+		MenuType type = eUndefinedType;
+		
 	};
 	class Button : public Menu
 	{
 	public:
-		Button(const graphics& g, std::function<void(Gui*)>onClick, std::wstring menuName, std::wstring filename, std::wstring highLightFile,
+		Button(graphics* g, std::function<void(void*)>onClick, void* _objptr, std::wstring menuName, std::wstring filename, std::wstring highLightFile,
 			DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight) :
-			Menu(g, filename, menuName, bottomLeft, topRight), highlight(pDevice.Get(), highLightFile, aiTextureType::aiTextureType_DIFFUSE), func(onClick)
+			Menu(g, filename, menuName, bottomLeft, topRight), highlight(g->GetDevice().Get(), highLightFile, aiTextureType::aiTextureType_DIFFUSE), func(onClick), objptr(_objptr)
 		{
-			
+			type = eButton;
 		};
 		~Button() {};
 		void Collision(DirectX::XMFLOAT2);
-		std::function<void(Gui*)> func;
-		virtual bool OnClick(Gui* g, DirectX::XMFLOAT2 mouse)
+		std::function<void(void*)> func;
+		virtual bool OnClick(DirectX::XMFLOAT2 mouse)
 		{
 			if(collision)
-				func(g);
+				func(objptr);
 			return collision;
 		}
 		virtual void Draw();
 	private:
+		void* objptr = nullptr;
 		texture highlight;
+		
 	};
 	class Image :public Menu
 	{
 	public:
-		Image(const graphics& g, std::wstring menuName, std::wstring filename,
+		Image(graphics* g, std::wstring menuName, std::wstring filename,
 			DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight) :
 			Menu(g, filename, menuName, bottomLeft, topRight)
-		{};
+		{
+			type = eImage;
+		};
 		virtual void Draw();
 		virtual void Collision(DirectX::XMFLOAT2) {};
-		virtual bool OnClick(Gui*, DirectX::XMFLOAT2) { return false; };
+		virtual bool OnClick(DirectX::XMFLOAT2) { return false; };
+	private:
+		
 	};
 	//class Edit :public Menu
 	//{

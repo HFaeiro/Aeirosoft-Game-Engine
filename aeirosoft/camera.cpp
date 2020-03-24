@@ -113,7 +113,7 @@ void camera::setPosition(float x, float y, float z)
 	pos.y = y;
 	pos.z = z;
 	vPos = XMLoadFloat3(&this->pos);
-	//render();
+	render();
 
 }
 

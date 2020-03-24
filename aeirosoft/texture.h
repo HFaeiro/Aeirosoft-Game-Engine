@@ -23,12 +23,12 @@ class texture
 public:
 
 	texture();
-
+	~texture();
 	texture(ID3D11Device* pDevice, const color& color, aiTextureType type);
 	texture(ID3D11Device* pDevice, const color* colorData, UINT width, UINT height, aiTextureType);
 	texture(ID3D11Device* pDevice, std::wstring filepath, aiTextureType);
-	~texture();
-	aiTextureType GetType();
+	
+	aiTextureType GetType() const;
 	ID3D11ShaderResourceView* GetTextureResourceView();
 	ID3D11ShaderResourceView** GetTextureResourceViewAddr();
 
