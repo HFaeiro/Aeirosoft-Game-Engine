@@ -4,7 +4,7 @@ graphics::graphics(const graphics& g)
 {
 	if (this != &g)
 	{
-		//this->pAudio = g.pAudio;
+
 		this->pContext = g.pContext;
 		this->pDevice = g.pDevice;
 		this->pSwap = g.pSwap;
@@ -28,8 +28,7 @@ graphics::graphics(HWND hWnd, bool fullscreen, bool vSync)
 }
 graphics::~graphics()
 {
-	/*if (pAudio)
-		pAudio->Suspend();*/
+
 	pSwap->SetFullscreenState(false, NULL);
 
 }
@@ -82,11 +81,6 @@ bool graphics::Initialize()
 	this->fovDegrees = 90.f;
 	FOV = (fovDegrees / 360) * DirectX::XM_PI;
 
-//	DirectX::AUDIO_ENGINE_FLAGS eflags = DirectX::AudioEngine_Default;
-//#ifdef _DEBUG
-//	eflags = eflags | DirectX::AudioEngine_Debug;
-//#endif
-//	pAudio = std::make_unique<DirectX::AudioEngine>(eflags);
 
 
 	HRESULT hr;
@@ -136,18 +130,10 @@ bool graphics::Initialize()
 	m_DefaultViewMatrix = m_Camera.getViewMatrix();
 	m_Camera.setProjection(m_ProjectionMatrix);
 
-
-
-	
-	//Load Models
-	//m_Model.init(L"Data\\Objects\\nanosuit\\nanosuit.obj", pDevice.Get(), pContext.Get());
-
-	//asteroid.init(L"Data\\Objects\\nanosuit\\nanosuit.obj", pDevice.Get(), pContext.Get());
-	//m_Model.adjustPosition(10, 0, 0);
 	m_batch = std::make_unique<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>>(pContext.Get());
 	
 	pSpriteBatch = std::make_unique<DirectX::SpriteBatch>(this->pContext.Get());
-	pSpriteFont = std::make_unique<DirectX::SpriteFont>(pDevice.Get(), L"Data\\Fonts\\hFontSm.spritefont");
+
 
 	
 	return true;
@@ -182,35 +168,6 @@ void graphics::CreateFloor(DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to,texture 
 	pContext->DrawIndexed(6, 0, 0);
 
 }
-//
-//void graphics::CreateWall(DirectX::XMFLOAT3 from, DirectX::XMFLOAT3 to, bool temporary)
-//{
-//	std::vector<Vertex> vertices;
-//	vertices.emplace_back(from.x, 0.f, from.y, 0.f, 1.f);
-//	vertices.emplace_back(to.x, 0.f, to.y, 1.f, 0.f);
-//	vertices.emplace_back(from.x, 0.f, to.y);
-//	vertices.emplace_back(to.x, 0.f, from.y, 1.f, 1.f);
-//
-//
-//	DWORD indecies[] =
-//	{
-//		0,2,1,
-//		0,1,3
-//	};
-//
-//	VertexBuffer vb;
-//	IndexBuffer ib;
-//	UINT offset = 0;
-//	if (temporary)
-//		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-//	else
-//		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//	CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
-//	pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
-//	pContext->IASetIndexBuffer(ib.Get(), DXGI_FORMAT_R32_UINT, 0);
-//	pContext->DrawIndexed(6, 0, 0);
-//
-//}
 
 void graphics::CreateIndexAndVectorBuffers(std::vector<Vertex> vertices, DWORD indecies[], VertexBuffer& vb, IndexBuffer& ib)
 {
@@ -252,10 +209,7 @@ void graphics::BeginScene(float red, float green, float blue, float alpha)
 	m_TextureShader.Render(pContext.Get(),m_WorldMatrix);
 
 	pContext->OMSetBlendState(pBlendState.Get(), 0, 0xffffffff);
-	//if (!pAudio->Update())
-	//{
 
-	//}
 }
 
 

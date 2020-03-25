@@ -22,7 +22,6 @@ public:
 			m->~Menu();
 		}
 	}
-	input* i;
 	virtual bool Initialize()
 	{
 		m_Window = g->GetWindow();
@@ -38,57 +37,28 @@ public:
 
 		return true;
 	}
-	void SetMainMenu(std::wstring menuName)
-	{
-		mainMenu = activeMenu = menuName;
-	}
-	void ActivateMenu(std::wstring menuName)  
-	{
-		
-		activeMenu = menuName;
-		vActive.clear();
-		for (const auto& m : vMenu)
-		{
-			if (m->MenuName() == activeMenu)
-				vActive.push_back(m);
-		}
-
-	}
-	bool AddExistingButton(std::wstring MenuName, std::wstring buttonName)
-	{
-		for (const auto& m : vMenu)
-		{
-			if (m->type == eButton)
-			{
-				if (m->objName == buttonName) {
-					
-					
-					vMenu.push_back(new Button(*(Button*)m));
-					vMenu[vMenu.size() - 1]->menuName = MenuName;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	void AddButton( std::function<void(void*)> onClick, void* objptr, std::wstring MenuName, std::wstring fileName, std::wstring highLightFile, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
-	{
-		vMenu.push_back(new Button(g, onClick, objptr, MenuName, fileName, highLightFile, bottomLeft, topRight));
-
-	}
-	void AddImage(std::wstring MenuName, std::wstring fileName, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
-	{
-		vMenu.push_back(new Image(g, MenuName, fileName, bottomLeft, topRight));
-	}
 
 	virtual void Update();
-	DirectX::XMFLOAT2 GetCursorToWorldOrtho();
 	virtual std::optional<Events*> Queue()
 	{
 		return this;
 	}
 
+	void SetMainMenu(std::wstring menuName);
+	void ActivateMenu(std::wstring menuName);
+	bool AddExistingButton(std::wstring MenuName, std::wstring buttonName);
+	void AddButton(std::function<void(void*)> onClick, void* objptr, std::wstring MenuName, std::wstring fileName, std::wstring highLightFile, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight);
+	void AddImage(std::wstring MenuName, std::wstring fileName, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight);
+
+
+	DirectX::XMFLOAT2 GetCursorToWorldOrtho();
+
+	std::wstring GetActiveMenu()
+	{
+		return activeMenu;
+	}
 	window* w;
+	input* i;
 private:
 	std::wstring mainMenu = L"";
 	std::wstring activeMenu = L"";
@@ -96,6 +66,56 @@ private:
 	graphics* g;
 	enum MenuType { eUndefinedType, eButton, eImage};
 	DirectX::XMMATRIX view = g->Get2DViewMatrix();
+	class Font
+	{
+	public:
+		Font(graphics* g, std::wstring font) : fontName(font), g(g)
+		{
+			pSpriteFont = std::make_unique<DirectX::SpriteFont>(g->GetDevice().Get(), font.c_str());
+			fontName = helper::strings::GetDirectoryFromPath(font);
+		}
+
+		~Font()
+		{
+			pSpriteFont.release();
+		}
+		void Render(const std::wstring text, DirectX::XMFLOAT2 location)
+		{
+			pSpriteFont->DrawString(g->pSpriteBatch.get(), text.c_str(), DirectX::XMFLOAT2(0, 40));
+		}
+		std::wstring fontName;
+	private:
+		graphics* g;
+		std::unique_ptr<DirectX::SpriteFont> pSpriteFont;
+
+	};
+	class Text
+	{
+	public:
+		Text(graphics* g, std::wstring name, std::wstring _font, DirectX::XMFLOAT2 location) : name(name), location(location), g(g)
+		{
+			pFont = new Font(g, _font);
+		}
+		Text(graphics* g, std::wstring name, Font* font, DirectX::XMFLOAT2 location)
+		{
+			pFont = font;
+		}
+		~Text() {};
+
+		void Render()
+		{
+			pFont->Render(textToRender, location);
+		}
+		Font* pFont;
+	private:
+		std::wstring textToRender;
+		DirectX::XMFLOAT2 location;
+		std::wstring name;
+		graphics* g;
+		//	pSpriteFont = std::make_unique<DirectX::SpriteFont>(pDevice.Get(), L"Data\\Fonts\\hFontSm.spritefont");
+		//		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
+	};
+
 	class Menu
 	{
 	public:

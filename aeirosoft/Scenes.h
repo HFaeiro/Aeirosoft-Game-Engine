@@ -11,13 +11,15 @@ class Scenes :public Events
 {
 public:
 
-	Scenes(graphics* g, Collision* C, window * _w) : g(g), C(C), w(_w){}
+	Scenes(graphics* g, input* i) : g(g), i(i){}
 	~Scenes()
 	{
 		for (const auto& scene : vScenes)
 		{
-			if (scene.player != nullptr)
-				scene.player->~Player();
+			for (const auto& events : scene.events)
+			{
+				events->~Events();
+			}
 		}
 	}
 
@@ -33,55 +35,66 @@ public:
 			else
 				return false;
 		}
-		ActiveScene->events.clear();
-		if (ActiveScene->guiStart) {
-			if (ActiveScene->gui)
-			{
-				if (ActiveScene->gui->Initialize())
-					ActiveScene->events.push_back(ActiveScene->gui);
-				else
-					return false;
-			}
+		ActiveScene->events.push_back(ActiveScene->C);
 
+		i->w->hideMouse = ActiveScene->hideMouse;
+		for (const auto& event : ActiveScene->events)
+		{
+			
+			event->Initialize();
 		}
-		else
-			if (ActiveScene->player) {
-				w->hideMouse = true;
-				if (ActiveScene->player->Initialize())
-				{
-					C->AddCollidable(ActiveScene->player);
-					ActiveScene->events.push_back(ActiveScene->player);
-				}
-				else
-					return false;
+		////if (ActiveScene->guiStart) {
+		////	if (ActiveScene->gui)
+		////	{
+		////		if (ActiveScene->gui->Initialize())
+		////			ActiveScene->events.push_back(ActiveScene->gui);
+		////		else
+		////			return false;
+		////	}
 
-				
-			}
+		////}
+		////else
+		////	if (ActiveScene->player) {
+		////		w->hideMouse = true;
+		////		if (ActiveScene->player->Initialize())
+		////		{
+		////			ActiveScene->events.push_back(ActiveScene->player);
+		////		}
+		////		else
+		////			return false;
+
+		////		
+		////	}
 		return true;
 
 	}
 	virtual std::optional<Events*> Queue()
 	{
-		if (ActiveScene->gui) {
-			if (!ActiveScene->guiVisible)
-			{
+		
+		//if (ActiveScene->gui) {
+		//	if (ActiveScene->gui->i->isKey(DIK_ESCAPE) && !bEscape)
+		//	{
+		//		bEscape = true;
+		//		std::wstring ActiveMenu = ActiveScene->gui->GetActiveMenu();
+		//		if (ActiveMenu != L"Pause" && ActiveScene->sceneName != L"MainMenu")
+		//		{
+		//			ActiveScene->gui->ActivateMenu(L"Pause");
+		//			ActiveScene->events.push_back(ActiveScene->gui);
+		//			w->hideMouse = false;
+		//		}
+		//		else if (ActiveMenu == L"Pause")
+		//		{
+		//			ActiveScene->gui->ActivateMenu(L"Main");
+		//			ActiveScene->guiVisible = false;
+		//			Initialize();
+		//		}
+		//	}
+		//	else if(!ActiveScene->gui->i->isKey(DIK_ESCAPE))
+		//		bEscape = false;
+		//}
+		
 
-				if (ActiveScene->gui->i->isKey(DIK_ESCAPE))
-				{
-					ActiveScene->gui->ActivateMenu(L"Pause");
-					ActiveScene->events.push_back(ActiveScene->gui);
-					w->hideMouse = false;
-				}
-			}
-			else
-			{
-				if (ActiveScene->sceneName == L"Pause")
-				{
-					ActiveScene->guiVisible = false;
-					w->hideMouse = true;
-				}
-			}
-		}
+
 		for (const auto& E : ActiveScene->events)
 			if (const auto optional = E->Queue())
 				queued.push_back(*optional);
@@ -104,9 +117,9 @@ public:
 
 	}
 
-	bool CreateScene(const std::wstring& sceneName, Gui* gui = nullptr, bool _guiStart = false);
+	bool CreateScene(const std::wstring& sceneName,Gui* gui = nullptr, bool _guiStart = false, bool hideMouse = false);
 	bool SetActiveScene(const std::wstring& sceneName);
-	bool AddEntityToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
+	bool AddObjectToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
 	bool AddPlayerToScene(std::wstring sceneName, Player* player)
 	{
 		for (auto& s : vScenes)
@@ -114,11 +127,26 @@ public:
 			if (s.sceneName == sceneName)
 			{
 				s.player = player;
+				s.events.push_back(player);
+				s.C->AddCollidable(s.player);
 				return true;
 			}
 		}
 		return false;
 	}
+	//bool AddCollidableEventToScene(std::wstring sceneName, void* E)
+	//{
+	//	for (auto& s : vScenes)
+	//	{
+	//		if (s.sceneName == sceneName)
+	//		{
+	//			s.events.push_back((Events*)E);
+	//			//s.C->AddCollidable((Collidable*)(E));
+	//			return true;
+	//		}
+	//	}
+	//	return false;
+	//}
 
 	bool CreateEntityObject(std::wstring filePath)
 	{
@@ -135,17 +163,18 @@ public:
 		entities.push_back(EntityObject(g, filePath));
 		return true;
 	}
-	Player GetActivePlayer()
-	{
-		if (!ActiveScene->sceneName.empty())
-			return *ActiveScene->player;
-	}
+	//Player GetActivePlayer()
+	//{
+	//	if (ActiveScene->player)
+	//		return *ActiveScene->player;
+
+	//}
 
 private:
 
 	//*/input* i;
 	graphics* g;
-	
+	bool bEscape = false;
 	
 	struct Scene
 	{
@@ -158,9 +187,11 @@ private:
 		Gui* gui = nullptr;
 		std::vector<Events*> events;
 		std::vector<EntityObject> entities;
-		Player* player = nullptr;
 		bool guiStart;
 		bool guiVisible = guiStart;
+		bool hideMouse = false;
+		Player* player;
+		Collision* C = new Collision();
 
 	};
 
@@ -168,8 +199,8 @@ private:
 	std::vector<EntityObject> entities;
 	std::vector<Scene> vScenes;
 	std::vector<Events*> queued;
-	Collision* C;
-	window* w;
+	//window* w;
+	input* i;
 
 };
 

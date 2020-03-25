@@ -81,6 +81,53 @@ void Gui::Image::Draw()
 	pContext->DrawIndexed(6, 0, 0);
 }
 
+void Gui::SetMainMenu(std::wstring menuName)
+{
+	mainMenu = activeMenu = menuName;
+}
+
+void Gui::ActivateMenu(std::wstring menuName)
+{
+
+	activeMenu = menuName;
+	vActive.clear();
+	for (const auto& m : vMenu)
+	{
+		if (m->MenuName() == activeMenu)
+			vActive.push_back(m);
+	}
+
+}
+
+bool Gui::AddExistingButton(std::wstring MenuName, std::wstring buttonName)
+{
+	for (const auto& m : vMenu)
+	{
+		if (m->type == eButton)
+		{
+			if (m->objName == buttonName) {
+
+
+				vMenu.push_back(new Button(*(Button*)m));
+				vMenu[vMenu.size() - 1]->menuName = MenuName;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void Gui::AddButton(std::function<void(void*)> onClick, void* objptr, std::wstring MenuName, std::wstring fileName, std::wstring highLightFile, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
+{
+	vMenu.push_back(new Button(g, onClick, objptr, MenuName, fileName, highLightFile, bottomLeft, topRight));
+
+}
+
+void Gui::AddImage(std::wstring MenuName, std::wstring fileName, DirectX::XMFLOAT2 bottomLeft, DirectX::XMFLOAT2 topRight)
+{
+	vMenu.push_back(new Image(g, MenuName, fileName, bottomLeft, topRight));
+}
+
 void Gui::Update()
 {
 	
@@ -103,14 +150,14 @@ void Gui::Update()
 
 	}
 
-	std::wstringstream wss;
-	wss << mouse.x << " " << mouse.y;
+	//std::wstringstream wss;
+	//wss << mouse.x << " " << mouse.y;
 
 
-	g->pSpriteBatch->Begin();
-	g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
-	g->pSpriteFont->DrawString(g->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 0));
-	g->pSpriteBatch->End();
+	//g->pSpriteBatch->Begin();
+	//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
+	//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 0));
+	//g->pSpriteBatch->End();
 
 }
 
@@ -120,7 +167,7 @@ DirectX::XMFLOAT2 Gui::GetCursorToWorldOrtho()
 	//GetCursorPos(&p);
 	i->GetMouse(p);
 	
-		RECT r = helper::window::GetRect(m_Window);
+		RECT r = helper::window::GetRect(w->getHWND());
 		//ScreenToClient(m_Window, &p);
 		
 		DirectX::XMMATRIX world = g->GetWorldMatrix();

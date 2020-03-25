@@ -53,10 +53,10 @@ public:
 		wss1 << L" Y: " << rot.y;
 		wss1 << L" Z: " << rot.z;
 
-		g->pSpriteBatch->Begin();
-		g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 60));
-		g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss1.str().c_str(), DirectX::XMFLOAT2(0, 80));
-		g->pSpriteBatch->End();
+		//g->pSpriteBatch->Begin();
+		//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 60));
+		//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss1.str().c_str(), DirectX::XMFLOAT2(0, 80));
+		//g->pSpriteBatch->End();
 		
 		g->Begin3DScene();
 

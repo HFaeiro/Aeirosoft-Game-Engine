@@ -59,7 +59,7 @@ public:
 	DirectX::XMMATRIX GetOrthoMatrix();
 
 	std::unique_ptr<DirectX::SpriteBatch> pSpriteBatch;
-	std::unique_ptr<DirectX::SpriteFont> pSpriteFont;
+	//std::unique_ptr<DirectX::SpriteFont> pSpriteFont;
 
 	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
 

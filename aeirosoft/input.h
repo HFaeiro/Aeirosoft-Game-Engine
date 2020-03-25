@@ -63,6 +63,7 @@ public:
 		my += pitch;
 		mx += yaw;
 	}
+	window* w;
 private:
 	bool frame();
 	int fps = 0;
@@ -109,7 +110,6 @@ private:
 	HINSTANCE hInstance;
 	HWND hWnd;
 	graphics* g;
-	window* w;
 	camera* c;
 	Timer* t;
 	Timer fsDelta;

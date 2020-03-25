@@ -20,20 +20,21 @@ app::~app()
 bool app::SetupApplication()
 {
 
-	
+	//cleanup
 	events.clear();
-	vBoxes.clear();
-	if (C != nullptr)
-	{
-		delete C;
-	}
-	C = new Collision();
 	if (s != nullptr) {
 		delete s;
 	}
-	s = new Scenes(m_Graphics, C, (window*)this);
+	for (const auto& mAimBox : vBoxes)
+	{
+		mAimBox->~MovingAimBox();
+	}
+	vBoxes.clear();
 	if (gui != nullptr)
 		delete gui;
+	////
+
+	s = new Scenes(m_Graphics, i);
 	gui = new Gui(m_Graphics, i, (window*)this);
 	StartupGui(gui);
 
@@ -45,17 +46,16 @@ bool app::SetupApplication()
 
 	events.push_back(i);
 	events.push_back(s);
-	
-	
-	//for (int i = 0; i < boxes; i++)
-	//{
-	//	MovingAimBox* M = new MovingAimBox(m_Graphics);
-	//	C->AddCollidable(M);
-	//	events.push_back(M);
-	//	vBoxes.push_back(M);
-	//
 
-	events.push_back(C);
+
+	for (int i = 0; i < Boxes; i++)
+	{
+
+		MovingAimBox* M = new MovingAimBox(m_Graphics);
+		vBoxes.push_back(M);
+	}
+
+
 
 
 	for (const auto& E : events)
@@ -128,8 +128,8 @@ int app::begin()
 
 
 	Boxes = settings[2];
-	if (!SetupApplication())
-		return false;
+	SetupApplication();
+		
 
 
 	while (true)
@@ -165,11 +165,11 @@ int app::begin()
 		//wss << L"Hits: " << hits;
 		//wsshots << L"Shots: " << shots;
 		//wssAcc << L"Accuracy: " << (int)(Accuracy * 100) << L"%";
-		//m_Graphics.pSpriteBatch->Begin();
-		//m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
-		//m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wsshots.str().c_str(), DirectX::XMFLOAT2(0, 0));
-		//m_Graphics.pSpriteFont->DrawString(m_Graphics.pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
-		//m_Graphics.pSpriteBatch->End();
+		//m_Graphics->pSpriteBatch->Begin();
+		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
+		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wsshots.str().c_str(), DirectX::XMFLOAT2(0, 0));
+		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
+		//m_Graphics->pSpriteBatch->End();
 
 
 
@@ -192,17 +192,18 @@ int app::begin()
 
 void app::CreateScenes(Scenes* s, Gui* gui)
 {
-	s->CreateScene(L"Scene1", gui, false);
+	s->CreateScene(L"Scene1", gui, false, true);
 	s->CreateScene(L"MainMenu", gui, true);
 	s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
 	s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
-	s->AddEntityToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
-	s->AddEntityToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
-	s->AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
-	s->AddEntityToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
-	s->AddEntityToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
-	s->AddEntityToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
-	s->SetActiveScene(L"MainMenu");
+	s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
+	s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
+	s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
+	s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
+	s->AddObjectToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
+	s->AddObjectToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+
+	s->SetActiveScene(restart ? L"Scene1" : L"MainMenu");
 	
 }
 
@@ -237,7 +238,7 @@ void app::StartupGui(Gui* gui)
 	float setBWit = 408 * sizeMult;
 	float setBHei = 67 * sizeMult;
 	
-	std::function<void(void*)> setfunc = [](void* g) { ((Gui*)g)->ActivateMenu(L"settingsMenu"); };
+	std::function<void(void*)> setfunc = [](void* g) { ((Gui*)g)->ActivateMenu(L"Main"); };
 	gui->AddButton(setfunc, gui, L"Main", L"Data\\Menu\\Main\\settings.png", L"Data\\Menu\\Main\\Settings_Selected.png",
 		{ -setBWit, -setBHei - stBHei}, { setBWit, setBHei - stBHei });
 
@@ -259,111 +260,6 @@ void app::StartupGui(Gui* gui)
 	gui->SetMainMenu(L"Main");
 
 }
-
-//void app::CheckBounds(model& m)
-//{
-//
-//	for (DirectX::BoundingBox i : m.vbBox)
-//	{
-//		
-//		DirectX::BoundingBox box;
-//		float f = 0.f;
-//		if (i.Intersects(clickOrigin, clickDestination, f))
-//		{
-//			intersecting = helper::strings::wsinttows(L"Intersecting: TRUE: Distance From: ", f);
-//			//collision = true;
-//			//m.Select();
-//			break;
-//		}
-//		else
-//		{
-//			//collision = false;
-//			
-//		}
-//	}
-//}
-
-/*
-	//void app::DrawClickRays()
-	//{
-	//
-	//	m_Graphics.m_batch->Begin();
-	//
-	//	for (int i = 0; i < vOrig.size() && i < vDest.size(); i++)
-	//	{
-	//		DirectX::VertexPositionColor v1(vOrig[i], DirectX::Colors::Red);
-	//		DirectX::VertexPositionColor v2(vDest[i], DirectX::Colors::Red);
-	//		m_Graphics.m_batch->DrawLine(v1, v2);
-	//	}
-	//	m_Graphics.m_batch->End();
-	//
-	//}
-
-
-	//
-	//DirectX::XMVECTOR app::GetMouseWorldDestination(bool storeOriginAndDestination)
-	//{
-	//	POINT p;
-	//	GetCursorPos(&p);
-	//	RECT r = helper::window::GetRect(m_Window);
-	//	//float x, y;
-	//
-	//	ScreenToClient(m_Window, &p);
-	//
-	//
-	//
-	//	DirectX::XMMATRIX projection = m_Graphics.GetProjectionMatrix();
-	//	DirectX::XMMATRIX view = m_Graphics.GetViewMatrix();
-	//	DirectX::XMMATRIX world = m_Graphics.GetWorldMatrix();
-	//
-	//	//
-	//	clickOrigin = DirectX::XMVector3Unproject(DirectX::XMVectorSet(p.x, p.y, 0.f, 0.f),
-	//		0, 0,
-	//		r.right, r.bottom,
-	//		0, 1.f,
-	//		projection,
-	//		view,
-	//		world);
-	//
-	//	DirectX::XMVECTOR dest = DirectX::XMVector3Unproject(DirectX::XMVectorSet(p.x, p.y, 1.f, 0.f),
-	//		0, 0,
-	//		r.right, r.bottom,
-	//		0, 1.f,
-	//		projection,
-	//		view,
-	//		world);
-	//
-	//
-	//	DirectX::XMVECTOR clickDestination = DirectX::XMVectorSubtract(dest, clickOrigin);
-	//
-	//	if (storeOriginAndDestination)
-	//	{
-	//		vOrig.push_back(clickOrigin);
-	//		vDest.push_back(clickDestination);
-	//		
-	//
-	//	}
-	//
-	//	return clickDestination;
-	//}
-}
-void app::CreateClickRay()
-{
-	
-	clickDestination = GetMouseWorldDestination(true);
-	DirectX::XMFLOAT3 fl3;
-	
-	clickDestination = DirectX::XMVector3Normalize(clickDestination);
-
-	DirectX::XMStoreFloat3(&fl3, clickDestination);
-
-	float fx = fl3.x;
-
-
-
-
-}
-*/
 
 //bool LoadModel(const std::wstring& filename, ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 //{

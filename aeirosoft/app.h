@@ -35,7 +35,6 @@ class app :
 	std::vector<int> GetStartInfo(std::string, std::vector<std::string>, std::vector<int> defaults);
 	std::vector<Events*> events;
 	std::vector<MovingAimBox*> vBoxes;
-	Collision* C = nullptr;
 	input *i;
 	Scenes* s = nullptr;
 	Gui* gui = nullptr;

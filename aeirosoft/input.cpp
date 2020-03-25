@@ -27,6 +27,8 @@ bool input::Initialize()
 
 bool input::frame()
 {
+	if (!w->active)
+		return false;
 	if (!ReadMouse())
 		return false;
 	if (!ReadKeyboard())
