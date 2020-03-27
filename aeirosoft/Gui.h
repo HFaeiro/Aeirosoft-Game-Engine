@@ -79,9 +79,9 @@ private:
 		{
 			pSpriteFont.release();
 		}
-		void Render(const std::wstring text, DirectX::XMFLOAT2 location)
+		void Render(wchar_t* text, DirectX::XMFLOAT2 location)
 		{
-			pSpriteFont->DrawString(g->pSpriteBatch.get(), text.c_str(), DirectX::XMFLOAT2(0, 40));
+			pSpriteFont->DrawString(g->pSpriteBatch.get(), text, DirectX::XMFLOAT2(0, 40));
 		}
 		std::wstring fontName;
 	private:
@@ -108,7 +108,7 @@ private:
 		}
 		Font* pFont;
 	private:
-		std::wstring textToRender;
+		wchar_t* textToRender;
 		DirectX::XMFLOAT2 location;
 		std::wstring name;
 		graphics* g;

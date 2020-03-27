@@ -5,7 +5,7 @@
 #include "weapon.h"
 #include <sstream>
 
-class Player : public Events , public Entity
+class Player : public Entity
 {
 public:
 
@@ -82,7 +82,7 @@ public:
 	{
 
 		deltaTimer.Start();
-		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
+		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerZWidth);
 		CreateBoundingOrientedBox(playerSize);
 		return true;
 	}
@@ -97,7 +97,7 @@ public:
 			i->AdjustInputs(prevAimDif.x * recoilDelta * 2, prevAimDif.y * recoilDelta * 2);
 			recoilTimer.Stop();
 		}
-		Entity::Update();
+		Entity::_Update();
 		if (isLeftClick())
 		{
 			if (main.shoot())
@@ -237,9 +237,9 @@ private:
 	bool Shooting = false;
 	bool aiming = false;
 	int shots = 0;
-	float playerHeight = 20.0f;
-	float playerWidth = 5.0f;
-	float playerZWidth = 2.5f;
+	float playerHeight = 30.0f;
+	float playerWidth = 10.0f;
+	float playerZWidth = 15.f;
 	float hangTime = .075f;
 	float moveSpeed = 100;
 	Timer hangTimer;

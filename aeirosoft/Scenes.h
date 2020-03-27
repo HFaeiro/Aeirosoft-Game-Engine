@@ -26,8 +26,7 @@ public:
 	virtual bool Initialize()
 	{
 
-		if (!ActiveScene) return false;
-		if (ActiveScene->sceneName.empty())
+		if (!ActiveScene)
 		{
 			if (!vScenes.empty()) {
 				SetActiveScene(vScenes[0].sceneName);
@@ -43,28 +42,7 @@ public:
 			
 			event->Initialize();
 		}
-		////if (ActiveScene->guiStart) {
-		////	if (ActiveScene->gui)
-		////	{
-		////		if (ActiveScene->gui->Initialize())
-		////			ActiveScene->events.push_back(ActiveScene->gui);
-		////		else
-		////			return false;
-		////	}
 
-		////}
-		////else
-		////	if (ActiveScene->player) {
-		////		w->hideMouse = true;
-		////		if (ActiveScene->player->Initialize())
-		////		{
-		////			ActiveScene->events.push_back(ActiveScene->player);
-		////		}
-		////		else
-		////			return false;
-
-		////		
-		////	}
 		return true;
 
 	}
@@ -103,7 +81,6 @@ public:
 	}
 	virtual void Update()
 	{
-
 		g->Begin3DScene();
 		for (auto& e : ActiveScene->entities)
 		{
@@ -113,40 +90,39 @@ public:
 		for (const auto& Q : queued)
 			Q->Update();
 		queued.clear();
-
-
 	}
 
 	bool CreateScene(const std::wstring& sceneName,Gui* gui = nullptr, bool _guiStart = false, bool hideMouse = false);
 	bool SetActiveScene(const std::wstring& sceneName);
 	bool AddObjectToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
-	bool AddPlayerToScene(std::wstring sceneName, Player* player)
+	bool AddEntityToScene(std::wstring sceneName, Entity* E)
 	{
 		for (auto& s : vScenes)
 		{
 			if (s.sceneName == sceneName)
 			{
-				s.player = player;
-				s.events.push_back(player);
-				s.C->AddCollidable(s.player);
+				
+				s.events.push_back(E);
+				s.C->AddCollidable(E);
 				return true;
 			}
 		}
 		return false;
 	}
-	//bool AddCollidableEventToScene(std::wstring sceneName, void* E)
-	//{
-	//	for (auto& s : vScenes)
-	//	{
-	//		if (s.sceneName == sceneName)
-	//		{
-	//			s.events.push_back((Events*)E);
-	//			//s.C->AddCollidable((Collidable*)(E));
-	//			return true;
-	//		}
-	//	}
-	//	return false;
-	//}
+
+	bool AddEntityAiToScene(std::wstring sceneName, EntityAi* E)
+	{
+		for (auto& s : vScenes)
+		{
+			if (s.sceneName == sceneName)
+			{
+
+				s.events.push_back(E);
+				s.C->AddCollidable(E);
+				return true;
+			}
+		}
+	}
 
 	bool CreateEntityObject(std::wstring filePath)
 	{
@@ -163,12 +139,7 @@ public:
 		entities.push_back(EntityObject(g, filePath));
 		return true;
 	}
-	//Player GetActivePlayer()
-	//{
-	//	if (ActiveScene->player)
-	//		return *ActiveScene->player;
 
-	//}
 
 private:
 
@@ -190,7 +161,6 @@ private:
 		bool guiStart;
 		bool guiVisible = guiStart;
 		bool hideMouse = false;
-		Player* player;
 		Collision* C = new Collision();
 
 	};

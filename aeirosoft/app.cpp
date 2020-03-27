@@ -39,7 +39,7 @@ bool app::SetupApplication()
 	StartupGui(gui);
 
 	CreateScenes(s, gui);
-	s->AddPlayerToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
+	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
 		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
 		L""));
 
@@ -50,9 +50,8 @@ bool app::SetupApplication()
 
 	for (int i = 0; i < Boxes; i++)
 	{
+		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
 
-		MovingAimBox* M = new MovingAimBox(m_Graphics);
-		vBoxes.push_back(M);
 	}
 
 

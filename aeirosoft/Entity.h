@@ -4,10 +4,17 @@
 #include "model.h"
 #include <string>
 
-class Entity : public Collidable, 
+
+class Entity : public Events, public Collidable, 
 	 public model
 {
 public:
+
+	virtual bool Initialize() = 0;
+	virtual void Update() = 0;
+	virtual std::optional<Events*> Queue() = 0;
+
+
 	Entity(graphics* g, input* _i, std::wstring filename, float scale = 1.f) : model(filename, g, scale), _g(g),Collidable(g), c(&g->m_Camera), i(_i)
 	{
 		Collidable::type = Collidable::Entity;
@@ -35,7 +42,7 @@ public:
 		return i->isKey(c);
 	}
 
-	void Update()
+	void _Update()
 	{
 		static int loop = 0;
 		static DirectX::XMFLOAT3 lastResort;
@@ -191,9 +198,13 @@ private:
 
 
 };
-class EntityAi : public Collidable, public model
+class EntityAi :public Events,  public Collidable, public model
 {
 public:
+	virtual bool Initialize() = 0;
+	virtual void Update() = 0;
+	virtual std::optional<Events*> Queue() = 0;
+
 	EntityAi(graphics* g, std::wstring filename, float scale = 1.f) : model(filename, g, scale), Collidable(g)
 	{
 		Collidable::type = Collidable::EntityAi;
