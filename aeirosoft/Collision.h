@@ -6,18 +6,18 @@
 #include <variant>
 class Collidable
 {
-	
+
 public:
 	Collidable(graphics* g);
 	~Collidable() {};
 	void TransformBounds(DirectX::XMMATRIX m);
 	enum Type { Entity, EntityAi, Object };
 	Type type;
-	DirectX::BoundingOrientedBox GetBounds()const
+	std::vector<DirectX::BoundingOrientedBox> GetBounds()const
 	{
 		if (vTransbBox.empty())
-			return vOGbBox[0];
-		return vTransbBox[0];
+			return vOGbBox;
+		return vTransbBox;
 	}
 
 	DirectX::BoundingSphere GetBoundSphere()const
@@ -75,9 +75,9 @@ private:
 	void DrawBoundingOrientedBox();
 
 
-	
-	
 
+
+	std::vector<DirectX::XMFLOAT3> g_corners;
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pContext;
 	DirectX::XMMATRIX currentMatrix = {};
@@ -91,6 +91,12 @@ private:
 	//DirectX::BoundingOrientedBox TransbBox;
 	std::vector < DirectX::XMFLOAT3> vMin;
 	std::vector < DirectX::XMFLOAT3> vMax;
+	std::vector <DWORD> Indecies;
+	//DWORD indecieArr[24] =
+	//{0, 1, 1, 2, 2, 3, 3, 0,
+	//	4, 5, 5, 6, 6, 7, 7, 4,
+	//	0, 4, 1, 5, 2, 6, 3, 7
+	//};
 	graphics* g;
 protected:
 
@@ -101,6 +107,7 @@ protected:
 
 	Collision* Cthis;
 	std::vector<Collidable> collidedWith;
+	std::vector<Vertex> vertices;
 };
 
 class Collision : public Events
@@ -133,7 +140,8 @@ public:
 						if (c != C)
 						{
 							
-							DirectX::BoundingOrientedBox box = c->GetBounds();
+							std::vector<DirectX::BoundingOrientedBox> bounds = c->GetBounds();
+							for (const auto& box : bounds)
 							if (box.Intersects(C->clickOrigin, C->clickDestination, f))
 							{
 								c->hit = true;
@@ -165,15 +173,22 @@ public:
 			{
 				if (C->type == Collidable::Type::Entity) {
 					auto box = C->GetBoundSphere();
-					if (box.Contains(c->GetBounds()))
+					std::vector<DirectX::BoundingOrientedBox> bounds =  c->GetBounds();
+					for(const auto& bound : bounds)
+					if (box.Contains(bound))
 					{
 						C->collision = true;
+						//for (const auto& v : c->vertices)
+						//{
+						//	//
+						//}
 					}
 				}
 				else {
 					auto box = C->GetBounds();
-
-					if (box.Contains(c->GetBounds()))
+					std::vector<DirectX::BoundingOrientedBox> bounds = c->GetBounds();
+					for (const auto& bound : bounds)
+					if (box[0].Contains(bound))
 					{
 						C->collision = true;
 					}

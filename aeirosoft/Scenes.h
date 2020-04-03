@@ -48,29 +48,43 @@ public:
 	}
 	virtual std::optional<Events*> Queue()
 	{
-		
-		//if (ActiveScene->gui) {
-		//	if (ActiveScene->gui->i->isKey(DIK_ESCAPE) && !bEscape)
-		//	{
-		//		bEscape = true;
-		//		std::wstring ActiveMenu = ActiveScene->gui->GetActiveMenu();
-		//		if (ActiveMenu != L"Pause" && ActiveScene->sceneName != L"MainMenu")
-		//		{
-		//			ActiveScene->gui->ActivateMenu(L"Pause");
-		//			ActiveScene->events.push_back(ActiveScene->gui);
-		//			w->hideMouse = false;
-		//		}
-		//		else if (ActiveMenu == L"Pause")
-		//		{
-		//			ActiveScene->gui->ActivateMenu(L"Main");
-		//			ActiveScene->guiVisible = false;
-		//			Initialize();
-		//		}
-		//	}
-		//	else if(!ActiveScene->gui->i->isKey(DIK_ESCAPE))
-		//		bEscape = false;
-		//}
-		
+	
+		if (!ActiveScene->OnKeyGui.empty())
+		{
+			for (auto& pair : ActiveScene->OnKeyGui)
+			{
+				double kTimer = keyTimer.GetMillisecondsElapsed() * .01;
+				if ( !kTimer || kTimer > 2)
+				if (i->isKey(pair.first))
+				{
+					keyTimer.restart();
+					auto& tuple = pair.second;
+					Gui* gui = std::get<0>(tuple);
+					if (!std::get<2>(tuple))
+					{
+						gui->ActivateMenu(std::get<3>(tuple));
+						ActiveScene->events.push_back(gui);
+						i->w->hideMouse = std::get<1>(tuple);
+						std::get<2>(tuple) = true;
+					}
+					else
+					{
+						int count = 0;
+						for (auto& E : ActiveScene->events)
+						{
+
+							if (E == gui)
+							{
+								ActiveScene->events.erase(ActiveScene->events.begin() + count);
+							}
+							count++;
+						}
+						std::get<2>(tuple) = false;
+						i->w->hideMouse = !std::get<1>(tuple);
+					}
+				}
+			}
+		}
 
 
 		for (const auto& E : ActiveScene->events)
@@ -109,7 +123,27 @@ public:
 		}
 		return false;
 	}
+	bool AddOnKeyEventToScene(const std::wstring sceneName, const std::wstring guiName, Gui* gui, bool hideMouse, UCHAR Key)
+	{
+		
+		if (sceneName.empty() || guiName.empty() || gui == nullptr || Key == NULL)
+			return false;
 
+		for (auto& s : vScenes)
+		{
+			if (s.sceneName == sceneName)
+			{
+
+				if (s.OnKeyGui.emplace(Key, std::make_tuple(gui, hideMouse, false, guiName)).second)
+					return true;
+				else
+					return false;
+			}
+			else
+				return false;
+		}
+
+	}
 	bool AddEntityAiToScene(std::wstring sceneName, EntityAi* E)
 	{
 		for (auto& s : vScenes)
@@ -143,9 +177,9 @@ public:
 
 private:
 
-	//*/input* i;
+
 	graphics* g;
-	bool bEscape = false;
+	Timer keyTimer;
 	
 	struct Scene
 	{
@@ -162,6 +196,7 @@ private:
 		bool guiVisible = guiStart;
 		bool hideMouse = false;
 		Collision* C = new Collision();
+		std::unordered_map<UCHAR, std::tuple<Gui*, bool, bool, std::wstring>> OnKeyGui; // UCHAR keypress, bool hidemouse, bool active, std::wstring guiSceneName
 
 	};
 
@@ -169,6 +204,8 @@ private:
 	std::vector<EntityObject> entities;
 	std::vector<Scene> vScenes;
 	std::vector<Events*> queued;
+
+	
 	//window* w;
 	input* i;
 

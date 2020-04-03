@@ -5,6 +5,10 @@ bool Scenes::CreateScene(const std::wstring& sceneName, Gui* gui, bool _guiStart
 	if (/*this->i == nullptr || */this->g == nullptr)
 		return false;
 
+	if (sceneName.empty())
+		return false;
+
+
 	for (const auto& scene : vScenes)
 	{
 		if (scene.sceneName == sceneName)

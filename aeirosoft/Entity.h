@@ -10,9 +10,9 @@ class Entity : public Events, public Collidable,
 {
 public:
 
-	virtual bool Initialize() = 0;
-	virtual void Update() = 0;
-	virtual std::optional<Events*> Queue() = 0;
+	//virtual bool Initialize() = 0;
+	//virtual void Update() = 0;
+	//virtual std::optional<Events*> Queue() = 0;
 
 
 	Entity(graphics* g, input* _i, std::wstring filename, float scale = 1.f) : model(filename, g, scale), _g(g),Collidable(g), c(&g->m_Camera), i(_i)
@@ -62,7 +62,7 @@ public:
 			DirectX::XMFLOAT3 posDifference = { movedPos.x - prevPos.x, movedPos.y - prevPos.y, movedPos.z - prevPos.z };
 			//DirectX::XMFLOAT3 posDifference = {prevPos.x - movedPos.x,prevPos.y - movedPos.y,prevPos.z - movedPos.z };
 			float newPosMult = .1999f * (loop == 0 ? 1 : loop * .0099f);
-
+			
 			if (posDifference.x) {
 				c->adjustPosition({ posDifference.x, 0, 0 });
 				TransformBounds(getWorldAtViewMatrix());
@@ -93,7 +93,8 @@ public:
 					c->adjustPosition({ 0,0, -posDifference.z });
 			}
 			if (posDifference.y) {
-				c->adjustPosition({ 0, posDifference.y, 0 });
+				falling = false;
+				c->adjustPosition({ 0, -posDifference.y * .5f, 0 });
 				TransformBounds(getWorldAtViewMatrix());
 				Collidable::Cthis->Check(this);
 				if (!collision) {
@@ -104,7 +105,7 @@ public:
 					return;
 				}
 				else
-					c->adjustPosition({ 0, -posDifference.y, 0 });
+					c->adjustPosition({ 0, posDifference.y * .5f, 0 });
 			}
 
 
@@ -112,28 +113,10 @@ public:
 			{
 				loop = 0;
 				c->setPosition(movedPos);
-				//DirectX::XMFLOAT3 center = Entity::Collidable::GetBoundSphere().Center;
-				//float radius = Entity::Collidable::GetBoundSphere().Radius;
-				//for (const auto& cWith : collidedWith)
-				//{
-				//	DirectX::XMFLOAT3 corners[8];
-				//	if (cWith.type == Collidable::Object)
-				//	{
-				//		cWith.GetBounds().GetCorners(corners);
-				//		for (int i = 0; i < 8; i++)
-				//		{
-				//			if (center.x - radius < corners[i].x)
-				//			{
-
-				//			}
-
-				//		}
-				//		
-				//	}
-				//}
 
 
-				c->adjustPosition({ 0,.01f,0 });
+
+				c->adjustPosition({ 0,.001f,0 });
 				collision = false;
 				return;
 			}
@@ -181,7 +164,7 @@ public:
 	float recentVelocity;
 	float prevVelocity;
 	const std::wstring getName() const { return name; }
-
+	bool falling = false;
 private:
 	DirectX::XMMATRIX getWorldAtViewMatrix()
 	{

@@ -8,7 +8,7 @@
 class Player : public Entity
 {
 public:
-
+#ifdef _DEBUG
 	void test()
 	{
 		double delt = deltaTimer.GetSecondsElapsed();
@@ -61,7 +61,7 @@ public:
 		g->Begin3DScene();
 
 	}
-
+#endif
 
 	Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS,
 		const std::wstring& filename) :
@@ -70,7 +70,7 @@ public:
 	{
 		main.setPosition(hip.pos);
 		main.setRotation(hip.rot);
-		setPosition(95, playerHeight, 95);
+		setPosition(20, playerHeight, -20);
 		//playerModel.init(filename, pDevice, pContext);
 	}
 	~Player() {
@@ -82,7 +82,7 @@ public:
 	{
 
 		deltaTimer.Start();
-		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerZWidth);
+		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
 		CreateBoundingOrientedBox(playerSize);
 		return true;
 	}
@@ -156,67 +156,70 @@ public:
 		
 
 		//playerModel.UpdateWorldMatrixWithViewMatrix(viewInverse);
-		if (isKey(DIK_W) && !isKey(DIK_S) && !isKey(DIK_D) && !isKey(DIK_A))
+		if (isKey(DIK_W) && !isKey(DIK_D) && !isKey(DIK_A))
 			adjustPosition(camera::movementType::forward, moveSpeed * GetDeltaTime());
-		else if (!isKey(DIK_W) && isKey(DIK_S) && !isKey(DIK_D) && !isKey(DIK_A))
+		else if (isKey(DIK_S) && !isKey(DIK_D) && !isKey(DIK_A))
 			adjustPosition(camera::movementType::backward, moveSpeed * GetDeltaTime());
 
-		else if (!isKey(DIK_W) && !isKey(DIK_S) && !isKey(DIK_D) && isKey(DIK_A))
+		else if (!isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_A))
 		{
 			adjustPosition(camera::movementType::left, moveSpeed * GetDeltaTime());
 
 		}
-		else if (!isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D) && !isKey(DIK_A))
+		else if (!isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D))
 		{
 			adjustPosition(camera::movementType::right, moveSpeed * GetDeltaTime());
 		}
-		else if (isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D) && !isKey(DIK_A))
+		else if (isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D))
 		{
 			adjustPosition(camera::movementType::forwardRight, moveSpeed * GetDeltaTime());
 		}
-		else if (isKey(DIK_W) && !isKey(DIK_S) && !isKey(DIK_D) && isKey(DIK_A))
+		else if (isKey(DIK_W) && !isKey(DIK_D) && isKey(DIK_A))
 		{
 			adjustPosition(camera::movementType::forwardLeft, moveSpeed * GetDeltaTime());
 		}
-		else if (!isKey(DIK_W) && isKey(DIK_S) && !isKey(DIK_D) && isKey(DIK_A))
+		else if (!isKey(DIK_W) && isKey(DIK_S) && isKey(DIK_A))
 		{
 			adjustPosition(camera::movementType::backLeft, moveSpeed * GetDeltaTime());
 		}
-		else if (!isKey(DIK_W) && isKey(DIK_S) && isKey(DIK_D) && !isKey(DIK_A))
+		else if (!isKey(DIK_W) && isKey(DIK_S) && isKey(DIK_D))
 		{
 			adjustPosition(camera::movementType::backRight, moveSpeed * GetDeltaTime());
 		}
 		DirectX::XMFLOAT3 pos = getPosition();
 
-		/*if (isKey(DIK_SPACE) && !jumping && !falling)
+		float gravity = 0.f;
+		if (isKey(DIK_SPACE) && !jumping && !falling)
+		{
 			jumping = true;
-		if (jumping && !falling)
-		{
-
-			if (pos.y < playerHeight + 10)
-				adjustPosition(camera::movementType::up, 45 * GetDeltaTime());
-			else
-			{
-
-				if (hangTimer.GetMillisecondsElapsed() == 0)
-					hangTimer.Start();
-				if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
-				{
-					jumping = false;
-					falling = true;
-					hangTimer.Stop();
-				}
-			}
+			jumpStart = getPosition().y;
 		}
-		else if (pos.y > playerHeight)
+		if (jumping)
 		{
 
-			adjustPosition(camera::movementType::up, -55 * GetDeltaTime());
+			if (getPosition().y - jumpStart >= jumpHeight)
+				hangTimer.Start();
+			else
+				gravity = 45 * GetDeltaTime();
+
+			if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
+			{
+				jumping = false;
+				falling = true;
+				hangTimer.Stop();
+			}
 
 		}
 		else
-			falling = false;*/
-		adjustPosition(camera::movementType::up, -50.f * GetDeltaTime());
+			gravity = -((50.f + timefalling) * GetDeltaTime());
+
+		adjustPosition(camera::movementType::up, gravity);
+		if (falling)
+		{
+			timefalling += deltaTimer.GetMillisecondsElapsed() * .001;
+		}
+		else
+			timefalling = 0;
 		deltaTimer.restart();
 		return this;
 	};
@@ -238,9 +241,11 @@ private:
 	bool aiming = false;
 	int shots = 0;
 	float playerHeight = 30.0f;
+	float jumpHeight = 10.f;
+	float jumpStart = 0.f;
 	float playerWidth = 10.0f;
 	float playerZWidth = 15.f;
-	float hangTime = .075f;
+	float hangTime = .0595f;
 	float moveSpeed = 100;
 	Timer hangTimer;
 	float GetDeltaTime() { return deltaTimer.GetMillisecondsElapsed() * .001f; }
@@ -248,9 +253,9 @@ private:
 	Timer recoilTimer;
 	Timer clickTimer;
 	bool jumping = false;
-	bool falling = false;
 	std::vector<Events*> events;
 	float health = 100.f;
+	float timefalling = 0.f;
 	//std::vector<weapons> equippedWeapons;
 	DirectX::XMFLOAT2 prevAimDif;
 

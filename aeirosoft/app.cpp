@@ -42,7 +42,7 @@ bool app::SetupApplication()
 	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
 		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
 		L""));
-
+	s->AddOnKeyEventToScene(L"Scene1", L"Pause", gui, false, DIK_ESCAPE);
 
 	events.push_back(i);
 	events.push_back(s);
@@ -115,7 +115,7 @@ std::vector<int> app::GetStartInfo(std::string filename, std::vector<std::string
 }
 int app::begin()
 {
-	std::vector<int> settings = GetStartInfo("settings.txt", { "FullScreen:", "VSYNC:", "BOXES:" }, { 0, 1, 3 });
+	std::vector<int> settings = GetStartInfo("settings.txt", { "FullScreen:", "VSYNC:", "BOXES:" }, { 0, 0, 3 });
 	
 	m_Graphics = new graphics(m_Window, settings[0], settings[1]);
 
@@ -193,14 +193,19 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 {
 	s->CreateScene(L"Scene1", gui, false, true);
 	s->CreateScene(L"MainMenu", gui, true);
-	s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
-	s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
-	s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
-	s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
-	s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,200 }, { 0,0,0 });
-	s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
-	s->AddObjectToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
-	s->AddObjectToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	s->CreateEntityObject(L"Data\\map\\map.obj");
+	s->AddObjectToScene(L"Scene1", L"map.obj", { 0,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
+	//s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -250,0,200 }, { 0,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 250,0,200 }, { 0,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
+	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
+	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+
+
 
 	s->SetActiveScene(restart ? L"Scene1" : L"MainMenu");
 	
@@ -237,9 +242,9 @@ void app::StartupGui(Gui* gui)
 	float setBWit = 408 * sizeMult;
 	float setBHei = 67 * sizeMult;
 	
-	std::function<void(void*)> setfunc = [](void* g) { ((Gui*)g)->ActivateMenu(L"Main"); };
-	gui->AddButton(setfunc, gui, L"Main", L"Data\\Menu\\Main\\settings.png", L"Data\\Menu\\Main\\Settings_Selected.png",
-		{ -setBWit, -setBHei - stBHei}, { setBWit, setBHei - stBHei });
+	//std::function<void(void*)> setfunc = [](void* g) { ((Gui*)g)->ActivateMenu(L"Main"); };
+	//gui->AddButton(setfunc, gui, L"Main", L"Data\\Menu\\Main\\settings.png", L"Data\\Menu\\Main\\Settings_Selected.png",
+	//	{ -setBWit, -setBHei - stBHei}, { setBWit, setBHei - stBHei });
 
 	float qBWit = 211 * sizeMult;
 	float qBHei = 69 * sizeMult;
