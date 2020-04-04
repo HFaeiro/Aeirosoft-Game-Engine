@@ -180,6 +180,7 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="timer.h" />
+    <ClInclude Include="tmpEntity.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="weapon.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="timer.cpp" />
+    <ClCompile Include="tmpEntity.cpp" />
     <ClCompile Include="weapon.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>

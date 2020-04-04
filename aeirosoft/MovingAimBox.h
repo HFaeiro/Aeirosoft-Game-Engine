@@ -1,6 +1,6 @@
 #pragma once
 #include "Events.h"
-#include "Entity.h"
+#include "tmpEntity.h"
 #include <time.h>
 #include "timer.h"
 #include <sstream>

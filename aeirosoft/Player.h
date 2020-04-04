@@ -154,7 +154,9 @@ public:
 	virtual std::optional<Events*> Queue() 
 	{ 
 		
-
+		float moveSpeed = g_moveSpeed;
+		if (isKey(DIK_LSHIFT))
+			moveSpeed += 40;
 		//playerModel.UpdateWorldMatrixWithViewMatrix(viewInverse);
 		if (isKey(DIK_W) && !isKey(DIK_D) && !isKey(DIK_A))
 			adjustPosition(camera::movementType::forward, moveSpeed * GetDeltaTime());
@@ -216,7 +218,7 @@ public:
 		adjustPosition(camera::movementType::up, gravity);
 		if (falling)
 		{
-			timefalling += deltaTimer.GetMillisecondsElapsed() * .001;
+			timefalling += deltaTimer.GetMillisecondsElapsed() * .1;
 		}
 		else
 			timefalling = 0;
@@ -246,7 +248,7 @@ private:
 	float playerWidth = 10.0f;
 	float playerZWidth = 15.f;
 	float hangTime = .0595f;
-	float moveSpeed = 100;
+	float g_moveSpeed = 100;
 	Timer hangTimer;
 	float GetDeltaTime() { return deltaTimer.GetMillisecondsElapsed() * .001f; }
 	Timer deltaTimer;

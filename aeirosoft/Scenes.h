@@ -2,9 +2,9 @@
 #include "framework.h"
 #include "Events.h"
 #include "Entity.h"
+#include "tmpEntity.h"
 #include "Gui.h"
 #include "helper.h"
-
 #include "Player.h"
 
 class Scenes :public Events
@@ -20,21 +20,31 @@ public:
 			{
 				events->~Events();
 			}
+			for (const auto& ent : scene.entities)
+			{
+				delete ent;
+			}
+			delete scene.C;
+		}
+		for (auto& ent : entities)
+		{
+			ent.~EntityObject();
 		}
 	}
-
-	virtual bool Initialize()
+	//bool Initialize()
+	//{
+	//	return true;
+	//}
+	bool Initialize()
 	{
-
 		if (!ActiveScene)
 		{
 			if (!vScenes.empty()) {
-				SetActiveScene(vScenes[0].sceneName);
+				SetActiveScene(vScenes[0].sceneName, false);
 			}
 			else
 				return false;
 		}
-		ActiveScene->events.push_back(ActiveScene->C);
 
 		i->w->hideMouse = ActiveScene->hideMouse;
 		for (const auto& event : ActiveScene->events)
@@ -90,6 +100,8 @@ public:
 		for (const auto& E : ActiveScene->events)
 			if (const auto optional = E->Queue())
 				queued.push_back(*optional);
+		if (ActiveScene->C)
+			ActiveScene->C->Queue();
 
 		return this;
 	}
@@ -98,7 +110,7 @@ public:
 		g->Begin3DScene();
 		for (auto& e : ActiveScene->entities)
 		{
-			e.Render(g->m_TextureShader);
+			e->Render(g->m_TextureShader);
 		}
 
 		for (const auto& Q : queued)
@@ -107,7 +119,7 @@ public:
 	}
 
 	bool CreateScene(const std::wstring& sceneName,Gui* gui = nullptr, bool _guiStart = false, bool hideMouse = false);
-	bool SetActiveScene(const std::wstring& sceneName);
+	bool SetActiveScene(const std::wstring& sceneName, bool Initalize = true);
 	bool AddObjectToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
 	bool AddEntityToScene(std::wstring sceneName, Entity* E)
 	{
@@ -191,7 +203,7 @@ private:
 		std::wstring sceneName;
 		Gui* gui = nullptr;
 		std::vector<Events*> events;
-		std::vector<EntityObject> entities;
+		std::vector<EntityObject*> entities;
 		bool guiStart;
 		bool guiVisible = guiStart;
 		bool hideMouse = false;

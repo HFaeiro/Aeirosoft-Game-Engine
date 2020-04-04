@@ -17,7 +17,6 @@ bool Scenes::CreateScene(const std::wstring& sceneName, Gui* gui, bool _guiStart
 	
 	Scene tmpScene = Scene(sceneName, gui, g, _guiStart);
 	tmpScene.hideMouse = hidemouse;
-	//tmpScene.events.push_back(tmpScene.C);
 	if (_guiStart)
 		tmpScene.events.push_back(gui);
 	vScenes.push_back(tmpScene);
@@ -25,13 +24,14 @@ bool Scenes::CreateScene(const std::wstring& sceneName, Gui* gui, bool _guiStart
 
 }
 
-bool Scenes::SetActiveScene(const std::wstring& sceneName)
+bool Scenes::SetActiveScene(const std::wstring& sceneName, bool Initialize)
 {
 	for (auto& s : vScenes)
 		if (s.sceneName == sceneName)
 		{
 			ActiveScene = &s;
-			return this->Initialize();
+			if(Initialize)
+				return this->Initialize();
 			return true;
 		}
 	return false;
@@ -58,7 +58,7 @@ bool Scenes::AddObjectToScene(const std::wstring& sceneName, const std::wstring&
 	{
 		if (s.sceneName == sceneName)
 		{
-			s.entities.push_back(*entModel);
+			s.entities.push_back(entModel);
 			s.C->AddCollidable(entModel);
 			return true;
 		}

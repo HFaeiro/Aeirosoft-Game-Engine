@@ -25,10 +25,7 @@ bool app::SetupApplication()
 	if (s != nullptr) {
 		delete s;
 	}
-	for (const auto& mAimBox : vBoxes)
-	{
-		mAimBox->~MovingAimBox();
-	}
+
 	vBoxes.clear();
 	if (gui != nullptr)
 		delete gui;
