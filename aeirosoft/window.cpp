@@ -69,7 +69,7 @@ void window::MyRegisterClass()
 BOOL window::InitInstance()
 {
 
-    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_OVERLAPPEDWINDOW | WS_EX_LAYERED,
+    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_POPUP,
         CW_USEDEFAULT, 0, width, height, nullptr, nullptr, hInst, this);
 
     if (!myhWnd)
@@ -121,7 +121,8 @@ LRESULT window::tWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_SIZE:
     {
-        wthis->sizeChange = true;
+        if(wthis)
+           wthis->sizeChange = true;
         break;
     }
     

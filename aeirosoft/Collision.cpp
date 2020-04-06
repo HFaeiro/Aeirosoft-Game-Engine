@@ -89,8 +89,8 @@ void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
 {
 
 	vertices = v;
-
-	if(v.size() == 20)
+	DWORD vsize = v.size();
+	if(vsize == 24 ||/* vsize == 24 || vsize == 20 || vsize == 48 ||*/ vsize == 30)
 	{
 		std::vector<DirectX::XMFLOAT3> corners;
 		bool add = true;

@@ -22,7 +22,7 @@ public:
 		std::vector< std::vector<Vertex>> vertices = getVertices();
 		for (const auto& v : vertices)
 		{
-			CreateBoundingOrientedBox(v);
+			Collidable::CreateBoundingOrientedBox(v);
 		}
 
 	}
@@ -34,10 +34,14 @@ public:
 	DirectX::XMMATRIX getViewMatrix() { return _g->GetViewMatrix(); }
 	DirectX::XMFLOAT3 getPosition()  { return c->getPosition(); }
 	DirectX::XMFLOAT3 getRotation()  { return c->getRotation(); }
-	void setPosition(DirectX::XMFLOAT3 xmfloat)  { playerHeight = xmfloat.y + 2;  c->setPosition(xmfloat); }
-	virtual bool isLeftClick()  { return i->isLeftClick(); };
-	virtual bool isRightClick() { return i->isRightClick(); };
-	void setPosition(float x, float y, float z)  { playerHeight = y + 2; c->setPosition(x, y, z);}
+	void setPosition(DirectX::XMFLOAT3 xmfloat)  { entityHeight = xmfloat.y + 2;  c->setPosition(xmfloat); }
+	bool isLeftClick()  { return i->isLeftClick(); };
+	bool isRightClick() { return i->isRightClick(); };
+
+	void setPosition(float x, float y, float z)  {
+		c->setPosition(x, y, z);
+		TransformBounds(getWorldAtViewMatrix());
+	}
 	virtual bool isKey(UCHAR c)  {
 		return i->isKey(c);
 	}
@@ -95,11 +99,11 @@ public:
 					c->adjustPosition({ 0,0, -posDifference.z });
 			}
 			if (posDifference.y) {
-				falling = false;
 				c->adjustPosition({ 0, -posDifference.y * .5f, 0 });
 				TransformBounds(getWorldAtViewMatrix());
 				Collidable::Cthis->Check(this);
 				if (!collision) {
+					falling = false;
 					c->adjustPosition({posDifference.x, 0, posDifference.z});
 					TransformBounds(getWorldAtViewMatrix());
 					Collidable::Cthis->Check(this);
@@ -169,14 +173,23 @@ public:
 	float prevVelocity;
 	const std::wstring getName() const { return name; }
 	bool falling = false;
-private:
+
+protected:
+	void CreateBoundingOrientedBox(DirectX::XMFLOAT3 size)
+	{
+		entityHeight = size.y;
+		Collidable::CreateBoundingOrientedBox(size);
+	}
 	DirectX::XMMATRIX getWorldAtViewMatrix()
 	{
 		DirectX::XMFLOAT3 rot = c->getRotation();
 		DirectX::XMFLOAT3 pos = c->getPosition();
-		return  DirectX::XMMatrixRotationRollPitchYaw(0, rot.y, 0) * DirectX::XMMatrixTranslation(pos.x, pos.y - playerHeight + 4, pos.z);
+		return  DirectX::XMMatrixRotationRollPitchYaw(0, rot.y, 0) * DirectX::XMMatrixTranslation(pos.x, pos.y - entityHeight, pos.z);
 	}
-	float playerHeight;
+
+private:
+
+	float entityHeight;
 
 	input* i;
 	camera* c;

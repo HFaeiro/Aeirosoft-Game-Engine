@@ -239,9 +239,9 @@ void app::StartupGui(Gui* gui)
 	float setBWit = 408 * sizeMult;
 	float setBHei = 67 * sizeMult;
 	
-	//std::function<void(void*)> setfunc = [](void* g) { ((Gui*)g)->ActivateMenu(L"Main"); };
-	//gui->AddButton(setfunc, gui, L"Main", L"Data\\Menu\\Main\\settings.png", L"Data\\Menu\\Main\\Settings_Selected.png",
-	//	{ -setBWit, -setBHei - stBHei}, { setBWit, setBHei - stBHei });
+	std::function<void(void*)> setfunc = [](void* g) { /*((Gui*)g)->ActivateMenu(L"Main")*/return; };
+	gui->AddButton(setfunc, gui, L"Main", L"Data\\Menu\\Main\\Settings_Selected.png" /*L"Data\\Menu\\Main\\settings.png"*/, L"Data\\Menu\\Main\\Settings_Selected.png",
+		{ -setBWit, -setBHei - stBHei}, { setBWit, setBHei - stBHei });
 
 	float qBWit = 211 * sizeMult;
 	float qBHei = 69 * sizeMult;
@@ -254,7 +254,7 @@ void app::StartupGui(Gui* gui)
 	std::function<void(void*)> refunc = [](void* g) { ((app*)g)->restart = true; };
 	gui->AddButton(refunc, (window*)this, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
 		{ -stBWit, -stBHei + 50 }, { stBWit, stBHei + 50 });
-	gui->AddExistingButton(L"Pause", L"settings.png");
+	gui->AddExistingButton(L"Pause", L"Settings_Selected.png"/* L"settings.png"*/);
 	gui->AddExistingButton(L"Pause", L"quit.png");
 
 

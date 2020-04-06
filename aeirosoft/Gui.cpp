@@ -27,15 +27,15 @@ void Gui::Menu::Add( DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to)
 
 	this->from = from;
 	this->to = to;
-	vertices.emplace_back(from.x, from.y, 0.f, 0.f, 1.f);// 0  bottom left
-	vertices.emplace_back(to.x, to.y, 0.f, 1.f, 0.f); //1 top right
-	vertices.emplace_back(from.x, to.y, 0.f, 0, 0);			//2 top left
+	vertices.emplace_back(from.x, from.y, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f);// 0  bottom left
+	vertices.emplace_back(to.x, to.y, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f); //1 top right
+	vertices.emplace_back(from.x, to.y, 0.f, 0, 0, 0.f, 0.f, 0.f);			//2 top left
 	
 	
 	
-	vertices.emplace_back(from.x, from.y, 0.f, 0.f, 1.f);// 0  bottom left
-	vertices.emplace_back(to.x, to.y, 0.f, 1.f, 0.f); //1 top right
-	vertices.emplace_back(to.x, from.y, 0.f, 1.f, 1.f); //3 bottom right
+	vertices.emplace_back(from.x, from.y, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f);// 0  bottom left
+	vertices.emplace_back(to.x, to.y, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f); //1 top right
+	vertices.emplace_back(to.x, from.y, 0.f, 1.f, 1.f, 0.f, 0.f, 0.f); //3 bottom right
 //	vertices.emplace_back(to.x, from.y, 0.f, 1.f, 1.f); //3 bottom right
 
 	DWORD indecies[] =

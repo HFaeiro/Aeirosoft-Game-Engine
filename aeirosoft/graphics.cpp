@@ -139,35 +139,35 @@ bool graphics::Initialize()
 	return true;
 
 }
-void graphics::CreateFloor(DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to,texture t, bool temporary)
-{
-	std::vector<Vertex> vertices;
-	vertices.emplace_back(from.x, 0.f, from.y, 0.f, 1.f);
-	vertices.emplace_back(to.x, 0.f, to.y, 1.f, 0.f);
-	vertices.emplace_back(from.x, 0.f, to.y);
-	vertices.emplace_back(to.x, 0.f, from.y, 1.f, 1.f);
-
-
-	DWORD indecies[] =
-	{
-		0,2,1,
-		0,1,3
-	};
-
-	VertexBuffer vb;
-	IndexBuffer ib;
-	UINT offset = 0;
-	pContext->PSSetShaderResources(0, 1, t.GetTextureResourceViewAddr());
-	if(temporary)
-		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	else
-		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
-	pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
-	pContext->IASetIndexBuffer(ib.Get(), DXGI_FORMAT_R32_UINT, 0);
-	pContext->DrawIndexed(6, 0, 0);
-
-}
+//void graphics::CreateFloor(DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to,texture t, bool temporary)
+//{
+//	std::vector<Vertex> vertices;
+//	vertices.emplace_back(from.x, 0.f, from.y, 0.f, 1.f);
+//	vertices.emplace_back(to.x, 0.f, to.y, 1.f, 0.f);
+//	vertices.emplace_back(from.x, 0.f, to.y);
+//	vertices.emplace_back(to.x, 0.f, from.y, 1.f, 1.f);
+//
+//
+//	DWORD indecies[] =
+//	{
+//		0,2,1,
+//		0,1,3
+//	};
+//
+//	VertexBuffer vb;
+//	IndexBuffer ib;
+//	UINT offset = 0;
+//	pContext->PSSetShaderResources(0, 1, t.GetTextureResourceViewAddr());
+//	if(temporary)
+//		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+//	else
+//		pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//	CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
+//	pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
+//	pContext->IASetIndexBuffer(ib.Get(), DXGI_FORMAT_R32_UINT, 0);
+//	pContext->DrawIndexed(6, 0, 0);
+//
+//}
 
 void graphics::CreateIndexAndVectorBuffers(std::vector<Vertex> vertices, DWORD indecies[], VertexBuffer& vb, IndexBuffer& ib)
 {

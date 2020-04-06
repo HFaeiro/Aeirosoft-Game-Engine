@@ -213,15 +213,19 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<DWORD> indices;
 
 	
+	
 
-		if (mesh->mTextureCoords[0])
+		if (mesh->mTextureCoords[0] && mesh->mNormals)
 			for (UINT i = 0; i < mesh->mNumVertices; i++)
 			{
 				vertices.emplace_back(mesh->mVertices[i].x * scale,
 					mesh->mVertices[i].y * scale,
 					mesh->mVertices[i].z * scale,
 					(float)mesh->mTextureCoords[0][i].x,
-					(float)mesh->mTextureCoords[0][i].y
+					(float)mesh->mTextureCoords[0][i].y,
+					(float)mesh->mNormals[i].x,
+					(float)mesh->mNormals[i].y,
+					(float)mesh->mNormals[i].z
 				);
 			}
 		else

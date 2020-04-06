@@ -82,12 +82,14 @@ public:
 	{
 
 		deltaTimer.Start();
+		DirectX::XMFLOAT3 pPos = getPosition();
 		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
 		CreateBoundingOrientedBox(playerSize);
 		return true;
 	}
 	virtual void Update()
 	{
+
 #ifdef _DEBUG
 		test();
 #endif
@@ -146,14 +148,13 @@ public:
 		viewInverse = DirectX::XMMatrixInverse(NULL, getViewMatrix());
 		main.UpdateWorldMatrixWithViewMatrix(viewInverse);
 		main.Render();
-		//DrawBoundingBox();
 		//playerModel.Render(g->m_TextureShader);
 
 		
 	};
 	virtual std::optional<Events*> Queue() 
 	{ 
-		
+
 		float moveSpeed = g_moveSpeed;
 		if (isKey(DIK_LSHIFT))
 			moveSpeed += 40;

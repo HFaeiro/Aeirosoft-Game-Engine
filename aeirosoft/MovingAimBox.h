@@ -111,6 +111,7 @@ private:
 			break;
 		}
 		timeMoving += delta.GetSecondsElapsed();
+		adjustRotation(timeMoving * delta.GetSecondsElapsed(), moveSpeed * delta.GetSecondsElapsed(), 1 * delta.GetSecondsElapsed());
 		delta.restart();
 	}
 	void SetRandomMove()

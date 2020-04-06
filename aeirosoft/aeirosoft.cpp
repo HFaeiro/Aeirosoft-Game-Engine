@@ -25,9 +25,9 @@ int APIENTRY wWinMain(
     POINT p;
 
 
-
-
-    app a(hInstance, L"Testing", { 1280, 720 });
+    RECT r;
+    GetWindowRect(GetDesktopWindow(), &r);
+    app a(hInstance, L"Testing", { r.right ,r.bottom });
     return a.begin();
 
 

@@ -19,6 +19,12 @@ class TextureShader
 		DirectX::XMMATRIX view;
 		DirectX::XMMATRIX projection;
 	};
+	struct LightBufferType
+	{
+		DirectX::XMVECTOR ambientColor;
+		DirectX::XMVECTOR diffuseColor;
+		DirectX::XMVECTOR lightDirection;
+	};
 
 public:
 	TextureShader();
@@ -40,7 +46,8 @@ private:
 	Microsoft::WRL::ComPtr < ID3D11InputLayout	> pLayout = nullptr;
 	Microsoft::WRL::ComPtr < ID3D11Buffer		> pViewProjectionMatrixBuffer = nullptr;
 	Microsoft::WRL::ComPtr < ID3D11Buffer		> pWorldMatrixBuffer = nullptr;
-	Microsoft::WRL::ComPtr < ID3D11SamplerState> pSampleState = nullptr;
+	Microsoft::WRL::ComPtr < ID3D11Buffer		> pLightBuffer = nullptr;
+	Microsoft::WRL::ComPtr < ID3D11SamplerState	> pSampleState = nullptr;
 
 };
 
