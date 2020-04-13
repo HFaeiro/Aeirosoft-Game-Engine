@@ -20,9 +20,12 @@ public:
 	~input();
 	virtual void Update()
 	{
-		ProcessMouse();
-		KeyboardInputs();
-		updateTimer();
+		if (w->active) {
+			if(w->hideMouse)
+				ProcessMouse();
+			KeyboardInputs();
+			updateTimer();
+		}
 		
 	}
 

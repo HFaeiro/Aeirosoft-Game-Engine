@@ -142,9 +142,59 @@ void model::setRotation(float x, float y)
 
 void model::Render(TextureShader pTextureShader)
 {
-
+	
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pTextureShader.UpdateWorldMatrixBuffer(pContext.Get(), world);
+
+	if (vAnimations.size())
+	{
+		//static int frame = 0;
+		boneTransforms.clear();
+		//if (frame == 60)
+		//	frame = 0;
+
+		vAnimations[0].deltaTime += vAnimations[0].deltaTimer.GetMillisecondsElapsed() * .001f;
+		vAnimations[0].deltaTimer.restart();
+		
+
+		float timeTicks = vAnimations[0].deltaTime * vAnimations[0].TicksPS;
+		float animTime = std::fmod(timeTicks, vAnimations[0].Duration);
+		if (animTime > vAnimations[0].Duration)
+			vAnimations[0].deltaTime = 0;
+		for (auto& bone : vBones)
+		{
+
+			for (const auto& channel : vAnimations[0].vChannels) {
+				if (bone->name == channel.name)
+				{
+					for (const auto& key : channel.keys)
+					{
+						if (animTime < key.time)
+						{
+							bone->transformationMatrix = key.matrix;
+							//for (auto& child : bone->vChildren)
+							//{
+							//	TransformBoneGlobals(bone);
+							//}
+							break;
+						}
+					}
+					break;
+				}
+			}
+			TransformBoneGlobals(bone);
+			DirectX::XMMATRIX finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix;
+			boneTransforms.push_back(finalTransform);
+		}
+
+		pTextureShader.SetShaders(pContext.Get(), true);
+
+		pTextureShader.UpdateBonesBuffer(pContext.Get(), boneTransforms);
+		//frame++;
+
+	}
+	else
+		pTextureShader.SetShaders(pContext.Get());
 
 	for (int i = 0; i < meshes.size(); i++)
 		meshes[i].Draw();
@@ -153,13 +203,61 @@ void model::Render(TextureShader pTextureShader)
 
 }
 
+model::Bone* model::CreateBoneTreeRecursive(aiNode* node, model::Bone* parent)
+{
+	Bone* retBone = new Bone();
+	retBone->parent = parent;
+	retBone->name = node->mName.data;
+	retBone->transformationMatrix = aiMatrix4x4ToDXMatrix(node->mTransformation);
+	retBone->OGTransformationMatrix = retBone->transformationMatrix;
+	TransformBoneGlobals(retBone);
+
+	for (int i = 0; i < node->mNumChildren; i++) {
+		Bone* child = CreateBoneTreeRecursive(node->mChildren[i], retBone);
+		if (child != nullptr)
+		{
+			retBone->vChildren.push_back(child);
+		}
+
+	}
+
+
+	vBonesTmp.push_back(retBone);
+	return retBone;
+
+}
+void model::TransformBoneGlobals(model::Bone* child)
+{
+	child->GlobalTransformationMatrix = child->transformationMatrix;
+	Bone* recurBone = child->parent;
+	while (recurBone != nullptr)
+	{
+		child->GlobalTransformationMatrix = recurBone->transformationMatrix * child->GlobalTransformationMatrix;
+		recurBone = recurBone->parent;
+	}
+
+}
+
+DirectX::XMMATRIX model::aiMatrix4x4ToDXMatrix(aiMatrix4x4 in)
+{
+	//this is a reason to dislike assimp ;
+	//but i mean it made it more portable
+	DirectX::XMFLOAT4X4 tmp;
+	tmp._11 = in.a1; tmp._12 = in.a2; tmp._13 = in.a3; tmp._14 = in.a4;
+	tmp._21 = in.b1; tmp._22 = in.b2; tmp._23 = in.b3; tmp._24 = in.b4;
+	tmp._31 = in.c1; tmp._32 = in.c2; tmp._33 = in.c3; tmp._34 = in.c4;
+	tmp._41 = in.d1; tmp._42 = in.d2; tmp._43 = in.d3; tmp._44 = in.d4;
+	
+	//return DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&tmp));
+	//return DirectX::XMLoadFloat4x4(&tmp) * DirectX::XMMatrixTranspose(DirectX::XMMatrixRotationX(-1.5708));
+	return DirectX::XMLoadFloat4x4(&tmp);
+	//return DirectX::XMMatrixIdentity();
+}
 
 void model::UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix)
 {
 	prevWorld = world;
 	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) * viewMatrix;
-
-	//TransformBounds(world);
 
 }
 
@@ -179,19 +277,40 @@ bool model::LoadModel(const std::wstring& filename)
 
 	std::string str = helper::strings::wideToChar(filename);
 	const aiScene* pScene = importer.ReadFile(str, aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices |
+		aiProcess_JoinIdenticalVertices | aiProcessPreset_TargetRealtime_Fast |
 		aiProcess_ConvertToLeftHanded);
 
 	if (pScene == nullptr)
 		return false;
 
+	if (pScene->HasAnimations())
+	{
+		for (int i = 0; i < pScene->mNumAnimations; i++)
+		{
+			Animation animation;
 
+			animation.TicksPS = pScene->mAnimations[i]->mTicksPerSecond;
+			animation.Duration = pScene->mAnimations[i]->mDuration;
+			for (int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
+			{
+				const aiNodeAnim* tmpChannel = pScene->mAnimations[i]->mChannels[j];
+				for (int k = 0; k < tmpChannel->mNumPositionKeys; k++)
+				{
+					animation.AddKeyFrameToChannel(tmpChannel->mNodeName.data, tmpChannel->mPositionKeys[k].mTime, tmpChannel->mPositionKeys[k].mValue,
+						tmpChannel->mRotationKeys[k].mValue, tmpChannel->mScalingKeys[k].mValue);
+				}
+			}
+			vAnimations.push_back(animation);
+		}
+
+
+	}
+	
 	for (UINT i = 0; i < pScene->mNumMeshes; i++)
 	{
 
 		meshes.push_back(this->ProcessMesh(pScene->mMeshes[i], pScene));
 	}
-
 
 	return true;
 }
@@ -212,7 +331,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<Vertex> vertices;
 	std::vector<DWORD> indices;
 
-	
+
 	
 
 		if (mesh->mTextureCoords[0] && mesh->mNormals)
@@ -228,6 +347,18 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 					(float)mesh->mNormals[i].z
 				);
 			}
+		else if (mesh->mTextureCoords[0])
+		{
+			for (UINT i = 0; i < mesh->mNumVertices; i++)
+			{
+				vertices.emplace_back(mesh->mVertices[i].x * scale,
+					mesh->mVertices[i].y * scale,
+					mesh->mVertices[i].z * scale,
+					(float)mesh->mTextureCoords[0][i].x,
+					(float)mesh->mTextureCoords[0][i].y
+					);
+			}
+		}
 		else
 		{
 			for (UINT i = 0; i < mesh->mNumVertices; i++)
@@ -250,13 +381,41 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	std::vector<texture> diffuseTextures = LoadTextures(material, aiTextureType::aiTextureType_DIFFUSE, scene);
 
+	if (mesh->HasBones())
+	{		
+		int boneNum = 0;
+		int offset = 0;
+		if(!vBones.size())
+			CreateBoneTreeRecursive(scene->mRootNode->mChildren[0]->mChildren[0], nullptr);
+		for (int i = 0; i < mesh->mNumBones; i++)
+		{
 
-	//CreateBoundingBox(vertices);
+			for (auto& bone : vBonesTmp)
+			{
+				
+				if (bone->name == mesh->mBones[i]->mName.data) {
+					bone->offsetMatrix = aiMatrix4x4ToDXMatrix(mesh->mBones[i]->mOffsetMatrix);
+					vBones.push_back(bone);
+					vBonesTmp.erase(vBonesTmp.begin() + boneNum);
+					boneNum = 0;
+					break;
+				}
+				boneNum++;
+			}
+			offset = vBones.size();
+			for (int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
+			{
+				if (mesh->mBones[i]->mWeights[j].mVertexId < vertices.size())
+					vertices[mesh->mBones[i]->mWeights[j].mVertexId].AddWeights(offset ? offset - 1 : 0, mesh->mBones[i]->mWeights[j].mWeight);
+			}
+		}
+		
 
+	}
+	
 	return Mesh(pDevice.Get(), pContext.Get(), vertices, indices, diffuseTextures);
 
 }
-//
 
 
 std::vector<texture> model::LoadTextures(aiMaterial* pMaterial, aiTextureType type, const aiScene* pScene)
@@ -357,26 +516,6 @@ TextureStorageType model::GetStorageType(const aiScene* pScene, aiMaterial* pMat
 
 
 }
-
-
-
-
-
-
-//void model::FillBoundingBuffers()
-//{
-//
-//	for (int i; i < vBVerts.size(); i++)
-//	{
-//		this->vertexBuffer.Init(pDevice.Get(), vBVerts[i].data(), vBVerts[i].size())
-//			
-//	}
-//
-//}
-
-
-
-
 
 bool model::initBuffers(const std::wstring& filename)
 {

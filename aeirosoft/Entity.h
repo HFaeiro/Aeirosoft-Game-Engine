@@ -52,20 +52,21 @@ public:
 
 		static int loop = 0;
 		static DirectX::XMFLOAT3 lastResort;
+		DirectX::XMFLOAT3 movedPos = c->getPosition();
+
+		c->revertView();
+		DirectX::XMFLOAT3 prevPos = c->getPosition();
+		if (loop == 0)
+			lastResort = prevPos;
+		c->setPosition(movedPos);
+		DirectX::XMFLOAT3 posDifference = { movedPos.x - prevPos.x, movedPos.y - prevPos.y, movedPos.z - prevPos.z };
+
+		
+
 
 		if (collision) {
 			collision = false;
-
-
-
-			DirectX::XMFLOAT3 movedPos = c->getPosition();
-			
-			c->revertView();
-			DirectX::XMFLOAT3 prevPos = c->getPosition();
-			if (loop == 0)
-				lastResort = prevPos;
 			c->setPosition(prevPos);
-			DirectX::XMFLOAT3 posDifference = { movedPos.x - prevPos.x, movedPos.y - prevPos.y, movedPos.z - prevPos.z };
 			//DirectX::XMFLOAT3 posDifference = {prevPos.x - movedPos.x,prevPos.y - movedPos.y,prevPos.z - movedPos.z };
 			float newPosMult = .1999f * (loop == 0 ? 1 : loop * .0099f);
 			
@@ -98,8 +99,21 @@ public:
 				else
 					c->adjustPosition({ 0,0, -posDifference.z });
 			}
-			if (posDifference.y) {
-				c->adjustPosition({ 0, -posDifference.y * .5f, 0 });
+			if (posDifference.y > 0 || posDifference.y < 0) {
+				/*c->adjustPosition({ 0, posDifference.y, 0 });
+				TransformBounds(getWorldAtViewMatrix());
+				Collidable::Cthis->Check(this);
+				if (!collision) {
+					falling = true;
+					c->adjustPosition({ posDifference.x, 0, posDifference.z });
+					TransformBounds(getWorldAtViewMatrix());
+					Collidable::Cthis->Check(this);
+					Update();
+					return;
+				}
+				c->adjustPosition({ 0, -posDifference.y, 0 });	
+				collision = false;*/
+				c->adjustPosition({ 0, -posDifference.y * .4f, 0 });
 				TransformBounds(getWorldAtViewMatrix());
 				Collidable::Cthis->Check(this);
 				if (!collision) {
@@ -111,7 +125,7 @@ public:
 					return;
 				}
 				else
-					c->adjustPosition({ 0, posDifference.y * .5f, 0 });
+					c->adjustPosition({ 0, posDifference.y * .4f, 0 });
 			}
 
 
@@ -150,6 +164,8 @@ public:
 
 		}
 		else {
+		if (posDifference.y < 0)
+			falling = true;
 			loop = 0;
 			
 		}

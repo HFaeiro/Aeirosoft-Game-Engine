@@ -15,11 +15,6 @@ struct PixelInputType
     float3 normal : NORMAL;
 };
 
-//static const float4 matColor = { .7f, .7f, .9f , 1.f};
-static const float4 ambient = { .1f, .1f, .1f , 1.0f};
-static const float4 diffColor = { .5f, .5f, .5f, 1.0f };
-static const float4 lightDirect = { 1.0f, 1.0f, 0.f, 0.f };
-
 
 float4 main(PixelInputType input) : SV_TARGET
 {

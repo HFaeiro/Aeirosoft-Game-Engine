@@ -9,7 +9,11 @@ public:
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT2 texture;
 	DirectX::XMFLOAT3 normal;
-	
+	BYTE Indecies[4] = { 0 };
+	float weights[4] = { 0 };
+
+
+
 	Vertex() {}
 	Vertex(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT2 tex)
 		:position(pos),
@@ -37,6 +41,21 @@ public:
 		texture(DirectX::XMFLOAT2(aiT.x, aiT.y)),
 		normal({ 0, 0, -1.f })
 	{}
+	void AddWeights(UINT index, float weight)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (weights[i] == 0.f)
+			{
+				Indecies[i] = index;
+				weights[i] = weight;
+				return;
+			}
+		}
+		//should never get here. using instruction as breakpoint.
+		int i = 1; 
+		return;
+	}
 };
 
 

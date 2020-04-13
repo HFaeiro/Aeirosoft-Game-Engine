@@ -133,7 +133,8 @@ bool graphics::Initialize()
 	m_batch = std::make_unique<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>>(pContext.Get());
 	
 	pSpriteBatch = std::make_unique<DirectX::SpriteBatch>(this->pContext.Get());
-
+	pSpriteFont = std::make_unique<DirectX::SpriteFont>(pDevice.Get(), L"Data\\Fonts\\hFontSm.spritefont");
+//		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
 
 	
 	return true;
@@ -456,6 +457,7 @@ void graphics::Begin2DScene()
 	TurnZBufferOff();
 	m_TextureShader.UpdateViewProjectionMatrixBuffer(pContext.Get(), m_DefaultViewMatrix, m_OrthoMatrix);
 	m_TextureShader.Render(pContext.Get(), DirectX::XMMatrixIdentity());
+	m_TextureShader.SetShaders(pContext.Get());
 }
 
 void graphics::Resize()

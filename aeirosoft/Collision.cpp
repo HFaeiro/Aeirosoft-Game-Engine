@@ -90,6 +90,8 @@ void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
 
 	vertices = v;
 	DWORD vsize = v.size();
+	if (vsize == 4)
+		return;
 	if(vsize == 24 ||/* vsize == 24 || vsize == 20 || vsize == 48 ||*/ vsize == 30)
 	{
 		std::vector<DirectX::XMFLOAT3> corners;
@@ -121,6 +123,7 @@ void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
 			return;
 	}
 	else {
+
 		DirectX::XMFLOAT3 minVertex = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
 		DirectX::XMFLOAT3 maxVertex = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 		for (Vertex i : v)

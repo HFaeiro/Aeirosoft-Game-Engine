@@ -59,7 +59,7 @@ public:
 	DirectX::XMMATRIX GetOrthoMatrix();
 
 	std::unique_ptr<DirectX::SpriteBatch> pSpriteBatch;
-	//std::unique_ptr<DirectX::SpriteFont> pSpriteFont;
+	std::unique_ptr<DirectX::SpriteFont> pSpriteFont;
 
 	std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
 
@@ -94,7 +94,7 @@ protected:
 	HWND m_Window;
 
 	float screenNear = .01f;
-	float renderDistance = 1000.f;
+	float renderDistance = 60000.f;
 	float FOV, aspectRatio, fovDegrees;
 
 	float roty = 0.f;

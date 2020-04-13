@@ -7,6 +7,8 @@
 #include "graphics.h"
 #include "Mesh.h"
 #include "TextureShader.h"
+#include "Timer.h"
+#include "Animation.h"
 
 class model
 {
@@ -65,6 +67,7 @@ private:
 	std::vector<Mesh> meshes;
 	void ProcessNode(aiScene* node, const aiScene* scene);
 	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
+
 	bool LoadModel(const std::wstring& filename);
 	std::vector<texture> LoadTextures(aiMaterial* pMaterial, aiTextureType type, const aiScene* pScene);
 	TextureStorageType GetStorageType(const aiScene*, aiMaterial*, int index, aiTextureType);
@@ -91,5 +94,32 @@ private:
 	DirectX::XMVECTOR camRight;
 	DirectX::XMVECTOR camUp;
 	DirectX::XMMATRIX camProjection;
+
+
+
+
+	
+	std::vector<Animation> vAnimations;
+	std::vector<DirectX::XMMATRIX> boneTransforms;
+
+	struct Bone
+	{
+		std::string name;
+		DirectX::XMMATRIX offsetMatrix;
+		DirectX::XMMATRIX transformationMatrix;
+		DirectX::XMMATRIX GlobalTransformationMatrix;
+		DirectX::XMMATRIX OGTransformationMatrix;
+		Bone* parent;
+		std::vector<Bone*> vChildren;
+	};
+	std::vector<Bone*> vBonesTmp;
+	std::vector<Bone*> vBones;
+	Bone* Bones;
+	Bone* CreateBoneTreeRecursive(aiNode*, model::Bone* parent);
+
+	void TransformBoneGlobals(model::Bone* child);
+
+	DirectX::XMMATRIX aiMatrix4x4ToDXMatrix(aiMatrix4x4 in);
+
 };
 

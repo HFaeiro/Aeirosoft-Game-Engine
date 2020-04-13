@@ -170,7 +170,7 @@ public:
 		}
 	}
 
-	bool CreateEntityObject(std::wstring filePath)
+	bool CreateEntityObject(std::wstring filePath, float scale = 1.f )
 	{
 
 		std::wstring entName = helper::strings::GetNameFromPath(filePath);
@@ -182,7 +182,7 @@ public:
 
 		}
 		
-		entities.push_back(EntityObject(g, filePath));
+		entities.push_back(EntityObject(g, filePath, scale));
 		return true;
 	}
 

@@ -128,7 +128,7 @@ public:
 		for (const auto& C : collidable)
 		{
 #ifdef _DEBUG
-			C->DrawBoundingOrientedBox();
+			//C->DrawBoundingOrientedBox();
 #endif
 			if (C->type != Collidable::Type::Object)
 			{

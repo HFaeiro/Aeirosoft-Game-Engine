@@ -69,7 +69,7 @@ void window::MyRegisterClass()
 BOOL window::InitInstance()
 {
 
-    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_POPUP,
+    myhWnd = CreateWindow(sWindowName.c_str(), sWindowName.c_str(), WS_OVERLAPPED,
         CW_USEDEFAULT, 0, width, height, nullptr, nullptr, hInst, this);
 
     if (!myhWnd)

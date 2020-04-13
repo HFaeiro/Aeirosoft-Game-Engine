@@ -36,9 +36,12 @@ bool app::SetupApplication()
 	StartupGui(gui);
 
 	CreateScenes(s, gui);
-	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
-		{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f } },
-		L""));
+	//s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
+	//	{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f }},
+	//	L"", .75f));
+	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L""/*L"Data\\FpsArms\\FpsArmsAnimated.dae"*/, { { 0, 0, 0 }, {0, 0, 0 } },
+		{ { 0, 0, 0 }, {0, 0, 0 } },
+		L"", .5f));
 	s->AddOnKeyEventToScene(L"Scene1", L"Pause", gui, false, DIK_ESCAPE);
 
 	events.push_back(i);
@@ -47,7 +50,7 @@ bool app::SetupApplication()
 
 	for (int i = 0; i < Boxes; i++)
 	{
-		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
+		//s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
 
 	}
 
@@ -190,8 +193,16 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 {
 	s->CreateScene(L"Scene1", gui, false, true);
 	s->CreateScene(L"MainMenu", gui, true);
-	s->CreateEntityObject(L"Data\\map\\map.obj");
-	s->AddObjectToScene(L"Scene1", L"map.obj", { 0,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	//s->CreateEntityObject(L"Data\\map\\map.obj");
+	//s->AddObjectToScene(L"Scene1", L"map.obj", { 0,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	s->CreateEntityObject(L"Data\\FpsArms\\FpsArmsAnimated.dae");
+	s->AddObjectToScene(L"Scene1", L"FpsArmsAnimated.dae", { 200,50,200 }, { 0,0,0 });
+
+	s->CreateEntityObject(L"Data\\FpsArms\\TestAnimCube.dae");
+	s->AddObjectToScene(L"Scene1", L"TestAnimCube.dae", { 55,50,55 }, { 0,0,0 });
+
+	s->CreateEntityObject(L"Data\\FpsArms\\TestAnimMonster.dae");
+	s->AddObjectToScene(L"Scene1", L"TestAnimMonster.dae", { -200,50,-200 }, { 0,0,0 });
 	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
 	//s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
 	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });

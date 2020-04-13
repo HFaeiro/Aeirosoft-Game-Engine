@@ -12,33 +12,42 @@ public:
 	void test()
 	{
 		double delt = deltaTimer.GetSecondsElapsed();
-		float moveSpeed = 1 * delt;
+		float moveSpeed = .4f * delt;
 		bool shift = isKey(DIK_LSHIFT);
+		bool ctrl = isKey(DIK_LCONTROL);
 		if (isKey(DIK_UP)) {
-			if (!shift)
-				main.adjustPosition({ 0,moveSpeed, 0 });
+			if (!shift && !ctrl)
+				main.adjustPosition({ 0 ,moveSpeed,0 });
+			else if (shift && !ctrl)
+				main.adjustRotation(0, 0, moveSpeed);
 			else
-				main.adjustRotation(0,0, moveSpeed);
+				main.adjustRotation(0, moveSpeed, 0);
 		}
 		if (isKey(DIK_DOWN)) {
-			if (!shift)
-				main.adjustPosition({ 0,-moveSpeed, 0 });
+			if (!shift && !ctrl)
+				main.adjustPosition({  0 , -moveSpeed ,0});
+			else if (shift && !ctrl)
+				main.adjustRotation(0, 0, -moveSpeed);
 			else
-				main.adjustRotation(0, 0,-moveSpeed);
+				main.adjustRotation(0, -moveSpeed, 0);
 		}
 		if (isKey(DIK_LEFT))
 		{
-			if (!shift)
+			if (!shift && !ctrl)
 				main.adjustPosition({ moveSpeed,0, 0 });
+			else if(shift && !ctrl)
+				main.adjustRotation(moveSpeed, 0, 0 );
 			else
-				main.adjustRotation(0, moveSpeed,0 );
+				main.adjustPosition({ 0  ,0 , moveSpeed });
 		}
 		if (isKey(DIK_RIGHT))
 		{
-			if (!shift)
+			if (!shift && !ctrl)
 				main.adjustPosition({ -moveSpeed, 0 ,0 });
+			else if(shift && !ctrl)
+				main.adjustRotation(-moveSpeed, 0,  0  );
 			else
-				main.adjustRotation(0, -moveSpeed, 0  );
+				main.adjustPosition({ 0  ,0 , -moveSpeed });
 		}
 
 		std::wstringstream wss, wss1;
@@ -53,10 +62,10 @@ public:
 		wss1 << L" Y: " << rot.y;
 		wss1 << L" Z: " << rot.z;
 
-		//g->pSpriteBatch->Begin();
-		//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 60));
-		//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss1.str().c_str(), DirectX::XMFLOAT2(0, 80));
-		//g->pSpriteBatch->End();
+		g->pSpriteBatch->Begin();
+		g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 60));
+		g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss1.str().c_str(), DirectX::XMFLOAT2(0, 80));
+		g->pSpriteBatch->End();
 		
 		g->Begin3DScene();
 
@@ -64,8 +73,8 @@ public:
 #endif
 
 	Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS,
-		const std::wstring& filename) :
-										g(g), main(g, startingGun, .75f),
+		const std::wstring& filename, float wScale = 1.f) :
+										g(g), main(g, startingGun, wScale),
 										Entity(g, i, filename), hip(hip), ADS(ADS), i(i)
 	{
 		main.setPosition(hip.pos);
@@ -82,14 +91,13 @@ public:
 	{
 
 		deltaTimer.Start();
-		DirectX::XMFLOAT3 pPos = getPosition();
 		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
 		CreateBoundingOrientedBox(playerSize);
 		return true;
 	}
 	virtual void Update()
 	{
-
+		
 #ifdef _DEBUG
 		test();
 #endif
@@ -145,7 +153,7 @@ public:
 		else if (isLeftClick())
 			Shooting = false;
 
-		viewInverse = DirectX::XMMatrixInverse(NULL, getViewMatrix());
+		viewInverse = DirectX::XMMatrixInverse(NULL, g->GetViewMatrix());
 		main.UpdateWorldMatrixWithViewMatrix(viewInverse);
 		main.Render();
 		//playerModel.Render(g->m_TextureShader);
@@ -156,11 +164,26 @@ public:
 	{ 
 
 		float moveSpeed = g_moveSpeed;
-		if (isKey(DIK_LSHIFT))
-			moveSpeed += 40;
+		if (isKey(DIK_LSHIFT) && !aiming)
+		{
+			moveSpeed *= 2;
+			running = true;
+		}
+		else
+			running = false;
+
+
 		//playerModel.UpdateWorldMatrixWithViewMatrix(viewInverse);
 		if (isKey(DIK_W) && !isKey(DIK_D) && !isKey(DIK_A))
 			adjustPosition(camera::movementType::forward, moveSpeed * GetDeltaTime());
+		else if (isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D))
+		{
+			adjustPosition(camera::movementType::forwardRight, moveSpeed * GetDeltaTime());
+		}
+		else if (isKey(DIK_W) && !isKey(DIK_D) && isKey(DIK_A))
+		{
+			adjustPosition(camera::movementType::forwardLeft, moveSpeed * GetDeltaTime());
+		}
 		else if (isKey(DIK_S) && !isKey(DIK_D) && !isKey(DIK_A))
 			adjustPosition(camera::movementType::backward, moveSpeed * GetDeltaTime());
 
@@ -172,14 +195,6 @@ public:
 		else if (!isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D))
 		{
 			adjustPosition(camera::movementType::right, moveSpeed * GetDeltaTime());
-		}
-		else if (isKey(DIK_W) && !isKey(DIK_S) && isKey(DIK_D))
-		{
-			adjustPosition(camera::movementType::forwardRight, moveSpeed * GetDeltaTime());
-		}
-		else if (isKey(DIK_W) && !isKey(DIK_D) && isKey(DIK_A))
-		{
-			adjustPosition(camera::movementType::forwardLeft, moveSpeed * GetDeltaTime());
 		}
 		else if (!isKey(DIK_W) && isKey(DIK_S) && isKey(DIK_A))
 		{
@@ -203,7 +218,7 @@ public:
 			if (getPosition().y - jumpStart >= jumpHeight)
 				hangTimer.Start();
 			else
-				gravity = 45 * GetDeltaTime();
+				gravity = 120 * GetDeltaTime();
 
 			if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
 			{
@@ -213,13 +228,14 @@ public:
 			}
 
 		}
-		else
-			gravity = -((50.f + timefalling) * GetDeltaTime());
+		else {
+			gravity = -((70.f + timefalling) * GetDeltaTime());
 
-		adjustPosition(camera::movementType::up, gravity);
+		}
+		//adjustPosition(camera::movementType::up, gravity);
 		if (falling)
 		{
-			timefalling += deltaTimer.GetMillisecondsElapsed() * .1;
+			timefalling += deltaTimer.GetMillisecondsElapsed() * .21;
 		}
 		else
 			timefalling = 0;
@@ -242,14 +258,16 @@ private:
 	graphics* g;
 	bool Shooting = false;
 	bool aiming = false;
+	bool running = false;
+	bool crouched = false;
 	int shots = 0;
-	float playerHeight = 30.0f;
-	float jumpHeight = 10.f;
+	float playerHeight = 100.0f;
+	float jumpHeight = 40.f;
 	float jumpStart = 0.f;
 	float playerWidth = 10.0f;
 	float playerZWidth = 15.f;
 	float hangTime = .0595f;
-	float g_moveSpeed = 100;
+	float g_moveSpeed = 120;
 	Timer hangTimer;
 	float GetDeltaTime() { return deltaTimer.GetMillisecondsElapsed() * .001f; }
 	Timer deltaTimer;
