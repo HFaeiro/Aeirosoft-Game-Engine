@@ -18,7 +18,20 @@ public:
 	model( const std::wstring& filename, graphics *g, float scale = 1.f);
 	model();
 	~model();
+	model(const model& m);
 
+	struct Bone
+	{
+		std::string name;
+		DirectX::XMMATRIX offsetMatrix;
+		DirectX::XMMATRIX transformationMatrix;
+		DirectX::XMMATRIX GlobalTransformationMatrix;
+		DirectX::XMMATRIX OGTransformationMatrix;
+		Bone* parent;
+		std::vector<Bone*> vChildren;
+	};
+
+	Bone* copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent);
 
 
 	void init(const std::wstring& filename, graphics *g, float scale = 1.f);
@@ -55,6 +68,12 @@ public:
 
 	bool active = false;
 private:
+
+	DirectX::XMMATRIX fbxMatrixMod = DirectX::XMMatrixRotationRollPitchYaw(1.5708, DirectX::XM_PI, 0);
+	std::vector<Bone*> vBonesTmp;
+	std::vector<Bone*> vBones;
+	Bone* pBoneMaster;
+
 	bool DEBUG = true;
 	void UpdateWorldMatrix();
 	DirectX::XMFLOAT3 pos;
@@ -102,24 +121,12 @@ private:
 	std::vector<Animation> vAnimations;
 	std::vector<DirectX::XMMATRIX> boneTransforms;
 
-	struct Bone
-	{
-		std::string name;
-		DirectX::XMMATRIX offsetMatrix;
-		DirectX::XMMATRIX transformationMatrix;
-		DirectX::XMMATRIX GlobalTransformationMatrix;
-		DirectX::XMMATRIX OGTransformationMatrix;
-		Bone* parent;
-		std::vector<Bone*> vChildren;
-	};
-	std::vector<Bone*> vBonesTmp;
-	std::vector<Bone*> vBones;
-	Bone* Bones;
 	Bone* CreateBoneTreeRecursive(aiNode*, model::Bone* parent);
 
 	void TransformBoneGlobals(model::Bone* child);
 
 	DirectX::XMMATRIX aiMatrix4x4ToDXMatrix(aiMatrix4x4 in);
+
 
 };
 

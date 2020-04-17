@@ -190,6 +190,12 @@ void graphics::UpdateOrthoProjectionMatrix()
 	m_OrthoMatrix = DirectX::XMMatrixOrthographicLH((float)width, (float)height, screenNear, renderDistance);
 
 }
+void graphics::ChangeFOV(float degrees)
+{
+	FOV = (degrees / 360) * DirectX::XM_PI;
+	m_ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, aspectRatio, screenNear, renderDistance);
+	m_Camera.setProjection(m_ProjectionMatrix);
+}
 
 void graphics::BeginScene(float red, float green, float blue, float alpha)
 {

@@ -14,7 +14,7 @@ void Animation::AddKeyFrameToChannel(std::string channelName, float time, aiVect
 	DirectX::XMFLOAT3 frameScale = { scale.x, scale.y, scale.z };
 
 	DirectX::XMMATRIX keyMatrix = DirectX::XMMatrixScaling(frameScale.x, frameScale.y, frameScale.z)
-		* tmpRotQuaternion * DirectX::XMMatrixTranslation(framePos.x, framePos.y, framePos.z);
+		* tmpRotQuaternion * ( DirectX::XMMatrixTranslation(framePos.x, framePos.y, framePos.z));
 
 	keyMatrix = DirectX::XMMatrixTranspose(keyMatrix);
 

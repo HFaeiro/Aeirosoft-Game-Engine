@@ -9,7 +9,10 @@ public:
 	virtual bool Initialize() = 0;
 	virtual void Update() = 0;
 	virtual std::optional<Events*> Queue() = 0;
-
+	EntityAi(const EntityAi& e) : model(e), Collidable(e)
+	{
+		
+	}
 	EntityAi(graphics* g, std::wstring filename, float scale = 1.f) : model(filename, g, scale), Collidable(g)
 	{
 		Collidable::type = Collidable::EntityAi;
@@ -45,8 +48,14 @@ public:
 			CreateBoundingOrientedBox(v);
 		}
 	}
+	EntityObject(const EntityObject& e) : model(e), Collidable(e)
+	{ 
+
+		*this = e;
+
+	}
 	~EntityObject() {
-		((model*)this)->~model();
+		/*((model*)this)->~model();*/
 	}
 
 	const std::wstring getName() const { return name; }

@@ -138,11 +138,13 @@ public:
 				clickTimer.restart();
 				if (aiming)
 				{
+					g->ChangeFOV(90.f);
 					main.setPosition(hip.pos);
 					main.setRotation(hip.rot);
 				}
 				else
 				{
+					g->ChangeFOV(60.f);
 					main.setPosition(ADS.pos);
 					main.setRotation(ADS.rot);
 				}

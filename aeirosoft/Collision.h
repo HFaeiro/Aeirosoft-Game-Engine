@@ -128,7 +128,7 @@ public:
 		for (const auto& C : collidable)
 		{
 #ifdef _DEBUG
-			//C->DrawBoundingOrientedBox();
+			C->DrawBoundingOrientedBox();
 #endif
 			if (C->type != Collidable::Type::Object)
 			{
@@ -188,10 +188,14 @@ public:
 					auto box = C->GetBounds();
 					std::vector<DirectX::BoundingOrientedBox> bounds = c->GetBounds();
 					for (const auto& bound : bounds)
-					if (box[0].Contains(bound))
-					{
-						C->collision = true;
-					}
+						for (const auto& b : box)
+						{
+							if (b.Contains(bound))
+							{
+								C->collision = true;
+							}
+						}
+
 				}
 			}
 		}

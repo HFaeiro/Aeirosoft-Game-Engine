@@ -181,7 +181,7 @@ public:
 				return false;
 
 		}
-		
+
 		entities.push_back(EntityObject(g, filePath, scale));
 		return true;
 	}

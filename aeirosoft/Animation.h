@@ -24,10 +24,12 @@ public:
 		void AddKeyFrameToChannel(std::string channelName, float time, aiVector3D pos, aiQuaternion rot, aiVector3D scale);
 		float TicksPS = 0.f;
 		float Duration = 0.f;
-		std::string name;
-		std::vector<Channel> vChannels;
 		float deltaTime = 0.f;
 		Timer deltaTimer;
-
+		std::string name;
+		std::vector<Channel> vChannels;
+private:
+	
+	//DirectX::XMMATRIX neg90 = DirectX::XMMatrixTranspose(DirectX::XMMatrixRotationX(-1.5708));
 };
 

@@ -13,11 +13,34 @@ static bool _compare_max_x(Vertex const& p1, Vertex const& p2) { return p1.posit
 static  bool _compare_max_y(Vertex const& p1, Vertex const& p2) { return p1.position.y > p2.position.y; }
 static bool _compare_max_z(Vertex const& p1, Vertex const& p2) { return p1.position.z > p2.position.z; }
 
+model::Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
+{
+	Bone* retBone = new Bone();
+	if (parent == nullptr)
+		pBoneMaster = retBone;
+	retBone->name = copyBone->name;
+	retBone->offsetMatrix = copyBone->offsetMatrix;
+	retBone->OGTransformationMatrix = copyBone->OGTransformationMatrix;
+	retBone->GlobalTransformationMatrix = copyBone->GlobalTransformationMatrix;
+	retBone->transformationMatrix = copyBone->transformationMatrix;
+	TransformBoneGlobals(retBone);
+
+	for (const auto& bone : copyBone->vChildren)
+	{
+		Bone* child = copyConstructBoneRecursive(bone, retBone);
+		if (child != nullptr)
+		{
+			retBone->vChildren.push_back(child);
+		}
+
+	}
 
 
+	vBones.push_back(retBone);
+	return retBone;
+}
 
-
-void model::init(const std::wstring& filename, graphics* g, float scale) 
+void model::init(const std::wstring& filename, graphics* g, float scale)
 {
 	
 	this->g = g;
@@ -52,9 +75,35 @@ model::model()
 
 model::~model()
 {
-	for (auto& mesh : meshes)
+	//for (auto& mesh : meshes)
+	//{
+	//	mesh.~Mesh();
+	//}
+	//for (auto& bone : vBones)
+	//{
+	//	delete bone;
+	//	bone = nullptr;
+	//}
+	//for (auto& bone : vBonesTmp)
+	//{
+	//	if (bone != nullptr)
+	//	{
+	//		delete bone;
+	//		bone = nullptr;
+	//	}
+	//}
+	//meshes.clear();
+	//vBones.clear();
+}
+
+model::model(const model& m)
+{
+	*this = m;
+	int numBones = vBones.size();
+	if (numBones)
 	{
-		mesh.~Mesh();
+		vBones.clear();
+		copyConstructBoneRecursive(m.pBoneMaster, nullptr);
 	}
 }
 
@@ -152,19 +201,29 @@ void model::Render(TextureShader pTextureShader)
 		boneTransforms.clear();
 		//if (frame == 60)
 		//	frame = 0;
-
-		vAnimations[0].deltaTime += vAnimations[0].deltaTimer.GetMillisecondsElapsed() * .001f;
-		vAnimations[0].deltaTimer.restart();
+		Animation* Anim = nullptr;
+		for (auto& anim : vAnimations)
+		{
+			if (anim.name.find("walking") != std::string::npos)
+			{
+				Anim = &anim;
+				break;
+			}
+		}
+		if (Anim == nullptr)
+			Anim = &vAnimations[0];
+		Anim->deltaTime += Anim->deltaTimer.GetMillisecondsElapsed() * .001f;
+		Anim->deltaTimer.restart();
 		
 
-		float timeTicks = vAnimations[0].deltaTime * vAnimations[0].TicksPS;
-		float animTime = std::fmod(timeTicks, vAnimations[0].Duration);
-		if (animTime > vAnimations[0].Duration)
-			vAnimations[0].deltaTime = 0;
+		float timeTicks = Anim->deltaTime * Anim->TicksPS;
+		float animTime = std::fmod(timeTicks, Anim->Duration);
+		if (animTime > Anim->Duration)
+			Anim->deltaTime = animTime - Anim->Duration;
 		for (auto& bone : vBones)
 		{
 
-			for (const auto& channel : vAnimations[0].vChannels) {
+			for (const auto& channel : Anim->vChannels) {
 				if (bone->name == channel.name)
 				{
 					for (const auto& key : channel.keys)
@@ -172,10 +231,6 @@ void model::Render(TextureShader pTextureShader)
 						if (animTime < key.time)
 						{
 							bone->transformationMatrix = key.matrix;
-							//for (auto& child : bone->vChildren)
-							//{
-							//	TransformBoneGlobals(bone);
-							//}
 							break;
 						}
 					}
@@ -183,14 +238,12 @@ void model::Render(TextureShader pTextureShader)
 				}
 			}
 			TransformBoneGlobals(bone);
-			DirectX::XMMATRIX finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix;
-			boneTransforms.push_back(finalTransform);
+			DirectX::XMMATRIX finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix ;
+			boneTransforms.push_back(/*fbxMatrixMod * */finalTransform);
 		}
 
 		pTextureShader.SetShaders(pContext.Get(), true);
-
 		pTextureShader.UpdateBonesBuffer(pContext.Get(), boneTransforms);
-		//frame++;
 
 	}
 	else
@@ -203,9 +256,65 @@ void model::Render(TextureShader pTextureShader)
 
 }
 
+
+bool model::LoadModel(const std::wstring& filename)
+{
+	Assimp::Importer importer;
+	//importer.SetPropertyBool(AI_CONFIG_IMPORT_REMOVE_EMPTY_BONES, false);
+	std::string str = helper::strings::wideToChar(filename);
+	const aiScene* pScene = importer.ReadFile(str, aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices | aiProcessPreset_TargetRealtime_Fast |
+		aiProcess_ConvertToLeftHanded);
+
+	if (pScene == nullptr)
+		return false;
+
+	for (UINT i = 0; i < pScene->mNumMeshes; i++)
+	{
+
+		meshes.push_back(this->ProcessMesh(pScene->mMeshes[i], pScene));
+	}
+
+	if (pScene->HasAnimations())
+	{
+		for (int i = 0; i < pScene->mNumAnimations; i++)
+		{
+			Animation animation;
+			animation.name = pScene->mAnimations[i]->mName.data;
+			if (animation.name == "")
+			{
+				animation.name = "Anim" + std::to_string(vAnimations.size());
+			}
+			animation.TicksPS = pScene->mAnimations[i]->mTicksPerSecond;
+			animation.Duration = pScene->mAnimations[i]->mDuration;
+			for (int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
+			{
+				const aiNodeAnim* tmpChannel = pScene->mAnimations[i]->mChannels[j];
+				std::string name = tmpChannel->mNodeName.data;
+				//if (name == "Armature")
+				//	name = pBoneMaster->name;
+				
+				for (int k = 0; k < tmpChannel->mNumPositionKeys; k++)
+				{
+
+
+					animation.AddKeyFrameToChannel(name, tmpChannel->mPositionKeys[k].mTime, tmpChannel->mPositionKeys[k].mValue,
+						tmpChannel->mRotationKeys[k].mValue, tmpChannel->mScalingKeys[k].mValue);
+				}
+			}
+			vAnimations.push_back(animation);
+		}
+
+		vBones.push_back(pBoneMaster);
+	}
+	return true;
+}
+
 model::Bone* model::CreateBoneTreeRecursive(aiNode* node, model::Bone* parent)
 {
 	Bone* retBone = new Bone();
+	if (parent == nullptr)
+		pBoneMaster = retBone;
 	retBone->parent = parent;
 	retBone->name = node->mName.data;
 	retBone->transformationMatrix = aiMatrix4x4ToDXMatrix(node->mTransformation);
@@ -248,10 +357,8 @@ DirectX::XMMATRIX model::aiMatrix4x4ToDXMatrix(aiMatrix4x4 in)
 	tmp._31 = in.c1; tmp._32 = in.c2; tmp._33 = in.c3; tmp._34 = in.c4;
 	tmp._41 = in.d1; tmp._42 = in.d2; tmp._43 = in.d3; tmp._44 = in.d4;
 	
-	//return DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&tmp));
-	//return DirectX::XMLoadFloat4x4(&tmp) * DirectX::XMMatrixTranspose(DirectX::XMMatrixRotationX(-1.5708));
 	return DirectX::XMLoadFloat4x4(&tmp);
-	//return DirectX::XMMatrixIdentity();
+
 }
 
 void model::UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix)
@@ -271,51 +378,6 @@ void model::UpdateWorldMatrix()
 
 
 }
-bool model::LoadModel(const std::wstring& filename)
-{
-	Assimp::Importer importer;
-
-	std::string str = helper::strings::wideToChar(filename);
-	const aiScene* pScene = importer.ReadFile(str, aiProcess_Triangulate |
-		aiProcess_JoinIdenticalVertices | aiProcessPreset_TargetRealtime_Fast |
-		aiProcess_ConvertToLeftHanded);
-
-	if (pScene == nullptr)
-		return false;
-
-	if (pScene->HasAnimations())
-	{
-		for (int i = 0; i < pScene->mNumAnimations; i++)
-		{
-			Animation animation;
-
-			animation.TicksPS = pScene->mAnimations[i]->mTicksPerSecond;
-			animation.Duration = pScene->mAnimations[i]->mDuration;
-			for (int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
-			{
-				const aiNodeAnim* tmpChannel = pScene->mAnimations[i]->mChannels[j];
-				for (int k = 0; k < tmpChannel->mNumPositionKeys; k++)
-				{
-					animation.AddKeyFrameToChannel(tmpChannel->mNodeName.data, tmpChannel->mPositionKeys[k].mTime, tmpChannel->mPositionKeys[k].mValue,
-						tmpChannel->mRotationKeys[k].mValue, tmpChannel->mScalingKeys[k].mValue);
-				}
-			}
-			vAnimations.push_back(animation);
-		}
-
-
-	}
-	
-	for (UINT i = 0; i < pScene->mNumMeshes; i++)
-	{
-
-		meshes.push_back(this->ProcessMesh(pScene->mMeshes[i], pScene));
-	}
-
-	return true;
-}
-
-
 void model::ProcessNode(aiScene* node, const aiScene* scene)
 {
 	for (UINT i = 0; i < node->mNumMeshes; i++)
@@ -386,7 +448,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		int boneNum = 0;
 		int offset = 0;
 		if(!vBones.size())
-			CreateBoneTreeRecursive(scene->mRootNode->mChildren[0]->mChildren[0], nullptr);
+			CreateBoneTreeRecursive(scene->mRootNode->mChildren[0], nullptr);
 		for (int i = 0; i < mesh->mNumBones; i++)
 		{
 
@@ -406,7 +468,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			for (int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 			{
 				if (mesh->mBones[i]->mWeights[j].mVertexId < vertices.size())
-					vertices[mesh->mBones[i]->mWeights[j].mVertexId].AddWeights(offset ? offset - 1 : 0, mesh->mBones[i]->mWeights[j].mWeight);
+					vertices[mesh->mBones[i]->mWeights[j].mVertexId].AddWeights(i/*offset ? offset - 1 : 0*/, mesh->mBones[i]->mWeights[j].mWeight);
 			}
 		}
 		

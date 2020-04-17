@@ -45,7 +45,7 @@ PixelInputType main(VertexInputType input)
     normal += input.weight.y * mul(input.normal, boneTransforms[input.boneIndecies.y]);
     normal += input.weight.z * mul(input.normal, boneTransforms[input.boneIndecies.z]);
     normal += input.weight.w * mul(input.normal, boneTransforms[input.boneIndecies.w]);
-    normal.w = 0.0f;
+
     
     output.position = mul(blendPos, worldMatrix);
    // output.position = mul(input.position, worldMatrix);
@@ -56,7 +56,7 @@ PixelInputType main(VertexInputType input)
     output.tex = input.tex;
 
 
-    //Calculate the noraml vector against the world matrix only.
+    //Calculate the normal vector against the world matrix only.
     output.normal = mul(normal, worldMatrix);
 
     //normalize the normal vector after multiplication

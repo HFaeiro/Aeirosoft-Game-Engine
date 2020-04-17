@@ -29,6 +29,7 @@ public:
 	//void CreateWall(DirectX::XMFLOAT3 from, DirectX::XMFLOAT3 to, bool temporary);
 	void CreateIndexAndVectorBuffers(std::vector<Vertex> vertices, DWORD indecies[], VertexBuffer& vb, IndexBuffer& ib);
 	void UpdateOrthoProjectionMatrix();
+	void ChangeFOV(float degrees);
 	void BeginScene(float, float, float, float);
 	//void Render();
 	void EndScene();
