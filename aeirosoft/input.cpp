@@ -64,7 +64,7 @@ void input::ProcessMouse()
 		
 	}
 	if (prevx != x || prevy != y)
-		/*g->m_Camera.adjustRotation(y, x, 0.f);adds weird camera effect at certain sens*/
+		//g->m_Camera.adjustRotation(y, x, 0.f); //adds weird camera effect at certain sens
 		g->SetCamRotation(y, x, 0.f);
 
 }
@@ -95,28 +95,6 @@ void input::KeyboardInputs()
 			fsDelta.restart();
 		}
 	}
-	//if (/*isKey(DIK_UP) || */isKey(DIK_W))
-	//	c->adjustPosition(camera::movementType::forward, moveSpeed);
-	//if (/*isKey(DIK_DOWN) ||*/ isKey(DIK_S))
-	//	c->adjustPosition(camera::movementType::backward, moveSpeed);
-
-	//if (/*isKey(DIK_LEFT) ||*/ isKey(DIK_A))
-	//{
-	//	c->adjustPosition(camera::movementType::left, moveSpeed);
-
-	//}
-	//if (/*isKey(DIK_RIGHT) ||*/ isKey(DIK_D))
-	//{
-	//	c->adjustPosition(camera::movementType::right, moveSpeed);
-	//}
-
-	//if (isKey(DIK_SPACE))
-	//	c->adjustPosition(camera::movementType::up, moveSpeed);
-
-	//if (isKey(DIK_LSHIFT))
-	//	c->adjustPosition(camera::movementType::up, -moveSpeed);
-	
-
 }
 
 bool input::isKey(UCHAR keyCode)
@@ -137,6 +115,7 @@ bool input::isRightClick()
 
 bool input::ReadKeyboard()
 {
+	
 	HRESULT hr;
 	hr = pKeyboard->GetDeviceState(sizeof(keyState), &keyState);
 	if (FAILED(hr))

@@ -3,6 +3,30 @@
 #include "Inc/Assimp/Importer.hpp"
 #include <DirectXMath.h>
 #include "Timer.h"
+
+struct Bone
+{
+	std::string name;
+	DirectX::XMMATRIX offsetMatrix;
+	DirectX::XMMATRIX transformationMatrix;
+	DirectX::XMMATRIX GlobalTransformationMatrix;
+	DirectX::XMMATRIX OGTransformationMatrix;
+	Bone* parent;
+	std::vector<Bone*> vChildren;
+	void TransformBoneGlobals()
+	{
+		GlobalTransformationMatrix = transformationMatrix;
+		Bone* recurBone = parent;
+		while (recurBone != nullptr)
+		{
+			GlobalTransformationMatrix = recurBone->transformationMatrix * GlobalTransformationMatrix;
+			recurBone = recurBone->parent;
+		}
+
+	}
+};
+
+
 class Animation
 {
 public:
@@ -22,14 +46,17 @@ public:
 			std::vector<Key> keys;
 		};
 		void AddKeyFrameToChannel(std::string channelName, float time, aiVector3D pos, aiQuaternion rot, aiVector3D scale);
+		std::vector<DirectX::XMMATRIX> TransformBones(std::vector<Bone*> Bones);
 		float TicksPS = 0.f;
 		float Duration = 0.f;
 		float deltaTime = 0.f;
+		bool Active = false;
 		Timer deltaTimer;
+
 		std::string name;
 		std::vector<Channel> vChannels;
+
 private:
-	
-	//DirectX::XMMATRIX neg90 = DirectX::XMMatrixTranspose(DirectX::XMMatrixRotationX(-1.5708));
+	std::vector<DirectX::XMMATRIX> boneTransforms;
 };
 

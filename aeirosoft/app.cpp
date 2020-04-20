@@ -192,16 +192,16 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 {
 	s->CreateScene(L"Scene1", gui, false, true);
 	s->CreateScene(L"MainMenu", gui, true);
-	//s->CreateEntityObject(L"Data\\map\\falling.obj");
-	//s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	s->CreateEntityObject(L"Data\\map\\falling.obj");
+	s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
 	//s->CreateEntityObject(L"Data\\FpsArms\\FpsArmsAnimated.dae");
 	//s->AddObjectToScene(L"Scene1", L"FpsArmsAnimated.dae", { 200,50,200 }, { 0,0,0 });
 
 	////s->CreateEntityObject(L"Data\\FpsArms\\TestAnimCube.dae");
 	////s->AddObjectToScene(L"Scene1", L"TestAnimCube.dae", { 55,50,55 }, { 0,0,0 });
 
-	s->CreateEntityObject(L"Data\\FpsArms\\TestAnimMonster.fbx");
-	s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });
+	//s->CreateEntityObject(L"Data\\FpsArms\\TestAnimMonster.fbx");
+	//s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });
 	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
 	//s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
 	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });

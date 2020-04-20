@@ -13,7 +13,7 @@ static bool _compare_max_x(Vertex const& p1, Vertex const& p2) { return p1.posit
 static  bool _compare_max_y(Vertex const& p1, Vertex const& p2) { return p1.position.y > p2.position.y; }
 static bool _compare_max_z(Vertex const& p1, Vertex const& p2) { return p1.position.z > p2.position.z; }
 
-model::Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
+Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
 {
 	Bone* retBone = new Bone();
 	if (parent == nullptr)
@@ -23,7 +23,7 @@ model::Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* pare
 	retBone->OGTransformationMatrix = copyBone->OGTransformationMatrix;
 	retBone->GlobalTransformationMatrix = copyBone->GlobalTransformationMatrix;
 	retBone->transformationMatrix = copyBone->transformationMatrix;
-	TransformBoneGlobals(retBone);
+	retBone->TransformBoneGlobals();
 
 	for (const auto& bone : copyBone->vChildren)
 	{
@@ -188,62 +188,56 @@ void model::setRotation(float x, float y)
 	UpdateWorldMatrix();
 }
 
+void model::SetCurrentAnimation(std::string animName)
+{
 
+	if (animName == "")
+	{
+		if (currentAnim != nullptr)
+		{
+			currentAnim->deltaTimer.Stop();
+			currentAnim->deltaTime = 0;
+			currentAnim->Active = false;
+			currentAnim = nullptr;
+		}
+
+		return;
+	}
+	else
+		if (currentAnim != nullptr)
+			if (animName == currentAnim->name)
+			{
+				currentAnim->Active = true;
+				return;
+			}
+	if (vAnimations.size())
+	{
+		for (auto& anim : vAnimations)
+		{
+			if (anim.name.find(animName) != std::string::npos)
+			{
+				
+				if(currentAnim == nullptr || currentAnim->name.find(animName) == std::string::npos)
+					currentAnim = &anim;
+				currentAnim->Active = true;
+				return;
+			}
+		}
+	}
+	currentAnim = nullptr;
+	return;
+}
 void model::Render(TextureShader pTextureShader)
 {
 	
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pTextureShader.UpdateWorldMatrixBuffer(pContext.Get(), world);
 
-	if (vAnimations.size())
+	if(currentAnim != nullptr)
 	{
-		//static int frame = 0;
-		boneTransforms.clear();
-		//if (frame == 60)
-		//	frame = 0;
-		Animation* Anim = nullptr;
-		for (auto& anim : vAnimations)
-		{
-			if (anim.name.find("walking") != std::string::npos)
-			{
-				Anim = &anim;
-				break;
-			}
-		}
-		if (Anim == nullptr)
-			Anim = &vAnimations[0];
-		Anim->deltaTime += Anim->deltaTimer.GetMillisecondsElapsed() * .001f;
-		Anim->deltaTimer.restart();
-		
-
-		float timeTicks = Anim->deltaTime * Anim->TicksPS;
-		float animTime = std::fmod(timeTicks, Anim->Duration);
-		if (animTime > Anim->Duration)
-			Anim->deltaTime = animTime - Anim->Duration;
-		for (auto& bone : vBones)
-		{
-
-			for (const auto& channel : Anim->vChannels) {
-				if (bone->name == channel.name)
-				{
-					for (const auto& key : channel.keys)
-					{
-						if (animTime < key.time)
-						{
-							bone->transformationMatrix = key.matrix;
-							break;
-						}
-					}
-					break;
-				}
-			}
-			TransformBoneGlobals(bone);
-			DirectX::XMMATRIX finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix ;
-			boneTransforms.push_back(/*fbxMatrixMod * */finalTransform);
-		}
 
 		pTextureShader.SetShaders(pContext.Get(), true);
-		pTextureShader.UpdateBonesBuffer(pContext.Get(), boneTransforms);
+		pTextureShader.UpdateBonesBuffer(pContext.Get(), currentAnim->TransformBones(vBones));
 
 	}
 	else
@@ -251,8 +245,6 @@ void model::Render(TextureShader pTextureShader)
 
 	for (int i = 0; i < meshes.size(); i++)
 		meshes[i].Draw();
-
-	//DrawBoundingBox();
 
 }
 
@@ -291,13 +283,9 @@ bool model::LoadModel(const std::wstring& filename)
 			{
 				const aiNodeAnim* tmpChannel = pScene->mAnimations[i]->mChannels[j];
 				std::string name = tmpChannel->mNodeName.data;
-				//if (name == "Armature")
-				//	name = pBoneMaster->name;
-				
+
 				for (int k = 0; k < tmpChannel->mNumPositionKeys; k++)
 				{
-
-
 					animation.AddKeyFrameToChannel(name, tmpChannel->mPositionKeys[k].mTime, tmpChannel->mPositionKeys[k].mValue,
 						tmpChannel->mRotationKeys[k].mValue, tmpChannel->mScalingKeys[k].mValue);
 				}
@@ -306,11 +294,12 @@ bool model::LoadModel(const std::wstring& filename)
 		}
 
 		vBones.push_back(pBoneMaster);
+
 	}
 	return true;
 }
 
-model::Bone* model::CreateBoneTreeRecursive(aiNode* node, model::Bone* parent)
+Bone* model::CreateBoneTreeRecursive(aiNode* node, Bone* parent)
 {
 	Bone* retBone = new Bone();
 	if (parent == nullptr)
@@ -319,7 +308,7 @@ model::Bone* model::CreateBoneTreeRecursive(aiNode* node, model::Bone* parent)
 	retBone->name = node->mName.data;
 	retBone->transformationMatrix = aiMatrix4x4ToDXMatrix(node->mTransformation);
 	retBone->OGTransformationMatrix = retBone->transformationMatrix;
-	TransformBoneGlobals(retBone);
+	retBone->TransformBoneGlobals();
 
 	for (int i = 0; i < node->mNumChildren; i++) {
 		Bone* child = CreateBoneTreeRecursive(node->mChildren[i], retBone);
@@ -335,17 +324,7 @@ model::Bone* model::CreateBoneTreeRecursive(aiNode* node, model::Bone* parent)
 	return retBone;
 
 }
-void model::TransformBoneGlobals(model::Bone* child)
-{
-	child->GlobalTransformationMatrix = child->transformationMatrix;
-	Bone* recurBone = child->parent;
-	while (recurBone != nullptr)
-	{
-		child->GlobalTransformationMatrix = recurBone->transformationMatrix * child->GlobalTransformationMatrix;
-		recurBone = recurBone->parent;
-	}
 
-}
 
 DirectX::XMMATRIX model::aiMatrix4x4ToDXMatrix(aiMatrix4x4 in)
 {

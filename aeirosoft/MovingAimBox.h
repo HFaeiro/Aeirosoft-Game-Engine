@@ -30,6 +30,7 @@ public:
 		Render(g->m_TextureShader);
 		g->TurnOnCulling();
 		prevDirection = direction;
+		model::SetCurrentAnimation("wiggle");
 		return;
 	}
 	virtual std::optional<Events*> Queue();

@@ -34,3 +34,46 @@ void Animation::AddKeyFrameToChannel(std::string channelName, float time, aiVect
 	vChannels.push_back(newChannel);
 
 }
+
+std::vector<DirectX::XMMATRIX> Animation::TransformBones(std::vector<Bone*> Bones)
+{
+
+	if (Active)
+	{
+		deltaTime += deltaTimer.GetMillisecondsElapsed() * .001f;
+		deltaTimer.restart();
+		float timeTicks = deltaTime * TicksPS;
+		float animTime = std::fmod(timeTicks, Duration);
+		float time = Duration / TicksPS;
+		if (deltaTime >= time)
+		{
+			deltaTimer.Stop();
+			deltaTime = 0;
+			Active = false;
+			return boneTransforms;
+		}
+		boneTransforms.clear();
+		for (auto& bone : Bones)
+		{
+
+			for (const auto& channel : vChannels) {
+				if (bone->name == channel.name)
+				{
+					for (int i = 0; i < channel.keys.size(); i++)
+					{
+						if (animTime < channel.keys[i].time)
+						{
+							bone->transformationMatrix = channel.keys[i].matrix;
+							break;
+						}
+					}
+					break;
+				}
+			}
+			bone->TransformBoneGlobals();
+			DirectX::XMMATRIX finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix;
+			boneTransforms.push_back(finalTransform);
+		}
+	}
+	return boneTransforms;
+}

@@ -105,6 +105,7 @@ private:
 	Microsoft::WRL::ComPtr < IDirectInputDevice8 > pKeyboard;
 
 	UCHAR keyState[256];
+	UCHAR prevKeyState[256];
 	DIMOUSESTATE mouseState;
 	float prevx, prevy;
 	float x, y;

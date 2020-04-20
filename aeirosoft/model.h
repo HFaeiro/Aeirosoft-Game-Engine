@@ -20,17 +20,6 @@ public:
 	~model();
 	model(const model& m);
 
-	struct Bone
-	{
-		std::string name;
-		DirectX::XMMATRIX offsetMatrix;
-		DirectX::XMMATRIX transformationMatrix;
-		DirectX::XMMATRIX GlobalTransformationMatrix;
-		DirectX::XMMATRIX OGTransformationMatrix;
-		Bone* parent;
-		std::vector<Bone*> vChildren;
-	};
-
 	Bone* copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent);
 
 
@@ -50,6 +39,7 @@ public:
 	DirectX::XMFLOAT3 getRotation() { return rot; }
 	DirectX::XMMATRIX getWorld() { return world; }
 	void revertWorld() { world = prevWorld; }
+	void SetCurrentAnimation(std::string animName);
 	void Render(TextureShader);
 	std::vector<std::vector<Vertex>> getVertices()
 	{
@@ -117,13 +107,11 @@ private:
 
 
 
-	
+	Animation* currentAnim = nullptr;
 	std::vector<Animation> vAnimations;
 	std::vector<DirectX::XMMATRIX> boneTransforms;
 
-	Bone* CreateBoneTreeRecursive(aiNode*, model::Bone* parent);
-
-	void TransformBoneGlobals(model::Bone* child);
+	Bone* CreateBoneTreeRecursive(aiNode*,Bone* parent);
 
 	DirectX::XMMATRIX aiMatrix4x4ToDXMatrix(aiMatrix4x4 in);
 
