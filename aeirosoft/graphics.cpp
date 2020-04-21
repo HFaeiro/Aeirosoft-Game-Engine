@@ -72,9 +72,28 @@ bool graphics::CreateDeviceAndSwap()
 
 	return true;
 }
+bool graphics::InitializeAudioEngine()
+{
+	HRESULT hr;
+	hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(hr))
+		return false;
+	
 
+	DirectX::AUDIO_ENGINE_FLAGS eflags = DirectX::AudioEngine_Default;
 
+#ifdef _DEBUG
+	eflags = eflags | DirectX::AudioEngine_Debug;
+#endif
 
+	audEngine = std::make_unique<DirectX::AudioEngine>(eflags);
+	return true;
+}
+std::unique_ptr<DirectX::SoundEffect> graphics::CreateSound(std::wstring name)
+{
+	std::unique_ptr<DirectX::SoundEffect> soundEffect;
+	return std::make_unique<DirectX::SoundEffect>(audEngine.get(), name.c_str());
+}
 bool graphics::Initialize()
 {
 
@@ -136,7 +155,7 @@ bool graphics::Initialize()
 	pSpriteFont = std::make_unique<DirectX::SpriteFont>(pDevice.Get(), L"Data\\Fonts\\hFontSm.spritefont");
 //		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
 
-	
+	InitializeAudioEngine();
 	return true;
 
 }
@@ -217,6 +236,14 @@ void graphics::BeginScene(float red, float green, float blue, float alpha)
 
 	pContext->OMSetBlendState(pBlendState.Get(), 0, 0xffffffff);
 
+	if (!audEngine->Update())
+	{
+		if (audEngine->IsCriticalError())
+		{
+			int i = 0;
+			i++;
+		}
+	}
 }
 
 
@@ -229,6 +256,7 @@ void graphics::EndScene()
 	else
 		pSwap->Present(0u, 0u);
 
+	
 }
 
 bool graphics::CreateDepthStencil()

@@ -1,13 +1,14 @@
 #include "Player.h"
 
-Player::Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS, const std::wstring& filename, float wScale) :
-	g(g), main(g, startingGun, wScale),
-	Entity(g, i, filename), hip(hip), ADS(ADS), i(i)
+Player::Player(graphics* g, input* i, const std::wstring& startingGun, const std::wstring& shotSound, const std::wstring& filename, float wScale) :
+	g(g), main(g, startingGun,shotSound, wScale),
+	Entity(g, i, filename), i(i)
 {
-	main.setPosition(hip.pos);
-	main.setRotation(hip.rot);
+	//main.setPosition(hip.pos);
+	//main.setRotation(hip.rot);
 	setPosition(20, playerHeight, -20);
-
+	walkingSoundEffect = g->CreateSound(L"Data\\Sounds\\Concrete_Shoes_Walking.wav");
+	walkingSound = walkingSoundEffect->CreateInstance();
 	//playerModel.init(filename, pDevice, pContext);
 }
 
@@ -126,11 +127,20 @@ std::optional<Events*> Player::Queue()
 		{
 			adjustPosition(camera::movementType::backRight, moveSpeed * GetDeltaTime());
 		}
+		if (!walkingSound->GetState())
+		{
+			walkingSound->Play();
+		}
 	}
 	else if( !aiming)
 	{
+		walkingSound->Stop();
 		main.SetCurrentAnimation("");
 	}
+	else
+		walkingSound->Stop();
+
+
 	DirectX::XMFLOAT3 pos = getPosition();
 
 	float gravity = 0.f;

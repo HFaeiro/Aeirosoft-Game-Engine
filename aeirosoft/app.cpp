@@ -3,6 +3,7 @@
 #include "Player.h"
 #include <fstream>
 #include <sstream>
+
 app::app(HINSTANCE hinst, const std::wstring windowName, POINT p) :
 	window(hinst, windowName, p)
 {
@@ -39,8 +40,8 @@ bool app::SetupApplication()
 	//s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
 	//	{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f }},
 	//	L"", .75f));
-	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx", { { 0, 0, 0 }, {0, 0, 0 } },
-		{ { 0, 0, 0 }, {0, 0, 0 } },
+	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",
+		L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",
 		L""));
 	s->AddOnKeyEventToScene(L"Scene1", L"Pause", gui, false, DIK_ESCAPE);
 

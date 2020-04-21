@@ -487,14 +487,14 @@ std::vector<texture> model::LoadTextures(aiMaterial* pMaterial, aiTextureType ty
 	{
 		for (UINT i = 0; i < textureCount; i++)
 		{
-			aiString path;
-			pMaterial->GetTexture(type, i, &path);
 			TextureStorageType storetype = GetStorageType(pScene, pMaterial, i, type);
+			
 			switch (storetype)
 			{
 			case TextureStorageType::Disk:
 			{
-
+				aiString path;
+				pMaterial->GetTexture(type, i, &path);
 				std::wstring filename = this->directory + L'\\' + helper::strings::charToWide(path.C_Str());
 				texture diskTexture(pDevice.Get(), filename, type);
 				vTexture.push_back(diskTexture);

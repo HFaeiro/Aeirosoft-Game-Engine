@@ -11,8 +11,8 @@
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
 #include "texture.h"
-//#include "Inc/DirectX/Audio.h"
-
+#include "Inc/DirectX/Audio.h"
+#pragma comment(lib,"DirectXTKAudioWin8.lib")
 class graphics
 {
 public:
@@ -23,6 +23,8 @@ public:
 	const graphics& operator = (graphics& g) { g = *this; }
 
 	
+
+	std::unique_ptr<DirectX::SoundEffect> CreateSound(std::wstring name);
 
 	bool Initialize();
 	void CreateFloor(DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to,texture t, bool temporary = false);
@@ -67,7 +69,8 @@ public:
 	TextureShader m_TextureShader;
 
 protected:
-
+	std::unique_ptr<DirectX::AudioEngine> audEngine;
+	std::unique_ptr<DirectX::SoundEffect> soundEffect;
 	bool m_vsync_enabled = false;
 	//int m_videoCardMemory = 0;
 	bool fullScreen = false;
@@ -103,6 +106,7 @@ protected:
 
 
 	bool CreateDeviceAndSwap();
+	bool InitializeAudioEngine();
 	bool CreateRasterStates();
 	bool CreateDepthStencil();
 

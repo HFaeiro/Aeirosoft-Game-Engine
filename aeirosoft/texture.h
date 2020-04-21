@@ -42,6 +42,6 @@ private:
 	void Initialize1x1colorTexture(ID3D11Device* pDevice, const color& colorData, aiTextureType type);
 	void InitializecolorTexture(ID3D11Device* pDevice, const color* colorData, UINT width, UINT height, aiTextureType type);
 	aiTextureType type = aiTextureType::aiTextureType_UNKNOWN;
-
+	std::wstring name;
 };
 

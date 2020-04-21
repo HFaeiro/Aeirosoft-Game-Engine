@@ -72,11 +72,12 @@ public:
 	}
 #endif
 
-	Player(graphics* g, input* i, const std::wstring& startingGun, PR hip, PR ADS,
+	Player(graphics* g, input* i, const std::wstring& startingGun, const std::wstring &shotSound,
 		const std::wstring& filename, float wScale = 1.f);
 	~Player() {
 		main.~weapon();
-
+		walkingSound.release();
+		walkingSoundEffect.release();
 	};
 
 	virtual bool Initialize()
@@ -133,8 +134,7 @@ private:
 	//weapon second;
 	DirectX::XMMATRIX viewInverse;
 
-	PR hip;
-	PR ADS;
-
+	std::unique_ptr<DirectX::SoundEffect> walkingSoundEffect;
+	std::unique_ptr<DirectX::SoundEffectInstance> walkingSound;
 };
 

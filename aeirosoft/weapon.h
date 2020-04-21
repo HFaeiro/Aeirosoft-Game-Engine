@@ -4,11 +4,6 @@
 #include "Events.h"
 #include "graphics.h"
 #include "Timer.h"
-struct PR
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 rot;
-};
 
 struct weaponStats
 {
@@ -20,8 +15,6 @@ struct weaponStats
 	float damage = 0.f;
 	float bulletSpeed = 0.f;
 	float hipPenalty = 1.2f;
-	PR ADS;
-	PR hip;
 	model Bullet;
 	model Flash;
 };
@@ -30,12 +23,18 @@ class weapon : public model
 {
 public:
 	
-	weapon(graphics* g, const std::wstring& filename, float scale = 1.f) : g(g)
+	weapon(graphics* g, const std::wstring& filename, const std::wstring& _shotSound, float scale = 1.f) : g(g)
 	{
 		init(filename, g, scale);
+		shotSoundEffect = g->CreateSound(_shotSound.c_str());
+		shotSound = shotSoundEffect->CreateInstance();
 		srand(static_cast <unsigned> (time(0)));
 	}
-	~weapon() {};
+	~weapon()
+	{
+		shotSoundEffect.release();
+		shotSound.release();
+	};
 
 	void setStats(weaponStats stats)
 	{
@@ -52,7 +51,9 @@ public:
 		if (shotTimer.GetSecondsElapsed() == 0 || shotTimer.GetSecondsElapsed() >= stats.fireRate)
 			{
 				shotTimer.restart();
-				
+				if (shotSound->GetState())
+					shotSound->Stop();
+				shotSound->Play();
 				return true;
 
 			}
@@ -72,5 +73,7 @@ private:
 	bool bRecoil = false;
 	Timer recoilTimer;
 
+	std::unique_ptr<DirectX::SoundEffect> shotSoundEffect;
+	std::unique_ptr<DirectX::SoundEffectInstance> shotSound;
 };
 
