@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="aeBounding.h" />
     <ClInclude Include="aeirosoft.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="app.h" />
@@ -186,8 +187,10 @@
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="weapon.h" />
     <ClInclude Include="window.h" />
+    <ClInclude Include="Zombie.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aeBounding.cpp" />
     <ClCompile Include="aeirosoft.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="app.cpp" />
@@ -212,6 +215,7 @@
     <ClCompile Include="tmpEntity.cpp" />
     <ClCompile Include="weapon.cpp" />
     <ClCompile Include="window.cpp" />
+    <ClCompile Include="Zombie.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="aeirosoft.rc" />

@@ -18,10 +18,11 @@ public:
 		Collidable::type = Collidable::EntityAi;
 		name = helper::strings::GetNameFromPath(filename);
 		std::vector< std::vector<Vertex>> vertices = getVertices();
-		for (const auto& v : vertices)
-		{
-			CreateBoundingOrientedBox(v);
-		}
+		std::vector<DirectX::XMMATRIX*> transformations = getTransforms();
+		//for (const auto& v : vertices)
+		//{
+			CreateBoundingOrientedBox(vertices, transformations);
+		//}
 	}
 	~EntityAi()
 	{
@@ -30,11 +31,19 @@ public:
 	}
 
 	const std::wstring getName() const { return name; }
+	void _Update();
 
 private:
 	std::wstring name;
 
 };
+
+
+
+
+
+
+
 class EntityObject : public Collidable, public model
 {
 public:
@@ -47,6 +56,7 @@ public:
 		{
 			CreateBoundingOrientedBox(v);
 		}
+		//CreateBoundingOrientedBox(vertices);
 	}
 	EntityObject(const EntityObject& e) : model(e), Collidable(e)
 	{ 

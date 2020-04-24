@@ -31,7 +31,6 @@ class app :
 	std::wstring intersecting = L"Intersecting: FALSE";
 	void CreateScenes(Scenes* s, Gui* gui = nullptr);
 	void StartupGui(Gui*);
-	
 	std::vector<int> GetStartInfo(std::string, std::vector<std::string>, std::vector<int> defaults);
 	std::vector<Events*> events;
 	std::vector<MovingAimBox*> vBoxes;

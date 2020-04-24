@@ -18,6 +18,7 @@ public:
 	model( const std::wstring& filename, graphics *g, float scale = 1.f);
 	model();
 	~model();
+	void LookAt(DirectX::XMFLOAT3 v);
 	model(const model& m);
 
 	Bone* copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent);
@@ -35,20 +36,44 @@ public:
 	virtual void setRotation(DirectX::XMFLOAT3 rot);
 	virtual void setRotation(float x, float y, float z);
 	virtual void setRotation(float x, float y);
+	bool isAnimActive();
 	DirectX::XMFLOAT3 getPosition() { return pos; }
 	DirectX::XMFLOAT3 getRotation() { return rot; }
 	DirectX::XMMATRIX getWorld() { return world; }
-	void revertWorld() { world = prevWorld; }
+	void revertWorld() { 
+		pos = prevPos;
+		world = prevWorld;
+	}
 	void SetCurrentAnimation(std::string animName);
 	void Render(TextureShader);
 	std::vector<std::vector<Vertex>> getVertices()
 	{
 		std::vector<std::vector<Vertex>> vertices;
+		if (vBones.size())
+		{
+			for (const auto& b : vBones)
+				if(b->vertices.size())
+					vertices.push_back(b->vertices);
+			if(vertices.size())
+				return vertices;
+		}
 		for (const auto& m : meshes)
 		{
+			
 			vertices.push_back(m.getVertices());
 		}
 		return vertices;
+	}
+	std::vector<DirectX::XMMATRIX*> getTransforms()
+	{
+		std::vector<DirectX::XMMATRIX*> transforms;
+
+		for (const auto& b : vBones)
+		{
+			transforms.push_back(&b->finalTransform);
+		}
+		return transforms;
+		
 	}
 
 	void UpdateWorldMatrixWithViewMatrix(DirectX::XMMATRIX viewMatrix);
@@ -66,6 +91,7 @@ private:
 
 	bool DEBUG = true;
 	void UpdateWorldMatrix();
+	DirectX::XMFLOAT3 prevPos;
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 rot;
 	DirectX::XMMATRIX world;
@@ -91,7 +117,7 @@ private:
 	graphics* g;
 	
 	DirectX::XMVECTOR vPos;
-	DirectX::XMVECTOR DefaultForward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	DirectX::XMVECTOR DefaultForward = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
 	DirectX::XMVECTOR DefaultRight = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 	DirectX::XMVECTOR DefaultBackward = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
 	DirectX::XMVECTOR DefaultLeft = DirectX::XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);

@@ -17,41 +17,30 @@ Collidable::Collidable(graphics* g) : g(g), pDevice(g->GetDevice().Get()), pCont
 #endif
 	}
 }
-
 void Collidable::TransformBounds(DirectX::XMMATRIX m)
 {
-	this->currentMatrix = m;
-	vTransbBox.clear();
-	DirectX::BoundingOrientedBox tmpBox;
-	float extents;
-	if (vOGbBox.empty())
-	{
+	if (Boundings.empty())
 		return;
-	}
-	for (auto& v : vOGbBox) {
-		DirectX::XMFLOAT3 corners[8];
-		DirectX::XMVECTOR vCorners[8];
-		v.GetCorners(corners);
-		for (int i = 0; i < 8; i++)
-		{
-			vCorners[i] = {corners[i].x, corners[i].y, corners[i].z, 1.f};
-			vCorners[i] = DirectX::XMVector3Transform(vCorners[i], m);
-			DirectX::XMStoreFloat3(&corners[i] ,vCorners[i]);
-
+	std::vector < DirectX::XMFLOAT3 > corners;
+	DirectX::XMFLOAT3 tmpf3[8];
+	for (auto& b : Boundings) {
+		b.Transform(m, type != Collidable::Type::Object);
+		if (hasMainBox) {
+			((DirectX::BoundingOrientedBox)b).GetCorners(tmpf3);
+			for (int i = 0; i < 8; i++)
+				corners.push_back(tmpf3[i]);
 		}
-		v.Transform(tmpBox, m);
-		extents = tmpBox.Extents.z;
-
-		
-		v.CreateFromPoints(tmpBox, 8, corners, sizeof(DirectX::XMFLOAT3));
-		//extents = tmpBox.Extents.z;
-		vTransbBox.push_back(tmpBox);
-
 	}
-	if (type == Type::Entity)
-		bSphere = DirectX::BoundingSphere(tmpBox.Center, extents);
-	
+
+	if (hasMainBox)
+	{
+		DirectX::BoundingOrientedBox tmpBox; 
+		((DirectX::BoundingOrientedBox)Boundings[0]).CreateFromPoints(tmpBox,
+			corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
+		Boundings[0] = tmpBox;
+	}
 }
+
 #ifdef _DEBUG
 void Collidable::DrawBoundingOrientedBox()
 {
@@ -61,7 +50,7 @@ void Collidable::DrawBoundingOrientedBox()
 	pContext->PSSetShaderResources(0, 1, redTexture.GetTextureResourceViewAddr());
 	g->m_TextureShader.UpdateWorldMatrixBuffer(pContext, DirectX::XMMatrixIdentity());
 
-	std::vector<DirectX::BoundingOrientedBox> tmpb = GetBounds();
+	std::vector<aeBounding> tmpb = GetBounds();
 	Indecies.clear();
 	g->Begin3DScene();
 	for (auto& v : tmpb) {
@@ -69,7 +58,7 @@ void Collidable::DrawBoundingOrientedBox()
 
 		std::vector<Vertex> vertices;
 		DirectX::XMFLOAT3 corners[8];
-		v.GetCorners(corners);
+		((DirectX::BoundingOrientedBox)v).GetCorners(corners);
 
 		for (DirectX::XMFLOAT3 j : corners)
 		{
@@ -85,106 +74,177 @@ void Collidable::DrawBoundingOrientedBox()
 	}
 }
 #endif
-void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
+void Collidable::CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, std::vector<DirectX::XMMATRIX*> transforms)
 {
-
-	vertices = v;
-	DWORD vsize = v.size();
-	if (vsize == 4)
-		return;
-	if(vsize == 24 ||/* vsize == 24 || vsize == 20 || vsize == 48 ||*/ vsize == 30)
+	std::vector<Vertex> tmpV;
+	for (const auto& vertexGroup : v)
+		for (const auto& vertice : vertexGroup)
+			tmpV.push_back(vertice);
+	aeBounding tmpBounds;
+	if (tmpBounds.Create(tmpV))
+		Boundings.push_back(tmpBounds);
+	hasMainBox = true;
+	int i = 0;
+	for (const auto& vertexGroup : v)
 	{
-		std::vector<DirectX::XMFLOAT3> corners;
-		bool add = true;
-		for (const auto& i : v)
+		aeBounding tmpBounds;
+		if (tmpBounds.Create(vertexGroup))
 		{
-			add = true;
-			for (const auto& c : corners)
-			{
-				if (c.x == i.position.x && c.y == i.position.y && c.z == i.position.z)
-				{
-					add = false;
-					break;
-				}
-			}
-			if (add)
-			{
-				corners.push_back(i.position);
-			}
-		}
-		if (corners.size() == 8)
-		{
-			DirectX::BoundingOrientedBox box;
-			box.CreateFromPoints(box, 8, corners.data(), sizeof(DirectX::XMFLOAT3));
+			if (transforms[i] != nullptr)
+				tmpBounds.setTransformPtr(transforms[i]);
+			Boundings.push_back(tmpBounds);
 			
-			vOGbBox.push_back(box);
 		}
-		else
-			return;
-	}
-	else {
-
-		DirectX::XMFLOAT3 minVertex = DirectX::XMFLOAT3(FLT_MAX, FLT_MAX, FLT_MAX);
-		DirectX::XMFLOAT3 maxVertex = DirectX::XMFLOAT3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-		for (Vertex i : v)
-		{
-			minVertex.x = std::min(minVertex.x, i.position.x);
-			minVertex.y = std::min(minVertex.y, i.position.y);
-			minVertex.z = std::min(minVertex.z, i.position.z);
-
-			maxVertex.x = std::max(maxVertex.x, i.position.x);
-			maxVertex.y = std::max(maxVertex.y, i.position.y);
-			maxVertex.z = std::max(maxVertex.z, i.position.z);
-
-		}
-		CreateBoundingOrientedBox(minVertex, maxVertex);
+		i++;
 	}
 }
+void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
+{
+	aeBounding tmpBounds;
+	if (tmpBounds.Create(v))
+		Boundings.push_back(tmpBounds);
+}
+//void Collidable::CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v)
+//{
+//	std::vector<Vertex> tmpV;
+//	for (const auto& vertexGroup : v)
+//		for(const auto& vertice : vertexGroup)
+//			tmpV.push_back(vertice);
+//	CreateBoundingOrientedBox(tmpV);
+//	if(vOGbBox.size())
+//		MainBox = vOGbBox[0];
+//	for (const auto& vertexGroup : v)
+//		CreateBoundingOrientedBox(vertexGroup);
+//}
+
 
 
 void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& size)
 {
-	DirectX::XMFLOAT3 minVertex = { .5f * -size.x, 0, .5f * -size.z };
-	DirectX::XMFLOAT3 maxVertex = { .5f * size.x, size.y, .5f * size.z };
 
-	CreateBoundingOrientedBox(minVertex, maxVertex);
-
-}
-void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max)
-{
-	DirectX::XMFLOAT3 centerOffset = { .5f * (min.x + max.x), .5f * (min.y + max.y) , .5f * (min.z + max.z) };
-	DirectX::XMFLOAT3 Extents = { .5f * (min.x - max.x), .5f * (min.y - max.y) , .5f * (min.z - max.z) };
-
-	vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
-	//bSphere.CreateFromBoundingBox(vOGbBox[0]);
-	if(type == Type::Entity)
-		bSphere = DirectX::BoundingSphere(centerOffset, Extents.z);
-}
-
-void Collidable::AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox)
-{
-	vOGbBox.push_back(bBox);
-}
-
-void Collidable::AddBoundingOrientedBox(DirectX::XMFLOAT3 size)
-{
-
-	if (vOGbBox.empty())
-		CreateBoundingOrientedBox(size);
-	else
-	{
-		DirectX::XMFLOAT3 minVertex = { .5f * -size.x, 0, .5f * -size.z };
-		DirectX::XMFLOAT3 maxVertex = { .5f * size.x, size.y, .5f * size.z };
-
-		DirectX::XMFLOAT3 centerOffset = { .5f * (minVertex.x + maxVertex.x), .5f * (minVertex.y + maxVertex.y) , .5f * (minVertex.z + maxVertex.z) };
-		DirectX::XMFLOAT3 Extents = { .5f * (minVertex.x - maxVertex.x), .5f * (minVertex.y - maxVertex.y) , .5f * (minVertex.z - maxVertex.z) };
-
-		vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
-	}
+	aeBounding tmpBounds;
+	if (tmpBounds.CreateFromFloat3(size))
+		Boundings.push_back(tmpBounds);
 
 }
+//void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max)
+//{
+//	DirectX::XMFLOAT3 centerOffset = { .5f * (min.x + max.x), .5f * (min.y + max.y) , .5f * (min.z + max.z) };
+//	DirectX::XMFLOAT3 Extents = { .5f * (min.x - max.x), .5f * (min.y - max.y) , .5f * (min.z - max.z) };
+//
+//	vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
+//	//bSphere.CreateFromBoundingBox(vOGbBox[0]);
+//	if(type == Type::Entity)
+//		bSphere = DirectX::BoundingSphere(centerOffset, Extents.z);
+//}
+
+//void Collidable::AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox)
+//{
+//	vOGbBox.push_back(bBox);
+//}
+//
+//void Collidable::AddBoundingOrientedBox(DirectX::XMFLOAT3 size)
+//{
+//
+//	if (vOGbBox.empty())
+//		CreateBoundingOrientedBox(size);
+//	else
+//	{
+//		DirectX::XMFLOAT3 minVertex = { .5f * -size.x, 0, .5f * -size.z };
+//		DirectX::XMFLOAT3 maxVertex = { .5f * size.x, size.y, .5f * size.z };
+//
+//		DirectX::XMFLOAT3 centerOffset = { .5f * (minVertex.x + maxVertex.x), .5f * (minVertex.y + maxVertex.y) , .5f * (minVertex.z + maxVertex.z) };
+//		DirectX::XMFLOAT3 Extents = { .5f * (minVertex.x - maxVertex.x), .5f * (minVertex.y - maxVertex.y) , .5f * (minVertex.z - maxVertex.z) };
+//
+//		vOGbBox.push_back(DirectX::BoundingOrientedBox(centerOffset, Extents, { 0,0,0,1.f }));
+//	}
+//
+//}
 
 void Collidable::CreateTexture()
 {
 	redTexture = texture(pDevice, colors::UnhandledTexturecolor, aiTextureType::aiTextureType_DIFFUSE);
+}
+
+
+
+////Collision/////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+std::optional<Events*> Collision::Queue()
+{
+
+	for (const auto& C : collidable)
+	{
+#ifdef _DEBUG
+		C->DrawBoundingOrientedBox();
+#endif
+		if (C->type != Collidable::Type::Object)
+		{
+			if (C->CheckRay)
+			{
+				float f = 0.f;
+				for (const auto& c : collidable)
+				{
+					if (c != C)
+					{
+
+						std::vector<aeBounding> bounds = c->GetBounds();
+						if (c->hasMainBox)
+							if (((DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
+								bounds.erase(bounds.begin());
+							else
+								bounds.clear();
+						for (const auto& box : bounds)
+							if (((DirectX::BoundingOrientedBox)box).Intersects(C->clickOrigin, C->clickDestination, f))
+							{
+								c->hit = true;
+								break;
+							}
+					}
+				}
+				C->CheckRay = false;
+			}
+			if(!C->collision)
+				Check(C);
+		}
+	}
+	return {};
+}
+
+void Collision::Check(Collidable* C)
+{
+	for (const auto& c : collidable)
+	{
+		if (c != C)
+		{
+			if (C->type != Collidable::Type::Object) {
+				auto box = C->GetBoundSphere();
+				auto bounds = c->GetBounds();
+				if (c->hasMainBox)
+					if (box.Contains(((DirectX::BoundingOrientedBox)bounds[0])))
+					{
+
+						bounds.erase(bounds.begin());
+
+					}
+					else
+						continue;
+ 
+				for (const auto& bound : bounds)
+					if (box.Contains(((DirectX::BoundingOrientedBox)bound)))
+					{
+						if (c->type != Collidable::Type::EntityAi || C->type == Collidable::Type::EntityAi)
+						{
+							C->collision = true;
+							break;
+						}
+						else
+						{
+							C->hit = true;
+							break;
+						}
+					}
+			}
+		}
+	}
 }

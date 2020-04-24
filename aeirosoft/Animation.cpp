@@ -71,8 +71,8 @@ std::vector<DirectX::XMMATRIX> Animation::TransformBones(std::vector<Bone*> Bone
 				}
 			}
 			bone->TransformBoneGlobals();
-			DirectX::XMMATRIX finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix;
-			boneTransforms.push_back(finalTransform);
+			bone->finalTransform = bone->GlobalTransformationMatrix * bone->offsetMatrix;
+			boneTransforms.push_back(bone->finalTransform);
 		}
 	}
 	return boneTransforms;

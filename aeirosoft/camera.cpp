@@ -162,7 +162,6 @@ void camera::render(bool spectate)
 	camTarget = XMVector3TransformCoord(DefaultForward, rotationMatrix);
 	camTarget = XMVector3Normalize(camTarget);
 
-
 	if (!spectate)
 	{
 		XMMATRIX RotateYTempMatrix;

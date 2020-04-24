@@ -95,7 +95,35 @@ model::~model()
 	//meshes.clear();
 	//vBones.clear();
 }
+void model::LookAt(DirectX::XMFLOAT3 f3)
+{
+	using namespace DirectX;
+	XMVECTOR v = { f3.x, f3.y, f3.z, 1.0f };
+	v = DirectX::XMVector3Normalize(v);
+	float dot = XMVectorGetX(XMVector3Dot(DefaultForward, v));
+	if (std::abs(dot - (-1.f)) < 0.000001f)
+	{
+		return;
+	}
+	if (std::abs(dot - (1.f)) < 0.000001f)
+	{
+		return;
+	}
+	float rotAngle = (float)std::acos(dot);
+	XMVECTOR rotAxis = XMVector3Cross(DefaultForward, v);
+	rotAxis = XMVector3Normalize(rotAxis);
+	XMFLOAT4 rot4;
+	XMStoreFloat4(&rot4, rotAxis);
 
+	float halfAngle = rotAngle * .5f;
+	float s = (float)std::sin(halfAngle);
+
+	XMFLOAT4 quat = { /*rot4.x * s*/0, rot4.y * s,/* rot4.z * s*/0, (float)std::cos(halfAngle)};
+	prevWorld = world;
+	world = XMMatrixRotationQuaternion(XMLoadFloat4(&quat)) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	
+	return;
+}
 model::model(const model& m)
 {
 	*this = m;
@@ -134,6 +162,7 @@ void model::adjustRotation(float x, float y, float z)
 }
 void model::setPosition(float x, float y, float z)
 {
+	prevPos = pos;
 	pos.x = x;
 	pos.y = y;
 	pos.z = z;
@@ -142,6 +171,7 @@ void model::setPosition(float x, float y, float z)
 }
 void model::setPosition(float x, float y)
 {
+	prevPos = pos;
 	pos.x = x;
 	pos.y = y;
 	UpdateWorldMatrix();
@@ -149,6 +179,7 @@ void model::setPosition(float x, float y)
 }
 void model::setPositionAndRotation(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot)
 {
+	prevPos = pos;
 	this->pos.x = pos.x;
 	this->pos.y = pos.y;
 	this->pos.z = pos.z;
@@ -159,6 +190,7 @@ void model::setPositionAndRotation(DirectX::XMFLOAT3 pos, DirectX::XMFLOAT3 rot)
 }
 void model::setPosition(DirectX::XMFLOAT3 pos)
 {
+	prevPos = pos;
 	this->pos.x = pos.x;
 	this->pos.y = pos.y;
 	this->pos.z = pos.z;
@@ -167,6 +199,7 @@ void model::setPosition(DirectX::XMFLOAT3 pos)
 }
 void model::setRotation(DirectX::XMFLOAT3 rot)
 {
+
 	this->rot.x = rot.x;
 	this->rot.y = rot.y;
 	this->rot.z = rot.z;
@@ -187,7 +220,12 @@ void model::setRotation(float x, float y)
 	rot.z = 0;
 	UpdateWorldMatrix();
 }
-
+bool model::isAnimActive()
+{
+	if (currentAnim != nullptr)
+		return currentAnim->Active;
+	return false;
+}
 void model::SetCurrentAnimation(std::string animName)
 {
 
@@ -427,7 +465,8 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		int boneNum = 0;
 		int offset = 0;
 		if(!vBones.size())
-			CreateBoneTreeRecursive(scene->mRootNode->mChildren[0], nullptr);
+			for(int i = 0; i < scene->mRootNode->mNumChildren; i++)
+				CreateBoneTreeRecursive(scene->mRootNode->mChildren[i], nullptr);
 		for (int i = 0; i < mesh->mNumBones; i++)
 		{
 
@@ -438,17 +477,22 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 					bone->offsetMatrix = aiMatrix4x4ToDXMatrix(mesh->mBones[i]->mOffsetMatrix);
 					vBones.push_back(bone);
 					vBonesTmp.erase(vBonesTmp.begin() + boneNum);
-					boneNum = 0;
 					break;
 				}
-				boneNum++;
+				else
+					boneNum++;
 			}
 			offset = vBones.size();
 			for (int j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 			{
 				if (mesh->mBones[i]->mWeights[j].mVertexId < vertices.size())
-					vertices[mesh->mBones[i]->mWeights[j].mVertexId].AddWeights(i/*offset ? offset - 1 : 0*/, mesh->mBones[i]->mWeights[j].mWeight);
+				{
+					vertices[mesh->mBones[i]->mWeights[j].mVertexId].AddWeights(i, mesh->mBones[i]->mWeights[j].mWeight);
+					if(vBones.size())
+						vBones[vBones.size()- 1]->vertices.push_back(vertices[mesh->mBones[i]->mWeights[j].mVertexId]);
+				}
 			}
+			boneNum = 0;
 		}
 		
 

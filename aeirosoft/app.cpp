@@ -3,6 +3,7 @@
 #include "Player.h"
 #include <fstream>
 #include <sstream>
+#include "Zombie.h"
 
 app::app(HINSTANCE hinst, const std::wstring windowName, POINT p) :
 	window(hinst, windowName, p)
@@ -48,12 +49,11 @@ bool app::SetupApplication()
 	events.push_back(i);
 	events.push_back(s);
 
-	for (int i = 0; i < Boxes; i++)
-	{
-		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
-
-	}
-
+	//for (int i = 0; i < Boxes; i++)
+	//{
+	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
+	//}
+	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
 
 
 
@@ -122,15 +122,11 @@ int app::begin()
 	if (!m_Graphics->Initialize())
 		return false;
 
-
 	i = new input(m_Graphics, static_cast<window*>(this), &m_Graphics->m_Camera, &m_Timer);
-
 
 	Boxes = settings[2];
 	SetupApplication();
 		
-
-
 	while (true)
 	{
 		if (const auto optional = processMessages())
@@ -151,9 +147,9 @@ int app::begin()
 		queued.clear();
 		//end of event que
 
-		std::wstringstream wss;
-		std::wstringstream wsshots;
-		std::wstringstream wssAcc;
+		//std::wstringstream wss;
+		//std::wstringstream wsshots;
+		//std::wstringstream wssAcc;
 
 		//int hits = 0;
 		//for (const auto& b : vBoxes)
@@ -194,12 +190,10 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 	s->CreateScene(L"Scene1", gui, false, true);
 	s->CreateScene(L"MainMenu", gui, true);
 	s->CreateEntityObject(L"Data\\map\\falling.obj");
-	s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
-	//s->CreateEntityObject(L"Data\\FpsArms\\FpsArmsAnimated.dae");
-	//s->AddObjectToScene(L"Scene1", L"FpsArmsAnimated.dae", { 200,50,200 }, { 0,0,0 });
+	s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,0,0 });
 
-	////s->CreateEntityObject(L"Data\\FpsArms\\TestAnimCube.dae");
-	////s->AddObjectToScene(L"Scene1", L"TestAnimCube.dae", { 55,50,55 }, { 0,0,0 });
+	//s->CreateEntityObject(L"Data\\FpsArms\\AnimatedZombie.fbx");
+	//s->AddObjectToScene(L"Scene1", L"AnimatedZombie.fbx", { 20,0,20 }, { 0,0,0 });
 
 	//s->CreateEntityObject(L"Data\\FpsArms\\TestAnimMonster.fbx");
 	//s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });

@@ -98,7 +98,7 @@ protected:
 	HWND m_Window;
 
 	float screenNear = .01f;
-	float renderDistance = 60000.f;
+	float renderDistance = 15000.f;
 	float FOV, aspectRatio, fovDegrees;
 
 	float roty = 0.f;

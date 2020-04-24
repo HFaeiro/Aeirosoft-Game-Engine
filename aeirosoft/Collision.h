@@ -2,35 +2,38 @@
 #include "framework.h"
 #include "Events.h"
 #include "graphics.h"
-#include <DirectXCollision.h>
+#include "aeBounding.h"
 #include <variant>
+
+
 class Collidable
 {
-
 public:
 	Collidable(graphics* g);
 	~Collidable() {};
 	void TransformBounds(DirectX::XMMATRIX m);
 	enum Type { Entity, EntityAi, Object };
 	Type type;
-	std::vector<DirectX::BoundingOrientedBox> GetBounds()const
+	std::vector<aeBounding> GetBounds()const
 	{
-		if (vTransbBox.empty())
-			return vOGbBox;
-		return vTransbBox;
+		//if (vTransbBox.empty())
+		//	return vOGbBox;
+		if(Boundings.size())
+			return Boundings;
 	}
 
 	DirectX::BoundingSphere GetBoundSphere()const
 	{
-		return bSphere;
+		if (Boundings.size())
+			return Boundings[0].getSphere();
 	}
 protected:
-
+	void CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, std::vector<DirectX::XMMATRIX*> transforms);
+	void CreateBoundingOrientedBox(std::vector < std::vector<Vertex>> v);
 	void CreateBoundingOrientedBox(std::vector<Vertex> v);
 	void CreateBoundingOrientedBox(DirectX::XMFLOAT3& size);
-	void CreateBoundingOrientedBox(DirectX::XMFLOAT3& min, DirectX::XMFLOAT3& max);
-	void AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox);
-	void AddBoundingOrientedBox(DirectX::XMFLOAT3 size);
+	/*void AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox);
+	void AddBoundingOrientedBox(DirectX::XMFLOAT3 size);*/
 	void AddRay()
 	{
 		RECT r = helper::window::GetRect(g->GetWindow());
@@ -88,6 +91,7 @@ private:
 	texture redTexture;
 	IndexBuffer ib;
 	DirectX::BoundingOrientedBox MainBox;
+	bool hasMainBox = false;
 	//DirectX::BoundingOrientedBox TransbBox;
 	std::vector < DirectX::XMFLOAT3> vMin;
 	std::vector < DirectX::XMFLOAT3> vMax;
@@ -99,12 +103,8 @@ private:
 	//};
 	graphics* g;
 protected:
-
-	std::vector<DirectX::BoundingOrientedBox> vOGbBox;
-	std::vector<DirectX::BoundingOrientedBox> vTransbBox;
-	DirectX::BoundingSphere bSphere;
-
-
+	
+	std::vector<aeBounding> Boundings;
 	Collision* Cthis;
 	std::vector<Collidable> collidedWith;
 	std::vector<Vertex> vertices;
@@ -123,38 +123,7 @@ public:
 
 		return;
 	}
-	virtual std::optional<Events*> Queue()
-	{
-		for (const auto& C : collidable)
-		{
-#ifdef _DEBUG
-			C->DrawBoundingOrientedBox();
-#endif
-			if (C->type != Collidable::Type::Object)
-			{
-				if (C->CheckRay)
-				{
-					float f = 0.f;
-					for (const auto& c : collidable)
-					{
-						if (c != C)
-						{
-							
-							std::vector<DirectX::BoundingOrientedBox> bounds = c->GetBounds();
-							for (const auto& box : bounds)
-							if (box.Intersects(C->clickOrigin, C->clickDestination, f))
-							{
-								c->hit = true;
-							}
-						}
-					}
-					C->CheckRay = false;
-				}
-				Check(C);
-			}
-		}
-		return {};
-	}
+	virtual std::optional<Events*> Queue();
 	void Clear()
 	{
 		collidable.clear();
@@ -165,41 +134,7 @@ public:
 			c->Cthis = this;
 		collidable.push_back(c);
 	}
-	void Check(Collidable* C)
-	{
-		for (const auto& c : collidable)
-		{
-			if (c != C)
-			{
-				if (C->type == Collidable::Type::Entity) {
-					auto box = C->GetBoundSphere();
-					std::vector<DirectX::BoundingOrientedBox> bounds =  c->GetBounds();
-					for(const auto& bound : bounds)
-					if (box.Contains(bound))
-					{
-						C->collision = true;
-						//for (const auto& v : c->vertices)
-						//{
-						//	//
-						//}
-					}
-				}
-				else {
-					auto box = C->GetBounds();
-					std::vector<DirectX::BoundingOrientedBox> bounds = c->GetBounds();
-					for (const auto& bound : bounds)
-						for (const auto& b : box)
-						{
-							if (b.Contains(bound))
-							{
-								C->collision = true;
-							}
-						}
-
-				}
-			}
-		}
-	}
+	void Check(Collidable* C);
 
 
 	std::vector<Collidable*> collidable;

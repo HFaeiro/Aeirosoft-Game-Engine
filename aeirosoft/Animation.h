@@ -3,6 +3,7 @@
 #include "Inc/Assimp/Importer.hpp"
 #include <DirectXMath.h>
 #include "Timer.h"
+#include "Vertex.h"
 
 struct Bone
 {
@@ -11,8 +12,10 @@ struct Bone
 	DirectX::XMMATRIX transformationMatrix;
 	DirectX::XMMATRIX GlobalTransformationMatrix;
 	DirectX::XMMATRIX OGTransformationMatrix;
+	DirectX::XMMATRIX finalTransform;
 	Bone* parent;
 	std::vector<Bone*> vChildren;
+	std::vector<Vertex> vertices;
 	void TransformBoneGlobals()
 	{
 		GlobalTransformationMatrix = transformationMatrix;
@@ -24,6 +27,7 @@ struct Bone
 		}
 
 	}
+
 };
 
 

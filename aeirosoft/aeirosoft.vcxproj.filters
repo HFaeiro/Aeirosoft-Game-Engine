@@ -19,20 +19,20 @@
     <Filter Include="Header Files\Shaders">
       <UniqueIdentifier>{e78446e5-76a3-48cd-bdbe-032c91671251}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\graphics">
-      <UniqueIdentifier>{6ce17762-519b-4cfe-a745-e09d05588958}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\model">
       <UniqueIdentifier>{f50cbfe7-5062-4eae-826d-ae273321207e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\graphics">
-      <UniqueIdentifier>{a2223dfd-711e-47a0-95c7-88c82f0c2729}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\model">
       <UniqueIdentifier>{071bdb94-3c8c-4be1-8829-00973d45e9c5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\sys">
       <UniqueIdentifier>{b83912ab-11e9-4454-9f7f-fb0dd59855f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sys\graphics">
+      <UniqueIdentifier>{a2223dfd-711e-47a0-95c7-88c82f0c2729}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sys\graphics">
+      <UniqueIdentifier>{6ce17762-519b-4cfe-a745-e09d05588958}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -70,13 +70,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="graphics.h">
-      <Filter>Header Files\graphics</Filter>
+      <Filter>Header Files\sys\graphics</Filter>
     </ClInclude>
     <ClInclude Include="color.h">
-      <Filter>Header Files\graphics</Filter>
+      <Filter>Header Files\sys\graphics</Filter>
     </ClInclude>
     <ClInclude Include="texture.h">
-      <Filter>Header Files\graphics</Filter>
+      <Filter>Header Files\sys\graphics</Filter>
     </ClInclude>
     <ClInclude Include="TextureShader.h">
       <Filter>Header Files\Shaders</Filter>
@@ -126,6 +126,12 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files\sys</Filter>
     </ClInclude>
+    <ClInclude Include="Zombie.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aeBounding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -156,13 +162,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="graphics.cpp">
-      <Filter>Source Files\graphics</Filter>
+      <Filter>Source Files\sys\graphics</Filter>
     </ClCompile>
     <ClCompile Include="TextureShader.cpp">
-      <Filter>Source Files\graphics</Filter>
+      <Filter>Source Files\sys\graphics</Filter>
     </ClCompile>
     <ClCompile Include="texture.cpp">
-      <Filter>Source Files\graphics</Filter>
+      <Filter>Source Files\sys\graphics</Filter>
     </ClCompile>
     <ClCompile Include="Animation.cpp">
       <Filter>Source Files\model</Filter>
@@ -195,10 +201,16 @@
       <Filter>Source Files\sys</Filter>
     </ClCompile>
     <ClCompile Include="color.cpp">
-      <Filter>Source Files\graphics</Filter>
+      <Filter>Source Files\sys\graphics</Filter>
     </ClCompile>
     <ClCompile Include="camera.cpp">
       <Filter>Source Files\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="Zombie.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aeBounding.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

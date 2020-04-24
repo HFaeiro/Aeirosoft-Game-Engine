@@ -10,11 +10,22 @@ Player::Player(graphics* g, input* i, const std::wstring& startingGun, const std
 	walkingSoundEffect = g->CreateSound(L"Data\\Sounds\\Concrete_Shoes_Walking.wav");
 	walkingSound = walkingSoundEffect->CreateInstance();
 	//playerModel.init(filename, pDevice, pContext);
+
+	
 }
 
 void Player::Update()
 {
+	std::wstringstream wss;
+	wss << L"Health: " << health;
 
+	g->pSpriteBatch->Begin();
+	g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 0));
+	g->pSpriteBatch->End();
+
+	g->Begin3DScene();
+	if (health <= 0)
+		return;
 #ifdef _DEBUG
 	test();
 #endif
@@ -82,6 +93,13 @@ void Player::Update()
 
 std::optional<Events*> Player::Queue()
 {
+	if (hit) {
+		health -= 20 * GetDeltaTime();
+		hit = false;
+	}
+
+	if (health <= 0)
+		return this;
 
 	float moveSpeed = g_moveSpeed;
 	if (isKey(DIK_LSHIFT) && !aiming)
@@ -169,7 +187,7 @@ std::optional<Events*> Player::Queue()
 		gravity = -((70.f + timefalling) * GetDeltaTime());
 
 	}
-	adjustPosition(camera::movementType::up, gravity);
+	//adjustPosition(camera::movementType::up, gravity);
 	if (falling)
 	{
 		timefalling += deltaTimer.GetMillisecondsElapsed() * .21;
