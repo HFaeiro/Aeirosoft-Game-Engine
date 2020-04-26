@@ -1,6 +1,6 @@
 #include "MovingAimBox.h"
 
-MovingAimBox::MovingAimBox(graphics* g) : g(g), EntityAi(g, L"Data\\FpsArms\\TestAnimMonster.fbx") { srand(static_cast <unsigned> (time(0))); }
+MovingAimBox::MovingAimBox(graphics* g) : g(g), EntityAi(g, L"Data\\Objects\\Target\\target.obj", 25) { srand(static_cast <unsigned> (time(0))); }
 
 std::optional<Events*> MovingAimBox::Queue()
 {
@@ -36,6 +36,7 @@ std::optional<Events*> MovingAimBox::Queue()
 
 void MovingAimBox::UpdateMove()
 {
+	using namespace DirectX;
 	DirectX::XMFLOAT3 pos = getPosition();
 	double elap = delta.GetMillisecondsElapsed() * .000666f;
 	double moveSpeed = m_moveSpeed * elap;
@@ -43,7 +44,7 @@ void MovingAimBox::UpdateMove()
 	DirectX::XMFLOAT3 mypos = getPosition();
 	DirectX::XMFLOAT3 playerPos = g->m_Camera.getPosition();
 
-	DirectX::XMFLOAT3 posDifference = { mypos.x - playerPos.x, mypos.y - playerPos.y, mypos.z - playerPos.z };
+	DirectX::XMFLOAT3 posDifference = { playerPos.x - mypos.x , playerPos.y - mypos.y,  playerPos.z - mypos.z };
 
 
 	switch (direction)
@@ -85,9 +86,19 @@ void MovingAimBox::UpdateMove()
 		adjustPosition(0, -moveSpeed, -moveSpeed);
 		break;
 	case 12:
-		moveTime *= .8f;
-		moveSpeed *= .5f;
-		adjustPosition(-posDifference.x * moveSpeed, -posDifference.y * moveSpeed, -posDifference.z * moveSpeed);
+	case 13:
+	case 14:
+	case 15:
+	case 16:
+	case 17:
+	case 18:
+	case 19:
+	case 20:
+		if (!timeMoving)
+			moveTime *= .8f;
+		DirectX::XMFLOAT3 posVecToPlayer;
+		DirectX::XMStoreFloat3(&posVecToPlayer, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&posDifference) * moveSpeed));
+		adjustPosition(posVecToPlayer);
 		break;
 	default:
 		break;
@@ -99,8 +110,8 @@ void MovingAimBox::UpdateMove()
 
 void MovingAimBox::SetRandomMove()
 {
-	m_moveSpeed = ((float)(rand() % 100) + 10.f);
-	direction = (rand() / static_cast <float> (RAND_MAX / 13));
+	m_moveSpeed = ((float)(rand() % 1500) + 80.f);
+	direction = (rand() / static_cast <float> (RAND_MAX / 20));
 	moveTime = (rand() / static_cast <double> (RAND_MAX / 1));
 	m_moveSpeed += direction;
 
@@ -108,8 +119,8 @@ void MovingAimBox::SetRandomMove()
 
 void MovingAimBox::SetRandomSpawn()
 {
-	double delt = delta.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
-	DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
+	//double delt = delta.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
+	//DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
 	float x = (rand() % 5000 + (-1500));
 	float y = (rand() % 200 + 600);
 	float z = (rand() % 5000 + (-1500));

@@ -49,12 +49,12 @@ bool app::SetupApplication()
 	events.push_back(i);
 	events.push_back(s);
 #ifdef _DEBUG
-	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
+	s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
 
 #else
 	for (int i = 0; i < Boxes; i++)
 	{
-		s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
+		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
 	}
 
 #endif // DEBUG

@@ -25,12 +25,13 @@ public:
 	}
 	virtual void Update()
 	{
-
-		g->TurnOffCulling();
+		_Update();
+	//	g->TurnOffCulling();
 		Render(g->m_TextureShader);
-		g->TurnOnCulling();
+	//	g->TurnOnCulling();
 		prevDirection = direction;
 		model::SetCurrentAnimation("wiggle");
+
 		return;
 	}
 	virtual std::optional<Events*> Queue();

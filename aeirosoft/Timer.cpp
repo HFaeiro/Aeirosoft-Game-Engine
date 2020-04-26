@@ -54,6 +54,7 @@ bool Timer::Start()
 {
 	if (isOn)
 	{
+
 		return false;
 	}
 	else

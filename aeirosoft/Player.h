@@ -83,7 +83,8 @@ public:
 
 	virtual bool Initialize()
 	{
-		deltaTimer.Start();
+		deltaTimer.restart();
+		Boundings[0].vAdjustments.clear();
 		health = 100;
 		SetRandomSpawn();
 		TransformBounds(getWorldAtViewMatrix());
@@ -95,7 +96,7 @@ public:
 		bool crouched = false;
 		int shots = 0;
 		timefalling = 0.f;
-		Boundings[0].vAdjustments.clear();
+
 		return true;
 	}
 	virtual void Update();;

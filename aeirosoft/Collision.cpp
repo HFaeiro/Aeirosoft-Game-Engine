@@ -107,10 +107,10 @@ void Collidable::CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, s
 		aeBounding tmpBounds;
 		if (tmpBounds.Create(vertexGroup))
 		{
-			if (transforms[i] != nullptr)
+			if (transforms.size())
 				tmpBounds.setTransformPtr(transforms[i]);
 			Boundings.push_back(tmpBounds);
-			
+
 		}
 		i++;
 	}
