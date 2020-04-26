@@ -85,7 +85,7 @@ public:
 	}
 	std::vector<Vertex> getVertices() const { return vertices; }
 
-	DirectX::XMFLOAT3 Resolve(aeBounding otherObject);
+	DirectX::XMFLOAT3 Resolve(const aeBounding& otherObject);
 
 
 

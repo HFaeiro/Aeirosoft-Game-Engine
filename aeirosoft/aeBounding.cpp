@@ -44,11 +44,15 @@ void aeBounding::Transform(DirectX::XMMATRIX _world, bool makeSphere)
 	////if (tOB.Extents.y > extents)
 	////	extents = tOB.Extents.y;
 	ogOB.CreateFromPoints(tOB, 8, corners, sizeof(DirectX::XMFLOAT3));
-	float extents = tOB.Extents.z;
 	if (std::isnan(tOB.Extents.z)) {
 		tOB = ogOB;
 	}
-	if (!std::isnan(extents) && makeSphere)
+	float extents = tOB.Extents.z;
+	if (tOB.Extents.x > extents)
+		extents = tOB.Extents.x;
+	if (tOB.Extents.y > extents)
+		extents = tOB.Extents.y;
+	if (makeSphere)
 		bSphere = DirectX::BoundingSphere(tOB.Center, extents);
 	hasSphere = makeSphere;
 }
@@ -66,58 +70,97 @@ void aeBounding::InverseTransformFromFloat3(DirectX::XMFLOAT3 f3)
 
 }
 
-DirectX::XMFLOAT3 aeBounding::Resolve(aeBounding otherObject)
+DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
 {
 	using namespace DirectX;
 	DirectX::XMFLOAT3 adjustment = { 0,0,0 };
-		if (hasSphere) {
-			DirectX::BoundingOrientedBox otherBox = otherObject.tOB;
-			DirectX::XMFLOAT3 d = { bSphere.Center.x - otherBox.Center.x ,
-				bSphere.Center.y - otherBox.Center.y  ,
-				bSphere.Center.z - otherBox.Center.z };
-			DirectX::XMVECTOR vD = DirectX::XMLoadFloat3(&d);
-			DirectX::XMFLOAT3 closest;
-			closest.x = std::clamp(d.x, -otherBox.Extents.x, otherBox.Extents.x);
-			closest.y = std::clamp(d.y, -otherBox.Extents.y, otherBox.Extents.y);
-			closest.z = std::clamp(d.z, -otherBox.Extents.z, otherBox.Extents.z);
-			bool inside = false;
-			if (d.x == closest.x && d.y == closest.y && d.z == closest.z)
-			{
-				inside = true;
-				DirectX::XMFLOAT3 dAbs;
-				DirectX::XMStoreFloat3(&dAbs, DirectX::XMVectorAbs(vD));
-				if (dAbs.x > dAbs.z)
-					if (closest.x > 0)
-						closest.x = otherBox.Extents.x;
-					else
-						closest.x = -otherBox.Extents.x;
+	//Sphere vs OBB
+	if (hasSphere && !otherObject.hasSphere) {
+		DirectX::BoundingOrientedBox otherBox = otherObject.tOB;
+		DirectX::XMFLOAT3 d = { bSphere.Center.x - otherBox.Center.x ,
+			bSphere.Center.y - otherBox.Center.y  ,
+			bSphere.Center.z - otherBox.Center.z };
+		DirectX::XMVECTOR vD = DirectX::XMLoadFloat3(&d);
+		DirectX::XMFLOAT3 closest;
+		closest.x = std::clamp(d.x, -otherBox.Extents.x, otherBox.Extents.x);
+		closest.y = std::clamp(d.y, -otherBox.Extents.y, otherBox.Extents.y);
+		closest.z = std::clamp(d.z, -otherBox.Extents.z, otherBox.Extents.z);
+		bool inside = false;
+
+		if (d.x == closest.x && d.y == closest.y && d.z == closest.z)
+		{
+			inside = true;
+			DirectX::XMFLOAT3 dAbs;
+			DirectX::XMStoreFloat3(&dAbs, DirectX::XMVectorAbs(vD));
+
+			////////////How do I include the 3rd dimension?////////////////////////////////////////
+			if (dAbs.x > dAbs.z)
+				if (closest.x > 0)
+					closest.x = otherBox.Extents.x;
 				else
-					if (closest.z > 0)
-						closest.z = otherBox.Extents.z;
-					else
-						closest.z = -otherBox.Extents.z;
-
-			}
-			DirectX::XMFLOAT3 normal = { d.x - closest.x , d.y - closest.y , d.z - closest.z };
-			DirectX::XMVECTOR vNormal = DirectX::XMLoadFloat3(&normal);
-
-			float normalMag = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
-			float radius = bSphere.Radius;
-
-			if (normalMag > radius * radius)
-			{
-				collision = false;
-				return adjustment;
-			}
-
-			normalMag = std::sqrt(normalMag);
-			float penetration = radius - normalMag;
-			float offset = penetration / (normalMag ? normalMag : 1);
-
-
-			DirectX::XMStoreFloat3(&adjustment, (inside ? -vNormal : vNormal) * offset);
-			vAdjustments.push_back(adjustment);
+					closest.x = -otherBox.Extents.x;
+			else
+				if (closest.z > 0)
+					closest.z = otherBox.Extents.z;
+				else
+					closest.z = -otherBox.Extents.z;
+			////////////////////////////////////////////////////////////////////////////////
 		}
+
+		DirectX::XMFLOAT3 normal = { d.x - closest.x , d.y - closest.y , d.z - closest.z };
+		DirectX::XMVECTOR vNormal = DirectX::XMLoadFloat3(&normal);
+
+		float normalMag = normal.x * normal.x + normal.y * normal.y + normal.z * normal.z;
+		float radius = bSphere.Radius;
+
+		if (normalMag > radius * radius)
+		{
+			collision = false;
+			return adjustment;
+		}
+
+		normalMag = std::sqrt(normalMag);
+		float penetration = radius - normalMag;
+		float offset = penetration / (normalMag ? normalMag : 1);
+
+
+		DirectX::XMStoreFloat3(&adjustment, (inside ? -vNormal : vNormal) * offset);
+		vAdjustments.push_back(adjustment);
+	}
+	////Sphere vs Sphere
+	else if (hasSphere && otherObject.hasSphere)
+	{
+		DirectX::BoundingSphere otherSphere = otherObject.bSphere;
+		DirectX::XMFLOAT3 d = { bSphere.Center.x - otherSphere.Center.x ,
+			bSphere.Center.y - otherSphere.Center.y  ,
+			bSphere.Center.z - otherSphere.Center.z };
+
+		float r = bSphere.Radius + otherSphere.Radius;
+		float r2 = r * r;
+
+		float normalMag = d.x * d.x + d.y * d.y + d.z * d.z;
+		if (normalMag > r2)
+			return adjustment;
+
+		normalMag = std::sqrt(normalMag);
+		float penetration = 0;
+		if (normalMag != 0)
+		{
+			penetration = (r - normalMag) * .5f;
+		}
+		else
+			penetration = bSphere.Radius;
+
+
+		DirectX::XMVECTOR dNormalized = DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&d));
+		DirectX::XMStoreFloat3(&adjustment, dNormalized * penetration);
+		adjustment.y = 0;
+
+
+		vAdjustments.push_back(adjustment);
+
+	}
+
 	collision = false;
 	return adjustment;
 }

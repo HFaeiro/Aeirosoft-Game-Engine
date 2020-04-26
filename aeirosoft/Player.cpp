@@ -90,13 +90,14 @@ void Player::Update()
 
 std::optional<Events*> Player::Queue()
 {
+	if (health <= 0)
+		return this;
 	if (hit) {
 		health -= 20 * GetDeltaTime();
 		hit = false;
 	}
 
-	if (health <= 0)
-		return this;
+
 
 	float moveSpeed = g_moveSpeed;
 	if (isKey(DIK_LSHIFT) && !aiming)

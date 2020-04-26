@@ -147,22 +147,23 @@ std::optional<Events*> Collision::Queue()
 				float f = 0.f;
 				for (const auto& c : collidable)
 				{
-					if (c != C)
+					if (c != C && c->type != Collidable::Type::Object)
 					{
-					
+
 						std::vector<aeBounding> bounds = c->GetBounds();
 						if (c->hasMainBox || bounds.size() == 1)
 							if (((DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
 								bounds.erase(bounds.begin());
 							else
 								continue;
-						for (const auto& box : bounds)
-							if (((DirectX::BoundingOrientedBox)box).Intersects(C->clickOrigin, C->clickDestination, f))
+						for (const DirectX::BoundingOrientedBox& box : bounds)
+							if (box.Intersects(C->clickOrigin, C->clickDestination, f))
 							{
 								c->hit = true;
 								C->CheckRay = false;
 								break;
 							}
+
 					}
 				}
 			}
@@ -186,7 +187,9 @@ void Collision::Check(Collidable* C)
 
 				auto bounds = c->GetBounds();
 				if (c->hasMainBox || bounds.size() == 1)
-					if (box.Contains(((DirectX::BoundingOrientedBox)bounds[0])))
+				{
+					auto bound = (bounds[0].hasSphere ? bounds[0].getSphere() : bounds[0]);
+					if (box.Contains(bound))
 					{
 #ifdef _DEBUG
 						c->Boundings[0].collision = true;
@@ -207,8 +210,9 @@ void Collision::Check(Collidable* C)
 						continue;
 					}
 #endif // _DEBUG
-				for (auto& bound : bounds)
-					if (box.Contains(((DirectX::BoundingOrientedBox)bound)))
+				}
+				for (const auto& bound : bounds)
+					if (box.Contains((DirectX::BoundingOrientedBox)bound))
 						if (C->resolve)
 							C->Boundings[0].Resolve(bound);
 			}

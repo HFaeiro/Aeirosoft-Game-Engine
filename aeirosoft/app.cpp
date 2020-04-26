@@ -191,7 +191,10 @@ int app::begin()
 	}
 }
 
-
+DirectX::XMFLOAT3 SetRandomSpawn()
+{
+	return { (float)(rand() % 1200 + (-800)) , 50, (float)(rand() % 1200 + (-800)) };
+}
 
 void app::CreateScenes(Scenes* s, Gui* gui)
 {
@@ -199,7 +202,6 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 	s->CreateScene(L"MainMenu", gui, true);
 	s->CreateEntityObject(L"Data\\map\\falling.obj");
 	s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,0,0 });
-
 	//s->CreateEntityObject(L"Data\\FpsArms\\AnimatedZombie.fbx");
 	//s->AddObjectToScene(L"Scene1", L"AnimatedZombie.fbx", { 20,0,20 }, { 0,0,0 });
 
@@ -207,7 +209,17 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 	//s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });
 	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
 	//s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { DirectX::XM_PI * .2f,0,DirectX::XM_PI });
+
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0});
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+
 	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -250,0,200 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 250,0,200 }, { 0,0,0 });

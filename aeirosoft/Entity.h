@@ -45,7 +45,6 @@ public:
 	virtual bool isKey(UCHAR c)  {
 		return i->isKey(c);
 	}
-
 	void _Update();
 	void adjustPosition(DirectX::XMFLOAT3 pos)
 	{

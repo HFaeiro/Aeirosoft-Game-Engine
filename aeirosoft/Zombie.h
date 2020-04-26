@@ -110,14 +110,9 @@ private:
 
 	void SetRandomSpawn()
 	{
-		double delt = deltaTimer.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
-		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
 		float x = (rand() % 1200 + (-800));
 		float y = 0;
 		float z = (rand() % 1200 + (-800));
-
-		float rando;
-
 		setPosition(x, y, z);
 
 

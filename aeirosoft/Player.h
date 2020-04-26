@@ -83,11 +83,19 @@ public:
 
 	virtual bool Initialize()
 	{
-
 		deltaTimer.Start();
 		health = 100;
 		SetRandomSpawn();
 		TransformBounds(getWorldAtViewMatrix());
+		falling = false;
+		bool rCReleased = true;
+		bool Shooting = false;
+		bool aiming = false;
+		bool running = false;
+		bool crouched = false;
+		int shots = 0;
+		timefalling = 0.f;
+		Boundings[0].vAdjustments.clear();
 		return true;
 	}
 	virtual void Update();;
@@ -105,17 +113,10 @@ public:
 private:
 	void SetRandomSpawn()
 	{
-		double delt = deltaTimer.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
-		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
 		float x = (rand() % 1200 + (-800));
 		float y = playerHeight;
 		float z = (rand() % 1200 + (-800));
-
-		float rando;
-
 		setPosition(x, y, z);
-
-
 	}
 	
 	graphics* g;
@@ -125,7 +126,7 @@ private:
 	bool running = false;
 	bool crouched = false;
 	int shots = 0;
-	float playerHeight = 100.0f;
+	float playerHeight = 50.0f;
 	float jumpHeight = 40.f;
 	float jumpStart = 0.f;
 	float playerWidth = 25.0f;
