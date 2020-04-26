@@ -15,20 +15,24 @@ public:
 	{
 
 		SetRandomSpawn();
-		setRotation({ 0,0,0 });
+		TransformBounds(getWorld());
+		deadDelta = 0;
 		health = 100;
 		attackMode = false;
+		hit = false;
+		dead = false;
+		resolve = true;
 		return true;
 	}
 	virtual void Update()
 	{
-		static float delta = 0;
+		/*static float delta = 0;
 		delta += deltaTimer.GetMillisecondsElapsed();
 		if (delta >= 5.f)
-		{
+		{*/
 			_Update();
-			delta = 0;
-		}
+	/*		delta = 0;
+		}*/
 		return;
 	}
 	virtual std::optional<Events*> Queue()
@@ -39,9 +43,11 @@ public:
 
 			if (!dead)
 			{
+
 				SetCurrentAnimation("dead");
 				dead = true;
 				LookAt(lastLookAt);
+				resolve = false;
 			}
 			g->TurnOffCulling();
 			if (isAnimActive())
@@ -49,7 +55,15 @@ public:
 			Render(g->m_TextureShader);
 
 			g->TurnOnCulling();
-			return{};
+			deadDelta += deltaTimer.GetSecondsElapsed();
+			deltaTimer.restart();
+			if (deadDelta >= 10.f)
+			{
+				Initialize();
+				
+			}
+			else
+				return {};
 		}
 
 
@@ -61,14 +75,16 @@ public:
 		DirectX::XMFLOAT3 posDifference = { mypos.x - playerPos.x,0, mypos.z - playerPos.z };
 
 		float delta = deltaTimer.GetMillisecondsElapsed() * .0010f;
+
+		//adjustPosition(0, -30 * delta, 0 );
 		float sight = 600.f;
+
 		if (((posDifference.x <= sight && posDifference.x >= -sight) && posDifference.z <= sight && posDifference.z >= -sight) || attackMode) {
-			if (!hit)
-				adjustPosition(-posDifference.x * delta, 0, -posDifference.z * delta);
+			adjustPosition(-posDifference.x * delta, -30 * delta, -posDifference.z * delta);
 			LookAt(posDifference);
 			lastLookAt = posDifference;
-
 		}
+
 		TransformBounds(getWorld());
 		if (hit)
 		{
@@ -84,6 +100,7 @@ public:
 		return this;
 	}
 private:
+	float deadDelta = 0;
 	DirectX::XMFLOAT3 lastLookAt;
 	bool attackMode = false;
 	bool dead = false;
@@ -96,7 +113,7 @@ private:
 		double delt = deltaTimer.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
 		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
 		float x = (rand() % 1200 + (-800));
-		float y = 5;
+		float y = 0;
 		float z = (rand() % 1200 + (-800));
 
 		float rando;

@@ -48,12 +48,20 @@ bool app::SetupApplication()
 
 	events.push_back(i);
 	events.push_back(s);
+#ifdef _DEBUG
+	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
 
-	//for (int i = 0; i < Boxes; i++)
-	//{
-	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
-	//}
-	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
+#else
+	for (int i = 0; i < Boxes; i++)
+	{
+		s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
+	}
+
+#endif // DEBUG
+
+
+
+	
 
 
 
@@ -199,7 +207,7 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 	//s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });
 	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
 	//s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { 0,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,0,0 }, { DirectX::XM_PI * .2f,0,DirectX::XM_PI });
 	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -250,0,200 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 250,0,200 }, { 0,0,0 });
@@ -256,8 +264,11 @@ void app::StartupGui(Gui* gui)
 		{ -qBWit, -qBHei - offset }, { qBWit, qBHei - offset });
 
 
-	std::function<void(void*)> refunc = [](void* g) { ((app*)g)->restart = true; };
-	gui->AddButton(refunc, (window*)this, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
+	//std::function<void(void*)> refunc = [](void* g) { ((app*)g)->restart = true; };
+	//gui->AddButton(refunc, (window*)this, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
+	//	{ -stBWit, -stBHei + 50 }, { stBWit, stBHei + 50 });
+	std::function<void(void*)> refunc = [](void* s) { ((Scenes*)s)->ResetActiveEntity(); ((Scenes*)s)->RemoveActiveKeyGui(); };
+	gui->AddButton(refunc, (Scenes*)s, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
 		{ -stBWit, -stBHei + 50 }, { stBWit, stBHei + 50 });
 	gui->AddExistingButton(L"Pause", L"Settings_Selected.png"/* L"settings.png"*/);
 	gui->AddExistingButton(L"Pause", L"quit.png");

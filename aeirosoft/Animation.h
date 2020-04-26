@@ -27,6 +27,15 @@ struct Bone
 		}
 
 	}
+	void ResetBoneTransforms()
+	{
+		transformationMatrix = OGTransformationMatrix;
+		for (auto& child : vChildren)
+		{
+			child->transformationMatrix = child->OGTransformationMatrix;
+		}
+		return;
+	}
 
 };
 

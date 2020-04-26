@@ -27,6 +27,7 @@ public:
 		if (Boundings.size())
 			return Boundings[0].getSphere();
 	}
+	bool resolve = true;
 protected:
 	void CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, std::vector<DirectX::XMMATRIX*> transforms);
 	void CreateBoundingOrientedBox(std::vector < std::vector<Vertex>> v);
@@ -74,8 +75,12 @@ protected:
 private:
 
 	friend class Collision;
+#ifdef _DEBUG
 	void CreateTexture();
 	void DrawBoundingOrientedBox();
+#endif // _DEBUG
+
+
 
 
 
@@ -89,24 +94,16 @@ private:
 	bool CheckRay = false;
 
 	texture redTexture;
+	texture blueTexture;
 	IndexBuffer ib;
-	DirectX::BoundingOrientedBox MainBox;
 	bool hasMainBox = false;
-	//DirectX::BoundingOrientedBox TransbBox;
-	std::vector < DirectX::XMFLOAT3> vMin;
-	std::vector < DirectX::XMFLOAT3> vMax;
 	std::vector <DWORD> Indecies;
-	//DWORD indecieArr[24] =
-	//{0, 1, 1, 2, 2, 3, 3, 0,
-	//	4, 5, 5, 6, 6, 7, 7, 4,
-	//	0, 4, 1, 5, 2, 6, 3, 7
-	//};
 	graphics* g;
 protected:
 	
 	std::vector<aeBounding> Boundings;
 	Collision* Cthis;
-	std::vector<Collidable> collidedWith;
+	std::vector<aeBounding> collidedWith;
 	std::vector<Vertex> vertices;
 };
 

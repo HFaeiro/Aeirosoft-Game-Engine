@@ -23,7 +23,36 @@ bool Scenes::CreateScene(const std::wstring& sceneName, Gui* gui, bool _guiStart
 	return true;
 
 }
+void Scenes::ResetActiveEntity()
+{
+	if (ActiveScene != nullptr)
+	{
+		if (ActiveScene->E != nullptr)
+			ActiveScene->E->Initialize();
+	}
+}
+void Scenes::RemoveActiveKeyGui()
+{
+	int count = 0;
+	if (!ActiveScene->OnKeyGui.empty())
+	{
+		for (auto& pair : ActiveScene->OnKeyGui)
+		{
+			for (auto& E : ActiveScene->events)
+			{
 
+				if (E == std::get<0>(pair.second))
+				{
+					ActiveScene->events.erase(ActiveScene->events.begin() + count);
+					i->w->hideMouse = !std::get<1>(pair.second);
+					std::get<2>(pair.second) = false;
+				}
+				count++;
+			}
+			count = 0;
+		}
+	}
+}
 bool Scenes::SetActiveScene(const std::wstring& sceneName, bool Initialize)
 {
 	for (auto& s : vScenes)

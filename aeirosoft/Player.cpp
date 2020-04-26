@@ -4,14 +4,11 @@ Player::Player(graphics* g, input* i, const std::wstring& startingGun, const std
 	g(g), main(g, startingGun,shotSound, wScale),
 	Entity(g, i, filename), i(i)
 {
-	//main.setPosition(hip.pos);
-	//main.setRotation(hip.rot);
-	setPosition(20, playerHeight, -20);
+
 	walkingSoundEffect = g->CreateSound(L"Data\\Sounds\\Concrete_Shoes_Walking.wav");
 	walkingSound = walkingSoundEffect->CreateInstance();
-	//playerModel.init(filename, pDevice, pContext);
-
-	
+	DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
+	CreateBoundingOrientedBox(playerSize);
 }
 
 void Player::Update()
@@ -187,7 +184,7 @@ std::optional<Events*> Player::Queue()
 		gravity = -((70.f + timefalling) * GetDeltaTime());
 
 	}
-	//adjustPosition(camera::movementType::up, gravity);
+	adjustPosition(camera::movementType::up, gravity);
 	if (falling)
 	{
 		timefalling += deltaTimer.GetMillisecondsElapsed() * .21;

@@ -228,7 +228,7 @@ void graphics::BeginScene(float red, float green, float blue, float alpha)
 	TurnZBufferOn();
 	m_TextureShader.SetShaders(pContext.Get());
 
-	m_Camera.render(true);
+	m_Camera.render(false);
 
 	m_ViewMatrix = m_Camera.getViewMatrix();
 

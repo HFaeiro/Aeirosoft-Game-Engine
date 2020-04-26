@@ -119,6 +119,8 @@ public:
 	}
 
 	bool CreateScene(const std::wstring& sceneName,Gui* gui = nullptr, bool _guiStart = false, bool hideMouse = false);
+	void ResetActiveEntity();
+	void RemoveActiveKeyGui();
 	bool SetActiveScene(const std::wstring& sceneName, bool Initalize = true);
 	bool AddObjectToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
 	bool AddEntityToScene(std::wstring sceneName, Entity* E)
@@ -127,7 +129,7 @@ public:
 		{
 			if (s.sceneName == sceneName)
 			{
-				
+				s.E = E;
 				s.events.push_back(E);
 				s.C->AddCollidable(E);
 				return true;
@@ -182,7 +184,7 @@ public:
 
 		}
 
-		entities.push_back(EntityObject(g, filePath, scale));
+		entities.emplace_back(EntityObject(g, filePath, scale));
 		return true;
 	}
 
@@ -209,7 +211,7 @@ private:
 		bool hideMouse = false;
 		Collision* C = new Collision();
 		std::unordered_map<UCHAR, std::tuple<Gui*, bool, bool, std::wstring>> OnKeyGui; // UCHAR keypress, bool hidemouse, bool active, std::wstring guiSceneName
-
+		Entity* E = nullptr;
 	};
 
 	Scene* ActiveScene = nullptr;

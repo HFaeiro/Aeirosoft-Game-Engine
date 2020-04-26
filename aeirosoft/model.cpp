@@ -98,8 +98,7 @@ model::~model()
 void model::LookAt(DirectX::XMFLOAT3 f3)
 {
 	using namespace DirectX;
-	XMVECTOR v = { f3.x, f3.y, f3.z, 1.0f };
-	v = DirectX::XMVector3Normalize(v);
+	XMVECTOR v = DirectX::XMVector3Normalize({ f3.x, f3.y, f3.z, 1.0f });
 	float dot = XMVectorGetX(XMVector3Dot(DefaultForward, v));
 	if (std::abs(dot - (-1.f)) < 0.000001f)
 	{
@@ -109,18 +108,16 @@ void model::LookAt(DirectX::XMFLOAT3 f3)
 	{
 		return;
 	}
-	float rotAngle = (float)std::acos(dot);
-	XMVECTOR rotAxis = XMVector3Cross(DefaultForward, v);
-	rotAxis = XMVector3Normalize(rotAxis);
+	float rotAngle = std::acos(dot);
 	XMFLOAT4 rot4;
-	XMStoreFloat4(&rot4, rotAxis);
+	XMStoreFloat4(&rot4, XMVector3Normalize(XMVector3Cross(DefaultForward, v)));
 
 	float halfAngle = rotAngle * .5f;
 	float s = (float)std::sin(halfAngle);
 
-	XMFLOAT4 quat = { /*rot4.x * s*/0, rot4.y * s,/* rot4.z * s*/0, (float)std::cos(halfAngle)};
+	XMVECTOR quat = { /*rot4.x * s*/0, rot4.y * s,/* rot4.z * s*/0, (float)std::cos(halfAngle)};
 	prevWorld = world;
-	world = XMMatrixRotationQuaternion(XMLoadFloat4(&quat)) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	world = XMMatrixRotationQuaternion(quat) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 	
 	return;
 }
@@ -137,7 +134,8 @@ model::model(const model& m)
 
 void model::adjustPosition(DirectX::XMFLOAT3 pos)
 {
-
+	if (std::isnan(pos.x))
+		return;
 	this->pos.x += pos.x;
 	this->pos.y += pos.y;
 	this->pos.z += pos.z;
@@ -255,13 +253,17 @@ void model::SetCurrentAnimation(std::string animName)
 			if (anim.name.find(animName) != std::string::npos)
 			{
 				
-				if(currentAnim == nullptr || currentAnim->name.find(animName) == std::string::npos)
+				if (currentAnim == nullptr || currentAnim->name.find(animName) == std::string::npos)
+				{
 					currentAnim = &anim;
+					pBoneMaster->ResetBoneTransforms();
+				}
 				currentAnim->Active = true;
 				return;
 			}
 		}
 	}
+
 	currentAnim = nullptr;
 	return;
 }
@@ -389,11 +391,6 @@ void model::UpdateWorldMatrix()
 {
 	prevWorld = world;
 	world = DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-
-	//TransformBounds(world);
-
-
-
 }
 void model::ProcessNode(aiScene* node, const aiScene* scene)
 {
@@ -501,7 +498,6 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	return Mesh(pDevice.Get(), pContext.Get(), vertices, indices, diffuseTextures);
 
 }
-
 
 std::vector<texture> model::LoadTextures(aiMaterial* pMaterial, aiTextureType type, const aiScene* pScene)
 {

@@ -9,6 +9,7 @@ public:
 	operator DirectX::BoundingOrientedBox() const { return tOB; }
 //	operator DirectX::BoundingOrientedBox (){ return tOB; }
 	operator DirectX::BoundingSphere () const { return bSphere; }
+	operator DirectX::XMMATRIX() const { return world; }
 	const aeBounding& operator = (const DirectX::BoundingOrientedBox& b);
 
 	bool Create(const std::vector<Vertex>& _vertices);
@@ -77,11 +78,24 @@ public:
 			return false;
 	}
 	void Transform(DirectX::XMMATRIX _world, bool makeSphere);
+	void InverseTransformFromFloat3(DirectX::XMFLOAT3 f3);
 	DirectX::BoundingSphere getSphere()const { return bSphere; }
 	void setTransformPtr(DirectX::XMMATRIX* _transform) {
 		transformation = _transform; 
 	}
 	std::vector<Vertex> getVertices() const { return vertices; }
+
+	DirectX::XMFLOAT3 Resolve(aeBounding otherObject);
+
+
+
+
+
+
+
+	bool hasSphere = false;
+	bool collision = false;
+	std::vector<DirectX::XMFLOAT3> vAdjustments;
 private:
 
 	DirectX::BoundingOrientedBox ogOB;
@@ -90,5 +104,6 @@ private:
 	std::vector<Vertex> vertices;
 	DirectX::XMMATRIX* transformation = nullptr;
 	DirectX::XMMATRIX world;
+
 };
 

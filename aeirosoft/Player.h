@@ -78,14 +78,16 @@ public:
 		main.~weapon();
 		walkingSound.release();
 		walkingSoundEffect.release();
+
 	};
 
 	virtual bool Initialize()
 	{
 
 		deltaTimer.Start();
-		DirectX::XMFLOAT3 playerSize = DirectX::XMFLOAT3(playerWidth, playerHeight, playerWidth);
-		CreateBoundingOrientedBox(playerSize);
+		health = 100;
+		SetRandomSpawn();
+		TransformBounds(getWorldAtViewMatrix());
 		return true;
 	}
 	virtual void Update();;
@@ -101,7 +103,20 @@ public:
 
 
 private:
+	void SetRandomSpawn()
+	{
+		double delt = deltaTimer.GetMillisecondsElapsed() * (rand() / static_cast <float> (RAND_MAX / 10));
+		DirectX::XMFLOAT3 playerpos = g->m_Camera.getPosition();
+		float x = (rand() % 1200 + (-800));
+		float y = playerHeight;
+		float z = (rand() % 1200 + (-800));
 
+		float rando;
+
+		setPosition(x, y, z);
+
+
+	}
 	
 	graphics* g;
 	bool rCReleased = true;
@@ -113,8 +128,8 @@ private:
 	float playerHeight = 100.0f;
 	float jumpHeight = 40.f;
 	float jumpStart = 0.f;
-	float playerWidth = 10.0f;
-	float playerZWidth = 15.f;
+	float playerWidth = 25.0f;
+	float playerZWidth = 25.f;
 	float hangTime = .0595f;
 	float g_moveSpeed = 120;
 	Timer hangTimer;

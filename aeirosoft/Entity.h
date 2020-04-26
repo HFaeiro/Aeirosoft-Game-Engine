@@ -47,10 +47,13 @@ public:
 	}
 
 	void _Update();
-
+	void adjustPosition(DirectX::XMFLOAT3 pos)
+	{
+		c->adjustPosition(pos);
+	}
 	void adjustPosition(camera::movementType type, float velocity) 
 	{
-		if (!collision ) {
+		if (!collision || true ) {
 			if (velocity > 5 && velocity < -5)
 				if (velocity > 5)
 					velocity = 5;

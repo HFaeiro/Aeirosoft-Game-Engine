@@ -40,4 +40,5 @@ namespace colors
 {
 	const color UnloadedTexturecolor(100, 100, 100);
 	const color UnhandledTexturecolor(250, 0, 0);
+	const color BlueTexturecolor(0, 0, 250);
 }
