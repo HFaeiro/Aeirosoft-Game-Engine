@@ -6,7 +6,7 @@
 #include "Gui.h"
 #include "helper.h"
 #include "Player.h"
-
+#include <thread>
 class Scenes :public Events
 {
 public:
@@ -52,71 +52,13 @@ public:
 			
 			event->Initialize();
 		}
-
+		if (ActiveScene->C != nullptr)
+			ActiveScene->C->Initialize();
 		return true;
 
 	}
-	virtual std::optional<Events*> Queue()
-	{
-	
-		if (!ActiveScene->OnKeyGui.empty())
-		{
-			for (auto& pair : ActiveScene->OnKeyGui)
-			{
-				double kTimer = keyTimer.GetMillisecondsElapsed() * .01;
-				if ( !kTimer || kTimer > 2)
-				if (i->isKey(pair.first))
-				{
-					keyTimer.restart();
-					auto& tuple = pair.second;
-					Gui* gui = std::get<0>(tuple);
-					if (!std::get<2>(tuple))
-					{
-						gui->ActivateMenu(std::get<3>(tuple));
-						ActiveScene->events.push_back(gui);
-						i->w->hideMouse = std::get<1>(tuple);
-						std::get<2>(tuple) = true;
-					}
-					else
-					{
-						int count = 0;
-						for (auto& E : ActiveScene->events)
-						{
-
-							if (E == gui)
-							{
-								ActiveScene->events.erase(ActiveScene->events.begin() + count);
-							}
-							count++;
-						}
-						std::get<2>(tuple) = false;
-						i->w->hideMouse = !std::get<1>(tuple);
-					}
-				}
-			}
-		}
-
-
-		for (const auto& E : ActiveScene->events)
-			if (const auto optional = E->Queue())
-				queued.push_back(*optional);
-		if (ActiveScene->C)
-			ActiveScene->C->Queue();
-
-		return this;
-	}
-	virtual void Update()
-	{
-		g->Begin3DScene();
-		for (auto& e : ActiveScene->entities)
-		{
-			e->Render(g->m_TextureShader);
-		}
-
-		for (const auto& Q : queued)
-			Q->Update();
-		queued.clear();
-	}
+	virtual std::optional<Events*> Queue();
+	virtual void Update();
 
 	bool CreateScene(const std::wstring& sceneName,Gui* gui = nullptr, bool _guiStart = false, bool hideMouse = false);
 	void ResetActiveEntity();
@@ -190,7 +132,7 @@ public:
 
 
 private:
-
+	std::vector<std::thread> threads;
 
 	graphics* g;
 	Timer keyTimer;

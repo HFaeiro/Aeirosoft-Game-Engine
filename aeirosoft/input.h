@@ -80,6 +80,7 @@ private:
 			fps = 0;
 			t->restart();
 			w->updateTitle(fpsString);
+
 		}
 		deltaTimer.restart();
 	}

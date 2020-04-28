@@ -11,7 +11,7 @@ public:
 	operator DirectX::BoundingSphere () const { return bSphere; }
 	operator DirectX::XMMATRIX() const { return world; }
 	const aeBounding& operator = (const DirectX::BoundingOrientedBox& b);
-
+	const aeBounding& operator = (const DirectX::BoundingBox& b);
 	bool Create(const std::vector<Vertex>& _vertices);
 	bool CreateFromFloat3(DirectX::XMFLOAT3& size)
 	{
@@ -87,12 +87,7 @@ public:
 
 	DirectX::XMFLOAT3 Resolve(const aeBounding& otherObject);
 
-
-
-
-
-
-
+	std::vector< int >QuadID;
 	bool hasSphere = false;
 	bool collision = false;
 	std::vector<DirectX::XMFLOAT3> vAdjustments;
@@ -100,6 +95,7 @@ private:
 
 	DirectX::BoundingOrientedBox ogOB;
 	DirectX::BoundingOrientedBox tOB;
+	DirectX::BoundingBox ogBB;
 	DirectX::BoundingSphere bSphere;
 	std::vector<Vertex> vertices;
 	DirectX::XMMATRIX* transformation = nullptr;

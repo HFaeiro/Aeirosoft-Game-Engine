@@ -5,13 +5,6 @@
 #pragma comment(lib, "assimp-vc142-mt.lib")
 #endif
 
-static bool _compare_min_x(Vertex const& p1, Vertex const& p2) { return p1.position.x < p2.position.x; }
-static  bool _compare_min_y(Vertex const& p1, Vertex const& p2) { return p1.position.y < p2.position.y; }
-static bool _compare_min_z(Vertex const& p1, Vertex const& p2) { return p1.position.z < p2.position.z; }
-
-static bool _compare_max_x(Vertex const& p1, Vertex const& p2) { return p1.position.x > p2.position.x; }
-static  bool _compare_max_y(Vertex const& p1, Vertex const& p2) { return p1.position.y > p2.position.y; }
-static bool _compare_max_z(Vertex const& p1, Vertex const& p2) { return p1.position.z > p2.position.z; }
 
 Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
 {
@@ -95,7 +88,7 @@ model::~model()
 	//meshes.clear();
 	//vBones.clear();
 }
-void model::LookAt(DirectX::XMFLOAT3 f3)
+void model::LookAt(DirectX::XMFLOAT3 f3, bool angular)
 {
 	using namespace DirectX;
 	XMVECTOR v = DirectX::XMVector3Normalize({ f3.x, f3.y, f3.z, 1.0f });
@@ -114,8 +107,11 @@ void model::LookAt(DirectX::XMFLOAT3 f3)
 
 	float halfAngle = rotAngle * .5f;
 	float s = (float)std::sin(halfAngle);
-
-	XMVECTOR quat = { /*rot4.x * s*/0, rot4.y * s,/* rot4.z * s*/0, (float)std::cos(halfAngle)};
+	XMVECTOR quat;
+	if(angular)
+		quat = { rot4.x * s, rot4.y * s, rot4.z * s, (float)std::cos(halfAngle) };
+	else
+		quat = { 0, rot4.y * s, 0, (float)std::cos(halfAngle)};
 	prevWorld = world;
 	world = XMMatrixRotationQuaternion(quat) * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 	

@@ -1,5 +1,5 @@
 #include "Player.h"
-
+#include <thread>
 Player::Player(graphics* g, input* i, const std::wstring& startingGun, const std::wstring& shotSound, const std::wstring& filename, float wScale) :
 	g(g), main(g, startingGun,shotSound, wScale),
 	Entity(g, i, filename), i(i)
@@ -79,6 +79,7 @@ void Player::Update()
 		rCReleased = true;
 	if (isLeftClick())
 		Shooting = false;
+
 
 	viewInverse = DirectX::XMMatrixInverse(NULL, g->GetViewMatrix());
 	main.UpdateWorldMatrixWithViewMatrix(viewInverse);

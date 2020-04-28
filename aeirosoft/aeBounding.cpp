@@ -5,7 +5,11 @@ const aeBounding& aeBounding::operator=(const DirectX::BoundingOrientedBox& b)
 	this->tOB = b;
 	return *this;
 }
-
+const aeBounding& aeBounding::operator=(const DirectX::BoundingBox& b)
+{
+	this->ogBB = b;
+	return *this;
+}
 bool aeBounding::Create(const std::vector<Vertex>& _vertices)
 {
 	vertices = _vertices;
@@ -125,7 +129,7 @@ DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
 
 
 		DirectX::XMStoreFloat3(&adjustment, (inside ? -vNormal : vNormal) * offset);
-		vAdjustments.push_back(adjustment);
+		vAdjustments.emplace_back(adjustment);
 	}
 	////Sphere vs Sphere
 	else if (hasSphere && otherObject.hasSphere)
@@ -157,7 +161,7 @@ DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
 		adjustment.y = 0;
 
 
-		vAdjustments.push_back(adjustment);
+		vAdjustments.emplace_back(adjustment);
 
 	}
 

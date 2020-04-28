@@ -18,7 +18,7 @@ public:
 	model( const std::wstring& filename, graphics *g, float scale = 1.f);
 	model();
 	~model();
-	void LookAt(DirectX::XMFLOAT3 v);
+	void LookAt(DirectX::XMFLOAT3 v, bool angular = false);
 	model(const model& m);
 
 	Bone* copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent);

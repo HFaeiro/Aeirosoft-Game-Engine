@@ -1,5 +1,68 @@
 #include "Scenes.h"
 
+std::optional<Events*> Scenes::Queue()
+{
+	
+	if (!ActiveScene->OnKeyGui.empty())
+	{
+		for (auto& pair : ActiveScene->OnKeyGui)
+		{
+			double kTimer = keyTimer.GetMillisecondsElapsed() * .01;
+			if (!kTimer || kTimer > 2)
+				if (i->isKey(pair.first))
+				{
+					keyTimer.restart();
+					auto& tuple = pair.second;
+					Gui* gui = std::get<0>(tuple);
+					if (!std::get<2>(tuple))
+					{
+						gui->ActivateMenu(std::get<3>(tuple));
+						ActiveScene->events.push_back(gui);
+						i->w->hideMouse = std::get<1>(tuple);
+						std::get<2>(tuple) = true;
+					}
+					else
+					{
+						int count = 0;
+						for (auto& E : ActiveScene->events)
+						{
+
+							if (E == gui)
+							{
+								ActiveScene->events.erase(ActiveScene->events.begin() + count);
+							}
+							count++;
+						}
+						std::get<2>(tuple) = false;
+						i->w->hideMouse = !std::get<1>(tuple);
+					}
+				}
+		}
+	}
+
+
+	for (const auto& E : ActiveScene->events)
+		if (const auto optional = E->Queue())
+			queued.push_back(*optional);
+		if (ActiveScene->C->collidable.size())
+			ActiveScene->C->Queue();
+	return this;
+}
+
+void Scenes::Update()
+{
+	g->Begin3DScene();
+
+
+	for (auto& e : ActiveScene->entities)
+	{
+		e->Render(g->m_TextureShader);
+	}
+	for (const auto& Q : queued)
+		Q->Update();
+	queued.clear();
+}
+
 bool Scenes::CreateScene(const std::wstring& sceneName, Gui* gui, bool _guiStart, bool hidemouse)
 {
 	if (/*this->i == nullptr || */this->g == nullptr)
@@ -59,8 +122,10 @@ bool Scenes::SetActiveScene(const std::wstring& sceneName, bool Initialize)
 		if (s.sceneName == sceneName)
 		{
 			ActiveScene = &s;
-			if(Initialize)
+			if (Initialize) {
 				return this->Initialize();
+
+			}
 			return true;
 		}
 	return false;

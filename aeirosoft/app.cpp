@@ -4,15 +4,14 @@
 #include <fstream>
 #include <sstream>
 #include "Zombie.h"
-
+#include <thread>
 app::app(HINSTANCE hinst, const std::wstring windowName, POINT p) :
 	window(hinst, windowName, p)
 {
 	hInst = hinst;
 	m_Window = getHWND();
 	m_Timer.Start();
-	m_ClickTimer.Start();
-	m_KeyTimer.Start();
+
 }
 
 app::~app()
@@ -37,11 +36,16 @@ bool app::SetupApplication()
 	gui = new Gui(m_Graphics, i, (window*)this);
 	StartupGui(gui);
 
-	CreateScenes(s, gui);
-	//s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\Guns\\AK47\\AK47.obj", { { 5.38699f, -1.94485f, 12.8215f }, { 0.f, 4.7067f, 0.061379f } },
-	//	{ { .0115558f, -.91269f, 5.8215f }, { 0.f, 4.71489f, -.0250774f }},
-	//	L"", .75f));
-	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",
+	s->CreateScene(L"Scene1", gui, false, true);
+	s->CreateScene(L"MainMenu", gui, true);
+
+
+
+
+	auto t1 = std::thread(&app::CreateScenes,this,  std::ref(s), std::ref(gui));
+	//CreateScenes(s, gui);
+	//auto t2 = std::thread(std::bind(&Scenes::AddEntityToScene, s, L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",L"")));
+		s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",
 		L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",
 		L""));
 	s->AddOnKeyEventToScene(L"Scene1", L"Pause", gui, false, DIK_ESCAPE);
@@ -49,7 +53,7 @@ bool app::SetupApplication()
 	events.push_back(i);
 	events.push_back(s);
 #ifdef _DEBUG
-	s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
+	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
 
 #else
 	for (int i = 0; i < Boxes; i++)
@@ -59,12 +63,10 @@ bool app::SetupApplication()
 
 #endif // DEBUG
 
+	s->SetActiveScene(restart ? L"Scene1" : L"MainMenu");
 
-
-	
-
-
-
+	t1.join();
+	//t2.join();
 	for (const auto& E : events)
 		if (!E->Initialize())
 			return false;
@@ -134,7 +136,6 @@ int app::begin()
 
 	Boxes = settings[2];
 	SetupApplication();
-		
 	while (true)
 	{
 		if (const auto optional = processMessages())
@@ -174,7 +175,9 @@ int app::begin()
 		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
 		//m_Graphics->pSpriteBatch->End();
 
-
+		m_Graphics->pSpriteBatch->Begin();
+		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
+		m_Graphics->pSpriteBatch->End();
 
 		m_Graphics->EndScene();
 
@@ -185,9 +188,7 @@ int app::begin()
 			else
 				return false;
 		}
-		//if (i->isKey(DIK_ESCAPE))
-		//	SetupApplication(&m_Graphics);
-		
+
 	}
 }
 
@@ -198,10 +199,26 @@ DirectX::XMFLOAT3 SetRandomSpawn()
 
 void app::CreateScenes(Scenes* s, Gui* gui)
 {
-	s->CreateScene(L"Scene1", gui, false, true);
-	s->CreateScene(L"MainMenu", gui, true);
+
 	s->CreateEntityObject(L"Data\\map\\falling.obj");
 	s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,0,0 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//s->CreateScene(L"Scene1", gui, false, true);
+	//s->CreateScene(L"MainMenu", gui, true);
+	//s->CreateEntityObject(L"Data\\map\\falling.obj");
+	//s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,0,0 });
 	//s->CreateEntityObject(L"Data\\FpsArms\\AnimatedZombie.fbx");
 	//s->AddObjectToScene(L"Scene1", L"AnimatedZombie.fbx", { 20,0,20 }, { 0,0,0 });
 
@@ -226,10 +243,6 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
-
-
-
-	s->SetActiveScene(restart ? L"Scene1" : L"MainMenu");
 	
 }
 

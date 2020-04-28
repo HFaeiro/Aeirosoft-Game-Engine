@@ -77,6 +77,7 @@ private:
 	friend class Collision;
 #ifdef _DEBUG
 	void CreateTexture();
+
 	void DrawBoundingOrientedBox();
 #endif // _DEBUG
 
@@ -111,10 +112,7 @@ class Collision : public Events
 {
 public:
 
-	virtual bool Initialize()
-	{
-		return true;
-	}
+	virtual bool Initialize();
 	virtual void Update()
 	{
 
@@ -135,9 +133,12 @@ public:
 
 
 	std::vector<Collidable*> collidable;
-	
+	bool done = true;;
 private:
-
-
+	std::vector<DirectX::BoundingBox> Subdivide(DirectX::BoundingBox box);
+	ID3D11Device* pDevice;
+	ID3D11DeviceContext* pContext;
+	std::vector<DirectX::BoundingBox> worldQuad;
+	void DrawBoundingQuads();
 };
 

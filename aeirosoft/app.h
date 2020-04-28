@@ -12,7 +12,7 @@ class app :
 	public window
 {
 
-	Timer m_Timer, m_ClickTimer, m_KeyTimer;
+	Timer m_Timer;
 
 	
 	//std::vector<model> vAsteroids;	

@@ -131,6 +131,8 @@ bool input::ReadKeyboard()
 bool input::ReadMouse()
 {
 	HRESULT hr;
+	if (pMouse == nullptr)
+		return false;
 	hr = pMouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 	if (FAILED(hr))
 	{
