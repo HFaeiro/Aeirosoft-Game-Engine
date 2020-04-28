@@ -64,7 +64,7 @@ void Player::Update()
 			clickTimer.restart();
 			if (aiming)
 			{
-				g->ChangeFOV(90.f);
+				g->ChangeFOV(120.f);
 			}
 			else
 			{
@@ -83,7 +83,9 @@ void Player::Update()
 
 	viewInverse = DirectX::XMMatrixInverse(NULL, g->GetViewMatrix());
 	main.UpdateWorldMatrixWithViewMatrix(viewInverse);
+
 	main.Render();
+	//g->ChangeFOV(30.f);
 	//playerModel.Render(g->m_TextureShader);
 
 

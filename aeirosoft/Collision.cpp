@@ -1,5 +1,4 @@
 #include "Collision.h"
-#include <thread>
 Collidable::Collidable(graphics* g) : g(g), pDevice(g->GetDevice().Get()), pContext(g->GetDeviceContext().Get())
 {
 #ifdef _DEBUG
@@ -149,6 +148,7 @@ bool Collision::Initialize()
 	//first we have to get all our corners and create a box around the whole thing. 
 	for (const auto& object : collidable)
 	{
+		if (object->type == Collidable::Type::Object)
 		for (const auto& bound : object->Boundings)
 		{
 			static_cast<DirectX::BoundingOrientedBox>(bound).GetCorners(tmpf3);
@@ -166,21 +166,18 @@ bool Collision::Initialize()
 	corners.clear();
 
 	worldQuad = Subdivide(world);
-	for (auto& object : collidable)
-	{
-		for (auto& bound : object->Boundings)
-		{
-			int i = 0;
-			for (const auto& quad : worldQuad)
-			{
-				if (quad.Contains(static_cast<DirectX::BoundingOrientedBox>(bound)))
-					bound.QuadID.emplace_back(i);
-					i++;
-			}
-		}
 
-	}
 
+	FillBoundingsAndQuads();
+	//std::vector<QuadBox> tmpBox;
+	//while ((tmpBox = Subdivide(worldQuad, 100)).size())
+	//{
+	//	for (const auto& box : tmpBox)
+	//	{
+	//		worldQuad.push_back(box);
+	//	}
+	//	FillBoundingsAndQuads();
+	//}
 
 
 
@@ -202,14 +199,13 @@ std::optional<Events*> Collision::Queue()
 
 			C->Boundings[0].QuadID.clear();
 			int i = 0;
-			for (const auto& quad : worldQuad)
+			for (const DirectX::BoundingBox& quad : worldQuad)
 			{
-				if (quad.Contains(static_cast<DirectX::BoundingSphere>(C->Boundings[0])))
+				if (quad.Contains(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
 					C->Boundings[0].QuadID.push_back(i);
 				i++;
 			}
-			if (!C->Boundings[0].QuadID.size())
-				continue;
+
 
 			if (C->CheckRay)
 			{
@@ -221,7 +217,7 @@ std::optional<Events*> Collision::Queue()
 
 						std::vector<aeBounding> bounds = c->GetBounds();
 						if (c->hasMainBox || bounds.size() == 1)
-							if (((DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
+							if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
 								bounds.erase(bounds.begin());
 							else
 								continue;
@@ -236,12 +232,10 @@ std::optional<Events*> Collision::Queue()
 					}
 				}
 			}
-			//std::thread(&Collision::Check, this, std::ref(C)).detach();
-
-			Check(C);
-			//auto t1 = 
-
-			//threads.emplace_back(std::thread(&Collision::Check, this, std::ref(C)));
+			
+			if (C->Boundings[0].QuadID.size())
+				Check(C);
+			
 		}
 #ifdef _DEBUG
 		C->DrawBoundingOrientedBox();
@@ -300,7 +294,7 @@ void Collision::Check(Collidable* C)
 					for (const auto& qID : bound.QuadID)
 						for (const auto& myqID : C->Boundings[0].QuadID)
 							if (qID == myqID)
-								if (box.Contains((DirectX::BoundingOrientedBox)bound))
+								if (box.Contains((const DirectX::BoundingOrientedBox)bound))
 									if (C->resolve) {
 										C->Boundings[0].Resolve(bound);
 										continue;
@@ -310,11 +304,33 @@ void Collision::Check(Collidable* C)
 	}
 
 }
-std::vector<DirectX::BoundingBox> Collision::Subdivide(DirectX::BoundingBox box)
+std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::QuadBox>& qBox, int limit)
+{
+	std::vector<QuadBox> tmpBox;
+	std::vector<QuadBox> tmpWorld = qBox;
+	qBox.clear();
+
+	for (const auto& quad : tmpWorld)
+	{
+
+		if (quad.contains > limit)
+		{
+			std::vector<QuadBox> tmpBox2 = Subdivide(quad);
+			for (const auto& box : tmpBox2)
+				tmpBox.emplace_back(box);
+		}
+		else {
+			qBox.emplace_back(quad);
+
+		}
+	}
+	return tmpBox;
+}
+std::vector<Collision::QuadBox> Collision::Subdivide(DirectX::BoundingBox box) const
 {
 	std::vector < DirectX::XMFLOAT3 > corners;
 	DirectX::XMFLOAT3 tmpf3[8];
-	std::vector<DirectX::BoundingBox> quad;
+	std::vector<Collision::QuadBox> quad;
 	box.GetCorners(tmpf3);
 
 	std::vector < DirectX::XMFLOAT3 > negXcorners;
@@ -335,60 +351,83 @@ std::vector<DirectX::BoundingBox> Collision::Subdivide(DirectX::BoundingBox box)
 		maxZ = std::max(maxZ, tmpf3[i].z);
 
 	}
-
-	corners.emplace_back(maxX, maxY, 0);
-	corners.emplace_back(maxX, minY, 0);
-	corners.emplace_back(0, maxY, 0);
-	corners.emplace_back(0, minY, 0);
-	corners.emplace_back(maxX, maxY, 0);
-	corners.emplace_back(maxX, minY, 0);
-	corners.emplace_back(0, maxY, minZ);
-	corners.emplace_back(0, minY, minZ);
+	DirectX::XMFLOAT3 c = box.Center;
+	corners.emplace_back(maxX, maxY, c.z);
+	corners.emplace_back(maxX, minY, c.z);
+	corners.emplace_back(c.x, maxY, c.z);
+	corners.emplace_back(c.x, minY, c.z);
+	corners.emplace_back(maxX, maxY, minZ);
+	corners.emplace_back(maxX, minY, minZ);
+	corners.emplace_back(c.x, maxY, minZ);
+	corners.emplace_back(c.x, minY, minZ);
 
 	DirectX::BoundingBox quarterWorld;
 	quarterWorld.CreateFromPoints(quarterWorld, corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
 	quad.emplace_back(quarterWorld);
 	corners.clear();
 
-	corners.emplace_back(minX, maxY, 0);
-	corners.emplace_back(maxX, minY, 0);
-	corners.emplace_back(0, maxY, 0);
-	corners.emplace_back(0, minY, 0);
-	corners.emplace_back(minX, maxY, 0);
-	corners.emplace_back(minX, minY, 0);
-	corners.emplace_back(0, maxY, minZ);
-	corners.emplace_back(0, minY, minZ);
+	corners.emplace_back(minX, maxY, c.z);
+	corners.emplace_back(maxX, minY, c.z);
+	corners.emplace_back(c.x, maxY, c.z);
+	corners.emplace_back(c.x, minY, c.z);
+	corners.emplace_back(minX, maxY, minZ);
+	corners.emplace_back(minX, minY, minZ);
+	corners.emplace_back(c.x, maxY, minZ);
+	corners.emplace_back(c.x, minY, minZ);
 
 	quarterWorld.CreateFromPoints(quarterWorld, corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
 	quad.emplace_back(quarterWorld);
 	corners.clear();
 
-	corners.emplace_back(minX, maxY, 0);
-	corners.emplace_back(maxX, minY, 0);
-	corners.emplace_back(0, maxY, 0);
-	corners.emplace_back(0, minY, 0);
-	corners.emplace_back(minX, maxY, 0);
-	corners.emplace_back(minX, minY, 0);
-	corners.emplace_back(0, maxY, maxZ);
-	corners.emplace_back(0, minY, maxZ);
+	corners.emplace_back(minX, maxY, c.z);
+	corners.emplace_back(maxX, minY, c.z);
+	corners.emplace_back(c.x, maxY, c.z);
+	corners.emplace_back(c.x, minY, c.z);
+	corners.emplace_back(minX, maxY, maxZ);
+	corners.emplace_back(minX, minY, maxZ);
+	corners.emplace_back(c.x, maxY, maxZ);
+	corners.emplace_back(c.x, minY, maxZ);
 
 	quarterWorld.CreateFromPoints(quarterWorld, corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
 	quad.emplace_back(quarterWorld);
 	corners.clear();
 
-	corners.emplace_back(maxX, maxY, 0);
-	corners.emplace_back(maxX, minY, 0);
-	corners.emplace_back(0, maxY, 0);
-	corners.emplace_back(0, minY, 0);
-	corners.emplace_back(maxX, maxY, 0);
-	corners.emplace_back(maxX, minY, 0);
-	corners.emplace_back(0, maxY, maxZ);
-	corners.emplace_back(0, minY, maxZ);
+	corners.emplace_back(maxX, maxY, c.z);
+	corners.emplace_back(maxX, minY, c.z);
+	corners.emplace_back(c.x, maxY, c.z);
+	corners.emplace_back(c.x, minY, c.z);
+	corners.emplace_back(maxX, maxY, maxZ);
+	corners.emplace_back(maxX, minY, maxZ);
+	corners.emplace_back(c.x, maxY, maxZ);
+	corners.emplace_back(c.x, minY, maxZ);
 
 	quarterWorld.CreateFromPoints(quarterWorld, corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
 	quad.emplace_back(quarterWorld);
 	corners.clear();
 	return quad;
+}
+void Collision::FillBoundingsAndQuads()
+{
+	for (auto& quad : worldQuad)
+		quad.contains = 0;
+	for (auto& object : collidable)
+	{
+		if(object->type == Collidable::Type::Object)
+		for (auto& bound : object->Boundings)
+		{
+			int i = 0;
+			for (auto& quad : worldQuad)
+			{
+				if (static_cast<DirectX::BoundingBox>(quad).Contains(static_cast<DirectX::BoundingOrientedBox>(bound)))
+				{
+					quad.contains++;
+					bound.QuadID.emplace_back(i);
+				}
+				i++;
+			}
+		}
+
+	}
 }
 void Collision::DrawBoundingQuads()
 {
@@ -401,7 +440,7 @@ void Collision::DrawBoundingQuads()
 
 	collidable[0]->g->m_TextureShader.UpdateWorldMatrixBuffer(pContext, DirectX::XMMatrixIdentity());
 	collidable[0]->g->Begin3DScene();
-	for (auto& q : worldQuad) {
+	for (const DirectX::BoundingBox& q : worldQuad) {
 
 
 		pContext->PSSetShaderResources(0, 1, tex->GetTextureResourceViewAddr());

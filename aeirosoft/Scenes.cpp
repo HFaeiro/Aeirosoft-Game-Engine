@@ -46,6 +46,7 @@ std::optional<Events*> Scenes::Queue()
 			queued.push_back(*optional);
 		if (ActiveScene->C->collidable.size())
 			ActiveScene->C->Queue();
+
 	return this;
 }
 

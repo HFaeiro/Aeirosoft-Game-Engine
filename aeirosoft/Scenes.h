@@ -6,7 +6,6 @@
 #include "Gui.h"
 #include "helper.h"
 #include "Player.h"
-#include <thread>
 class Scenes :public Events
 {
 public:
@@ -132,8 +131,7 @@ public:
 
 
 private:
-	std::vector<std::thread> threads;
-
+	
 	graphics* g;
 	Timer keyTimer;
 	

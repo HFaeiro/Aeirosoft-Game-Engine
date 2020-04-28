@@ -97,7 +97,7 @@ std::unique_ptr<DirectX::SoundEffect> graphics::CreateSound(std::wstring name)
 bool graphics::Initialize()
 {
 
-	this->fovDegrees = 90.f;
+	this->fovDegrees = 120.f;
 	FOV = (fovDegrees / 360) * DirectX::XM_PI;
 
 

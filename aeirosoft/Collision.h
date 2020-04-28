@@ -135,10 +135,20 @@ public:
 	std::vector<Collidable*> collidable;
 	bool done = true;;
 private:
-	std::vector<DirectX::BoundingBox> Subdivide(DirectX::BoundingBox box);
+	
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pContext;
-	std::vector<DirectX::BoundingBox> worldQuad;
+	struct QuadBox
+	{
+		operator DirectX::BoundingBox() const { return box; }
+		QuadBox(DirectX::BoundingBox b) : box(b) {}
+		int contains = 0;
+		DirectX::BoundingBox box;
+	};
+	std::vector<QuadBox> Subdivide(DirectX::BoundingBox box) const;
+	std::vector<QuadBox> Subdivide(std::vector<QuadBox>& qBox, int limit);
+	std::vector<QuadBox> worldQuad;
+	void FillBoundingsAndQuads();
 	void DrawBoundingQuads();
 };
 
