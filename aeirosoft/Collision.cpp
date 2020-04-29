@@ -93,6 +93,7 @@ void Collidable::CreateTexture()
 #endif
 void Collidable::CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, std::vector<DirectX::XMMATRIX*> transforms)
 {
+	Boundings.clear();
 	std::vector<Vertex> tmpV;
 	for (const auto& vertexGroup : v)
 		for (const auto& vertice : vertexGroup)
@@ -169,8 +170,8 @@ bool Collision::Initialize()
 
 
 	FillBoundingsAndQuads();
-	//std::vector<QuadBox> tmpBox;
-	//while ((tmpBox = Subdivide(worldQuad, 100)).size())
+	std::vector<QuadBox> tmpBox;
+	//while ((tmpBox = Subdivide(worldQuad, 20)).size())
 	//{
 	//	for (const auto& box : tmpBox)
 	//	{
@@ -201,7 +202,7 @@ std::optional<Events*> Collision::Queue()
 			int i = 0;
 			for (const DirectX::BoundingBox& quad : worldQuad)
 			{
-				if (quad.Contains(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
+				if (quad.Intersects(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
 					C->Boundings[0].QuadID.push_back(i);
 				i++;
 			}
@@ -235,6 +236,7 @@ std::optional<Events*> Collision::Queue()
 			
 			if (C->Boundings[0].QuadID.size())
 				Check(C);
+
 			
 		}
 #ifdef _DEBUG
@@ -262,23 +264,20 @@ void Collision::Check(Collidable* C)
 						for (const auto& myqID : C->Boundings[0].QuadID)
 							if (qID == myqID) {
 								auto bound = (bounds[0].hasSphere ? bounds[0].getSphere() : bounds[0]);
-								if (box.Contains(bound))
+								if (box.Intersects(bound))
 								{
 #ifdef _DEBUG
 									c->Boundings[0].collision = true;
 									C->Boundings[0].collision = true;
 #endif // _DEBUG
-									if (c->type != Collidable::Type::EntityAi && C->type == Collidable::Type::EntityAi)
+									if (c->type != Collidable::Type::EntityAi)
 									{
+										if(c->resolve)
 										c->hit = true;
 									}
-									if (C->resolve) {
+									C->Boundings[0].Resolve(bounds[0]);
 
-										//threads.emplace_back(std::thread(&aeBounding::Resolve, C->Boundings[0], std::ref(bounds[0])));
-										//t1.join();
-										C->Boundings[0].Resolve(bounds[0]);
-
-									}
+									
 									continue;
 								}
 #ifdef _DEBUG
@@ -294,8 +293,8 @@ void Collision::Check(Collidable* C)
 					for (const auto& qID : bound.QuadID)
 						for (const auto& myqID : C->Boundings[0].QuadID)
 							if (qID == myqID)
-								if (box.Contains((const DirectX::BoundingOrientedBox)bound))
-									if (C->resolve) {
+								if (box.Intersects((const DirectX::BoundingOrientedBox)bound))
+									{
 										C->Boundings[0].Resolve(bound);
 										continue;
 									}
@@ -418,7 +417,7 @@ void Collision::FillBoundingsAndQuads()
 			int i = 0;
 			for (auto& quad : worldQuad)
 			{
-				if (static_cast<DirectX::BoundingBox>(quad).Contains(static_cast<DirectX::BoundingOrientedBox>(bound)))
+				if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingOrientedBox>(bound)))
 				{
 					quad.contains++;
 					bound.QuadID.emplace_back(i);

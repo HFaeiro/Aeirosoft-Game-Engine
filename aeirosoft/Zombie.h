@@ -26,13 +26,12 @@ public:
 	}
 	virtual void Update()
 	{
-		/*static float delta = 0;
-		delta += deltaTimer.GetMillisecondsElapsed();
-		if (delta >= 5.f)
-		{*/
+
+		if (delta >= .25f)
+		{
 			_Update();
-	/*		delta = 0;
-		}*/
+			delta = 0;
+		}
 		return;
 	}
 	virtual std::optional<Events*> Queue()
@@ -74,7 +73,7 @@ public:
 
 		DirectX::XMFLOAT3 posDifference = { mypos.x - playerPos.x,0, mypos.z - playerPos.z };
 
-		float delta = deltaTimer.GetMillisecondsElapsed() * .0010f;
+		delta = deltaTimer.GetMillisecondsElapsed() * .001f;
 
 		//adjustPosition(0, -30 * delta, 0 );
 		float sight = 600.f;
@@ -107,7 +106,7 @@ private:
 	Timer deltaTimer;
 	graphics* g;
 	float health = 100;
-
+	float delta = 0;
 	void SetRandomSpawn()
 	{
 		float x = (rand() % 1200 + (-800));

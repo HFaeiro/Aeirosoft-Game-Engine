@@ -23,13 +23,7 @@ class weapon : public model
 {
 public:
 	
-	weapon(graphics* g, const std::wstring& filename, const std::wstring& _shotSound, float scale = 1.f) : g(g)
-	{
-		init(filename, g, scale);
-		shotSoundEffect = g->CreateSound(_shotSound.c_str());
-		shotSound = shotSoundEffect->CreateInstance();
-		srand(static_cast <unsigned> (time(0)));
-	}
+	weapon(graphics* g, const std::wstring& filename, const std::wstring& _shotSound, float scale = 1.f);
 	~weapon()
 	{
 		shotSoundEffect.release();
@@ -46,20 +40,7 @@ public:
 
 		model::Render(this->g->m_TextureShader);
 	}
-	bool shoot()
-	{
-		if (shotTimer.GetSecondsElapsed() == 0 || shotTimer.GetSecondsElapsed() >= stats.fireRate)
-			{
-				shotTimer.restart();
-				if (shotSound->GetState())
-					shotSound->Stop();
-				shotSound->Play();
-				return true;
-
-			}
-		return false;
-			
-	}
+	bool shoot();
 	DirectX::XMFLOAT2 recoil()
 	{
 		return { (float)(rand() % stats.vRecoil + 4 ), (float)(rand() % stats.hRecoil + (-stats.hRecoil * .5)) };
@@ -75,5 +56,7 @@ private:
 
 	std::unique_ptr<DirectX::SoundEffect> shotSoundEffect;
 	std::unique_ptr<DirectX::SoundEffectInstance> shotSound;
+	std::unique_ptr<DirectX::SoundEffectInstance> shotSoundcpy;
+	std::vector< std::unique_ptr<DirectX::SoundEffectInstance>> shotSounds;
 };
 

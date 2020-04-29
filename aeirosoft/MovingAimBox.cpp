@@ -4,32 +4,43 @@ MovingAimBox::MovingAimBox(graphics* g) : g(g), EntityAi(g, L"Data\\Objects\\Bul
 
 std::optional<Events*> MovingAimBox::Queue()
 {
+	if (health)
+	{
+		if (hit) {
+			health -= 100;
+		}
 
-	if (hit) {
-		Initialize();
-		hits += 1;
+		hit = false;
+		if (moveTime <= timeMoving) {
+			SetRandomMove();
+			timeMoving = 0.f;
+		}
+		UpdateMove(); 
 	}
-	//if (aliveTime.GetSecondsElapsed() >= 25) {
-	//	Initialize();
+	else
+	{
+		//if (!dead)
+		//{
 
-	//}
-	if (collision) {
-		revertWorld();
-		if (prevDirection == -1)
+		//	dead = true;
+		adjustPosition({ 0, -deadDelta  , 0 });
+			LookAt({ 0, -deadDelta  , 0 });
+			resolve = false;
+		//}
+		g->TurnOffCulling();
+
+		//if (isAnimActive())
+			//TransformBounds(getWorld());
+
+		g->TurnOnCulling();
+		deadDelta += delta.GetSecondsElapsed();
+		delta.restart();
+		if (deadDelta >= 10.f)
 		{
 			Initialize();
-			return {};
-		}
-		m_moveSpeed = -m_moveSpeed;
-		collision = false;
 
+		}
 	}
-	hit = false;
-	if (moveTime <= timeMoving) {
-		SetRandomMove();
-		timeMoving = 0.f;
-	}
-	UpdateMove();
 	TransformBounds(getWorld());
 	return this;
 }
@@ -106,11 +117,8 @@ void MovingAimBox::UpdateMove()
 	case 18:
 	case 19:
 	case 20:
-
-		/*if (!timeMoving)
-			moveTime *= .8f;*/
 		DirectX::XMFLOAT3 posVecToPlayer;
-		DirectX::XMStoreFloat3(&posVecToPlayer, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&posDifference) * m_moveSpeed));
+		DirectX::XMStoreFloat3(&posVecToPlayer, DirectX::XMVector3NormalizeEst(DirectX::XMLoadFloat3(&posDifference)) * moveSpeed);
 		adjustPosition(posVecToPlayer);
 		toVector = DirectX::XMLoadFloat3(&posDifference);
 		break;
@@ -126,10 +134,11 @@ void MovingAimBox::UpdateMove()
 	}
 	else
 	{
-		DirectX::XMStoreFloat3(&tof3, toVector);
+		DirectX::XMStoreFloat3(&tof3, toVector * m_moveSpeed);
 		model::SetCurrentAnimation("attack");
 	}
 	LookAt(tof3, true);
+	lastLookAt = tof3;
 	delta.restart();
 }
 

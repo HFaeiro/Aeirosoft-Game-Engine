@@ -32,11 +32,15 @@ void aeBounding::Transform(DirectX::XMMATRIX _world, bool makeSphere)
 	world = _world;
 	DirectX::XMFLOAT3 corners[8];
 	DirectX::XMVECTOR vCorners[8];
+	DirectX::XMVECTOR vCornersT[8];
 	ogOB.GetCorners(corners);
 	for (int i = 0; i < 8; i++)
 	{
 		vCorners[i] = { corners[i].x, corners[i].y, corners[i].z, 1.f };
 		vCorners[i] = DirectX::XMVector3Transform(vCorners[i], transformation == nullptr ? world : DirectX::XMMatrixTranspose(*transformation) * world);
+
+
+
 		DirectX::XMStoreFloat3(&corners[i], vCorners[i]);
 
 	}

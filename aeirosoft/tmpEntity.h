@@ -11,7 +11,12 @@ public:
 	virtual std::optional<Events*> Queue() = 0;
 	EntityAi(const EntityAi& e) : model(e), Collidable(e)
 	{
-		
+		*this = e;
+		std::vector< std::vector<Vertex>> vertices = getVertices();
+		std::vector<DirectX::XMMATRIX*> transformations = getTransforms();
+		//for (const auto& v : vertices)
+		//{
+		CreateBoundingOrientedBox(vertices, transformations);
 	}
 	EntityAi(graphics* g, std::wstring filename, float scale = 1.f) : model(filename, g, scale), Collidable(g)
 	{

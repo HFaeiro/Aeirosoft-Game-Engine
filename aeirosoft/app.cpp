@@ -53,12 +53,14 @@ bool app::SetupApplication()
 	events.push_back(i);
 	events.push_back(s);
 #ifdef _DEBUG
-	s->AddEntityAiToScene(L"Scene1", new Zombie(m_Graphics));
+	Zombie z(m_Graphics);
+	s->AddEntityAiToScene(L"Scene1", new Zombie(z));
 
 #else
+	MovingAimBox m(m_Graphics);
 	for (int i = 0; i < Boxes; i++)
 	{
-		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m_Graphics));
+		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m));
 	}
 
 #endif // DEBUG
@@ -125,6 +127,7 @@ std::vector<int> app::GetStartInfo(std::string filename, std::vector<std::string
 }
 int app::begin()
 {
+
 	std::vector<int> settings = GetStartInfo("settings.txt", { "FullScreen:", "VSYNC:", "BOXES:" }, { 0, 0, 3 });
 	
 	m_Graphics = new graphics(m_Window, settings[0], settings[1]);
@@ -136,6 +139,9 @@ int app::begin()
 
 	Boxes = settings[2];
 	SetupApplication();
+	double loadTime = m_Timer.GetSecondsElapsed();
+	std::wstringstream wss;
+	wss << L"Load Time: " << loadTime << "s";
 	while (true)
 	{
 		if (const auto optional = processMessages())
@@ -148,7 +154,7 @@ int app::begin()
 
 		for (const auto& E : events)
 			if (const auto optional = E->Queue())
-				queued.push_back(*optional);
+				queued.emplace_back(*optional);
 
 		for (const auto& E : queued)
 			E->Update();
@@ -156,7 +162,7 @@ int app::begin()
 		queued.clear();
 		//end of event que
 
-		//std::wstringstream wss;
+
 		//std::wstringstream wsshots;
 		//std::wstringstream wssAcc;
 
@@ -166,7 +172,7 @@ int app::begin()
 		//
 		//int shots = s->GetActivePlayer().GetShots();
 		//float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
-		//wss << L"Hits: " << hits;
+
 		//wsshots << L"Shots: " << shots;
 		//wssAcc << L"Accuracy: " << (int)(Accuracy * 100) << L"%";
 		//m_Graphics->pSpriteBatch->Begin();
@@ -177,6 +183,7 @@ int app::begin()
 
 		m_Graphics->pSpriteBatch->Begin();
 		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
+		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 40));
 		m_Graphics->pSpriteBatch->End();
 
 		m_Graphics->EndScene();

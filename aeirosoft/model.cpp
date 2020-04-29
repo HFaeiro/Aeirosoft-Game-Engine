@@ -11,6 +11,9 @@ Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
 	Bone* retBone = new Bone();
 	if (parent == nullptr)
 		pBoneMaster = retBone;
+	else
+		vBones.emplace_back(retBone);
+	retBone->parent = parent;
 	retBone->name = copyBone->name;
 	retBone->offsetMatrix = copyBone->offsetMatrix;
 	retBone->OGTransformationMatrix = copyBone->OGTransformationMatrix;
@@ -23,13 +26,12 @@ Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
 		Bone* child = copyConstructBoneRecursive(bone, retBone);
 		if (child != nullptr)
 		{
-			retBone->vChildren.push_back(child);
+			retBone->vChildren.emplace_back(child);
 		}
 
 	}
-
-
-	vBones.push_back(retBone);
+	if (parent == nullptr)
+		vBones.emplace_back(retBone);
 	return retBone;
 }
 
@@ -275,6 +277,7 @@ void model::Render(TextureShader pTextureShader)
 		pTextureShader.SetShaders(pContext.Get(), true);
 		pTextureShader.UpdateBonesBuffer(pContext.Get(), currentAnim->TransformBones(vBones));
 
+
 	}
 	else
 		pTextureShader.SetShaders(pContext.Get());
@@ -300,7 +303,7 @@ bool model::LoadModel(const std::wstring& filename)
 	for (UINT i = 0; i < pScene->mNumMeshes; i++)
 	{
 
-		meshes.push_back(this->ProcessMesh(pScene->mMeshes[i], pScene));
+		meshes.emplace_back(this->ProcessMesh(pScene->mMeshes[i], pScene));
 	}
 
 	if (pScene->HasAnimations())
@@ -326,10 +329,10 @@ bool model::LoadModel(const std::wstring& filename)
 						tmpChannel->mRotationKeys[k].mValue, tmpChannel->mScalingKeys[k].mValue);
 				}
 			}
-			vAnimations.push_back(animation);
+			vAnimations.emplace_back(animation);
 		}
 
-		vBones.push_back(pBoneMaster);
+		vBones.emplace_back(pBoneMaster);
 
 	}
 	return true;
@@ -350,13 +353,13 @@ Bone* model::CreateBoneTreeRecursive(aiNode* node, Bone* parent)
 		Bone* child = CreateBoneTreeRecursive(node->mChildren[i], retBone);
 		if (child != nullptr)
 		{
-			retBone->vChildren.push_back(child);
+			retBone->vChildren.emplace_back(child);
 		}
 
 	}
 
 
-	vBonesTmp.push_back(retBone);
+	vBonesTmp.emplace_back(retBone);
 	return retBone;
 
 }
@@ -393,7 +396,7 @@ void model::ProcessNode(aiScene* node, const aiScene* scene)
 	for (UINT i = 0; i < node->mNumMeshes; i++)
 	{
 
-		meshes.push_back(this->ProcessMesh(scene->mMeshes[i], scene));
+		meshes.emplace_back(this->ProcessMesh(scene->mMeshes[i], scene));
 	}
 
 }
@@ -435,7 +438,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			for (UINT i = 0; i < mesh->mNumVertices; i++)
 			{
-				vertices.push_back(Vertex(mesh->mVertices[i].x,
+				vertices.emplace_back(Vertex(mesh->mVertices[i].x,
 					mesh->mVertices[i].y,
 					mesh->mVertices[i].z));
 			}
@@ -444,9 +447,9 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
 	for (UINT i = 0; i < mesh->mNumFaces; i++)
 	{
-		indices.push_back(mesh->mFaces[i].mIndices[0]);
-		indices.push_back(mesh->mFaces[i].mIndices[1]);
-		indices.push_back(mesh->mFaces[i].mIndices[2]);
+		indices.emplace_back(mesh->mFaces[i].mIndices[0]);
+		indices.emplace_back(mesh->mFaces[i].mIndices[1]);
+		indices.emplace_back(mesh->mFaces[i].mIndices[2]);
 	}
 
 	std::vector<texture> vTexture;
@@ -468,7 +471,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 				
 				if (bone->name == mesh->mBones[i]->mName.data) {
 					bone->offsetMatrix = aiMatrix4x4ToDXMatrix(mesh->mBones[i]->mOffsetMatrix);
-					vBones.push_back(bone);
+					vBones.emplace_back(bone);
 					vBonesTmp.erase(vBonesTmp.begin() + boneNum);
 					break;
 				}
@@ -482,7 +485,7 @@ Mesh model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 				{
 					vertices[mesh->mBones[i]->mWeights[j].mVertexId].AddWeights(i, mesh->mBones[i]->mWeights[j].mWeight);
 					if(vBones.size())
-						vBones[vBones.size()- 1]->vertices.push_back(vertices[mesh->mBones[i]->mWeights[j].mVertexId]);
+						vBones[vBones.size()- 1]->vertices.emplace_back(vertices[mesh->mBones[i]->mWeights[j].mVertexId]);
 				}
 			}
 			boneNum = 0;
@@ -511,10 +514,10 @@ std::vector<texture> model::LoadTextures(aiMaterial* pMaterial, aiTextureType ty
 			pMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aicolor);
 			if (aicolor.IsBlack())
 			{
-				vTexture.push_back(texture(this->pDevice.Get(), colors::UnloadedTexturecolor, type));
+				vTexture.emplace_back(texture(this->pDevice.Get(), colors::UnloadedTexturecolor, type));
 				return vTexture;
 			}
-			vTexture.push_back(texture(this->pDevice.Get(), color(aicolor.r * 255, aicolor.g * 255, aicolor.b * 255), type));
+			vTexture.emplace_back(texture(this->pDevice.Get(), color(aicolor.r * 255, aicolor.g * 255, aicolor.b * 255), type));
 			return vTexture;
 		}
 		}
@@ -533,14 +536,14 @@ std::vector<texture> model::LoadTextures(aiMaterial* pMaterial, aiTextureType ty
 				pMaterial->GetTexture(type, i, &path);
 				std::wstring filename = this->directory + L'\\' + helper::strings::charToWide(path.C_Str());
 				texture diskTexture(pDevice.Get(), filename, type);
-				vTexture.push_back(diskTexture);
+				vTexture.emplace_back(diskTexture);
 				break;
 			}
 			}
 		}
 	}
 	if (!vTexture.size())
-		vTexture.push_back(texture(this->pDevice.Get(), colors::UnhandledTexturecolor, type));
+		vTexture.emplace_back(texture(this->pDevice.Get(), colors::UnhandledTexturecolor, type));
 
 
 

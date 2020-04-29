@@ -19,8 +19,11 @@ public:
 	{
 		SetRandomSpawn();
 		//UpdateScale({ 20, 20, 20});
+		health = 100;
+		hit = false;
 		delta.restart();
 		aliveTime.restart();
+		deadDelta = 0;
 		return true;
 	}
 	virtual void Update()
@@ -52,5 +55,9 @@ private:
 	DWORD direction;
 	graphics* g;
 	Timer delta;
+	int health = 100;
+	bool dead = false;
+	DirectX::XMFLOAT3 lastLookAt;
+	float deadDelta = 0;
 };
 
