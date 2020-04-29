@@ -24,7 +24,6 @@ public:
 		{
 			Collidable::CreateBoundingOrientedBox(v);
 		}
-		//Collidable::CreateBoundingOrientedBox(vertices);
 	}
 
 	~Entity() 
@@ -50,20 +49,18 @@ public:
 	{
 		c->adjustPosition(pos);
 	}
-	void adjustPosition(camera::movementType type, float velocity) 
+	void adjustPosition(camera::movementType type, float velocity)
 	{
-		if (!collision || true ) {
-			if (velocity > 5 && velocity < -5)
-				if (velocity > 5)
-					velocity = 5;
-				else
-					velocity = -5;
-			prevMove = type;
-			recentVelocity = velocity;
-		
-			c->adjustPosition(type, velocity);
-			TransformBounds(getWorldAtViewMatrix());
-		}
+		if (velocity > 5 && velocity < -5)
+			if (velocity > 5)
+				velocity = 5;
+			else
+				velocity = -5;
+		prevMove = type;
+		recentVelocity = velocity;
+
+		c->adjustPosition(type, velocity);
+		TransformBounds(getWorldAtViewMatrix());
 		return;
 	}
 

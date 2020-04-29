@@ -24,7 +24,7 @@ std::optional<Events*> MovingAimBox::Queue()
 
 		//	dead = true;
 		adjustPosition({ 0, -deadDelta  , 0 });
-			LookAt({ 0, -deadDelta  , 0 });
+			LookAt({ 0, -deadDelta  , 0 }, true);
 			resolve = false;
 		//}
 		g->TurnOffCulling();

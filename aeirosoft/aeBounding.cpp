@@ -38,19 +38,8 @@ void aeBounding::Transform(DirectX::XMMATRIX _world, bool makeSphere)
 	{
 		vCorners[i] = { corners[i].x, corners[i].y, corners[i].z, 1.f };
 		vCorners[i] = DirectX::XMVector3Transform(vCorners[i], transformation == nullptr ? world : DirectX::XMMatrixTranspose(*transformation) * world);
-
-
-
 		DirectX::XMStoreFloat3(&corners[i], vCorners[i]);
-
 	}
-	//ogOB.Transform(tOB, transformation == nullptr ? world : DirectX::XMMatrixTranspose(*transformation) * world);
-	//
-	//float extents = tOB.Extents.z;
-	////if (tOB.Extents.x > extents)
-	////	extents = tOB.Extents.x;
-	////if (tOB.Extents.y > extents)
-	////	extents = tOB.Extents.y;
 	ogOB.CreateFromPoints(tOB, 8, corners, sizeof(DirectX::XMFLOAT3));
 	if (std::isnan(tOB.Extents.z)) {
 		tOB = ogOB;

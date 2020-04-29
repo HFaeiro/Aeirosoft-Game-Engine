@@ -12,8 +12,6 @@ void Entity::_Update()
 			else if (adjustment.y < 0)
 				falling = true;
 			adjustPosition(adjustment);
-			//adjustment = { 0,0,0 };
-			//Boundings[0].vAdjustments.erase(Boundings[0].vAdjustments.begin());
 		}
 		Boundings[0].vAdjustments.clear();
 //		Collidable::Cthis->Check(this);

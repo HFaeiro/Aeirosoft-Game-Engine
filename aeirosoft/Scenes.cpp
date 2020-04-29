@@ -44,7 +44,7 @@ std::optional<Events*> Scenes::Queue()
 	for (const auto& E : ActiveScene->events)
 		if (const auto optional = E->Queue())
 			queued.push_back(*optional);
-		if (ActiveScene->C->collidable.size())
+		if (ActiveScene->C->staticCollidable.size())
 			ActiveScene->C->Queue();
 
 	return this;

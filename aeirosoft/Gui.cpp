@@ -2,11 +2,9 @@
 #include <sstream>
 void Gui::Button::Collision(DirectX::XMFLOAT2 p)
 {
-	//////fixed?
-	//////need to fix from and to points on window resize.
-	//////thinks they're always in the same place. 
-	//////multiply points by difference in old window size to new?
-	//think window border is causing this problem?
+
+	//window border is causing problems with menu hit detection. 
+	//ill need to figure out if its full screen or not and handle mouse coords that way.
 
 	if (p.x > from.x && p.y > from.y) {
 		if (p.x < to.x && p.y < to.y)
@@ -44,8 +42,6 @@ void Gui::Menu::Add( DirectX::XMFLOAT2 from, DirectX::XMFLOAT2 to)
 		0,2,1,
 			3,4,5,
 	};
-
-
 
 	g->CreateIndexAndVectorBuffers(vertices, indecies, vb, ib);
 
@@ -130,17 +126,10 @@ void Gui::AddImage(std::wstring MenuName, std::wstring fileName, DirectX::XMFLOA
 
 void Gui::Update()
 {
-	
-	
 	DirectX::XMFLOAT2 mouse = GetCursorToWorldOrtho();
-
-
 	for (const auto& m : vActive)
 	{
 		m->Draw();
-
-
-
 		m->Collision({ mouse.x, mouse.y });
 		if (i->isLeftClick())
 		{
@@ -149,39 +138,27 @@ void Gui::Update()
 		}
 
 	}
-
-	//std::wstringstream wss;
-	//wss << mouse.x << " " << mouse.y;
-
-
-	//g->pSpriteBatch->Begin();
-	//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
-	//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 0));
-	//g->pSpriteBatch->End();
-
 }
 
 DirectX::XMFLOAT2 Gui::GetCursorToWorldOrtho()
 {
 	POINT p;
-	//GetCursorPos(&p);
 	i->GetMouse(p);
-	
-		RECT r = helper::window::GetRect(w->getHWND());
-		//ScreenToClient(m_Window, &p);
-		
-		DirectX::XMMATRIX world = g->GetWorldMatrix();
-		DirectX::XMVECTOR clickOrigin = DirectX::XMVector3Unproject(DirectX::XMVectorSet(p.x, p.y, 0.f, 0.f),
-			0, 0,
-			r.right, r.bottom,
-			0, 1.f,
-			g->GetOrthoMatrix(),
-			view,
-			world);
 
-		DirectX::XMFLOAT3 origin;
-		DirectX::XMStoreFloat3(&origin, clickOrigin);
+	RECT r = helper::window::GetRect(w->getHWND());
 
-		return { origin.x, origin.y };
+	DirectX::XMMATRIX world = g->GetWorldMatrix();
+	DirectX::XMVECTOR clickOrigin = DirectX::XMVector3Unproject(DirectX::XMVectorSet(p.x, p.y, 0.f, 0.f),
+		0, 0,
+		r.right, r.bottom,
+		0, 1.f,
+		g->GetOrthoMatrix(),
+		view,
+		world);
+
+	DirectX::XMFLOAT3 origin;
+	DirectX::XMStoreFloat3(&origin, clickOrigin);
+
+	return { origin.x, origin.y };
 
 }

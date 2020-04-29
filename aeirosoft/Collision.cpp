@@ -111,7 +111,6 @@ void Collidable::CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, s
 			if (transforms.size())
 				tmpBounds.setTransformPtr(transforms[i]);
 			Boundings.emplace_back(tmpBounds);
-
 		}
 		i++;
 	}
@@ -135,10 +134,10 @@ void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& size)
 
 bool Collision::Initialize()
 {
-	if (collidable.size())
+	if (staticCollidable.size())
 	{
-		pDevice = collidable[0]->pDevice;
-		pContext = collidable[0]->pContext;
+		pDevice = staticCollidable[0]->pDevice;
+		pContext = staticCollidable[0]->pContext;
 	}
 	else
 		return false;
@@ -147,7 +146,7 @@ bool Collision::Initialize()
 	DirectX::XMFLOAT3 tmpf3[8];
 
 	//first we have to get all our corners and create a box around the whole thing. 
-	for (const auto& object : collidable)
+	for (const auto& object : staticCollidable)
 	{
 		if (object->type == Collidable::Type::Object)
 		for (const auto& bound : object->Boundings)
@@ -191,54 +190,43 @@ bool Collision::Initialize()
 std::optional<Events*> Collision::Queue()
 {
 
-	for (auto& C : collidable)
+	for (auto& C : dynamicCollidable)
 	{
-
-		//C->Boundings[0].vAdjustments.clear();
-		if (C->type != Collidable::Type::Object)
+		C->Boundings[0].QuadID.clear();
+		int i = 0;
+		for (const DirectX::BoundingBox& quad : worldQuad)
 		{
+			if (quad.Intersects(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
+				C->Boundings[0].QuadID.push_back(i);
+			i++;
+		}
 
-			C->Boundings[0].QuadID.clear();
-			int i = 0;
-			for (const DirectX::BoundingBox& quad : worldQuad)
+		if (C->CheckRay)
+		{
+			float f = 0.f;
+			for (const auto& c : dynamicCollidable)
 			{
-				if (quad.Intersects(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
-					C->Boundings[0].QuadID.push_back(i);
-				i++;
-			}
-
-
-			if (C->CheckRay)
-			{
-				float f = 0.f;
-				for (const auto& c : collidable)
+				if (c != C)
 				{
-					if (c != C && c->type != Collidable::Type::Object)
-					{
-
-						std::vector<aeBounding> bounds = c->GetBounds();
-						if (c->hasMainBox || bounds.size() == 1)
-							if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
-								bounds.erase(bounds.begin());
-							else
-								continue;
-						for (const DirectX::BoundingOrientedBox& box : bounds)
-							if (box.Intersects(C->clickOrigin, C->clickDestination, f))
-							{
-								c->hit = true;
-								C->CheckRay = false;
-								break;
-							}
-
-					}
+					std::vector<aeBounding> bounds = c->GetBounds();
+					if (c->hasMainBox || bounds.size() == 1)
+						if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
+							bounds.erase(bounds.begin());
+						else
+							continue;
+					for (const DirectX::BoundingOrientedBox& box : bounds)
+						if (box.Intersects(C->clickOrigin, C->clickDestination, f))
+						{
+							c->hit = true;
+							C->CheckRay = false;
+							break;
+						}
 				}
 			}
-			
-			if (C->Boundings[0].QuadID.size())
-				Check(C);
-
-			
 		}
+
+		if (C->Boundings[0].QuadID.size())
+			Check(C);
 #ifdef _DEBUG
 		C->DrawBoundingOrientedBox();
 #endif
@@ -249,57 +237,63 @@ std::optional<Events*> Collision::Queue()
 
 void Collision::Check(Collidable* C)
 {
-	auto box = C->GetBoundSphere();
-	for (const auto& c : collidable)
+	auto mySphere = C->GetBoundSphere();
+	for (const auto& c : dynamicCollidable)
 	{
-		if (c != C)
-		{
-			if (C->type != Collidable::Type::Object) {
-
-				auto bounds = c->GetBounds();
-
-				if (c->hasMainBox || bounds.size() == 1)
-				{
-					for (const auto& qID : bounds[0].QuadID)
-						for (const auto& myqID : C->Boundings[0].QuadID)
-							if (qID == myqID) {
-								auto bound = (bounds[0].hasSphere ? bounds[0].getSphere() : bounds[0]);
-								if (box.Intersects(bound))
-								{
-#ifdef _DEBUG
-									c->Boundings[0].collision = true;
-									C->Boundings[0].collision = true;
-#endif // _DEBUG
-									if (c->type != Collidable::Type::EntityAi)
-									{
-										if(c->resolve)
-										c->hit = true;
-									}
-									C->Boundings[0].Resolve(bounds[0]);
-
-									
-									continue;
-								}
-#ifdef _DEBUG
-								else
-								{
-									c->Boundings[0].collision = false;
-									continue;
-								}
-#endif // _DEBUG
-							}
+		//auto theirSphere = c->GetBoundSphere();
+		for (const auto& qID : c->Boundings[0].QuadID)
+			for (const auto& myqID : C->Boundings[0].QuadID)
+				if (qID == myqID) {
+					//if (mySphere.Intersects(theirSphere))
+					//{
+					C->Boundings[0].Resolve(c->Boundings[0]);
+					//}
 				}
-				for (const auto& bound : bounds)
-					for (const auto& qID : bound.QuadID)
-						for (const auto& myqID : C->Boundings[0].QuadID)
-							if (qID == myqID)
-								if (box.Intersects((const DirectX::BoundingOrientedBox)bound))
-									{
-										C->Boundings[0].Resolve(bound);
-										continue;
-									}
-			}
-		}
+	}
+	for (const auto& c : staticCollidable)
+	{
+			auto bounds = c->GetBounds();
+//
+//			if (c->hasMainBox || bounds.size() == 1)
+//			{
+//				for (const auto& qID : bounds[0].QuadID)
+//					for (const auto& myqID : C->Boundings[0].QuadID)
+//						if (qID == myqID) {
+//							auto bound = (bounds[0].hasSphere ? bounds[0].getSphere() : bounds[0]);
+//							if (box.Intersects(bound))
+//							{
+//#ifdef _DEBUG
+//								c->Boundings[0].collision = true;
+//								C->Boundings[0].collision = true;
+//#endif // _DEBUG
+//								if (c->type != Collidable::Type::EntityAi)
+//								{
+//									if (c->resolve)
+//										c->hit = true;
+//								}
+//								C->Boundings[0].Resolve(bounds[0]);
+//
+//
+//								continue;
+//							}
+//#ifdef _DEBUG
+//							else
+//							{
+//								c->Boundings[0].collision = false;
+//								continue;
+//							}
+//#endif // _DEBUG
+//						}
+//			}
+			for (const auto& bound : bounds)
+				for (const auto& qID : bound.QuadID)
+					for (const auto& myqID : C->Boundings[0].QuadID)
+						if (qID == myqID)
+							if (mySphere.Intersects((const DirectX::BoundingOrientedBox)bound))
+							{
+								C->Boundings[0].Resolve(bound);
+								continue;
+							}
 	}
 
 }
@@ -311,7 +305,6 @@ std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::Quad
 
 	for (const auto& quad : tmpWorld)
 	{
-
 		if (quad.contains > limit)
 		{
 			std::vector<QuadBox> tmpBox2 = Subdivide(quad);
@@ -320,7 +313,6 @@ std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::Quad
 		}
 		else {
 			qBox.emplace_back(quad);
-
 		}
 	}
 	return tmpBox;
@@ -409,9 +401,8 @@ void Collision::FillBoundingsAndQuads()
 {
 	for (auto& quad : worldQuad)
 		quad.contains = 0;
-	for (auto& object : collidable)
+	for (auto& object : staticCollidable)
 	{
-		if(object->type == Collidable::Type::Object)
 		for (auto& bound : object->Boundings)
 		{
 			int i = 0;
@@ -430,32 +421,28 @@ void Collision::FillBoundingsAndQuads()
 }
 void Collision::DrawBoundingQuads()
 {
-	if (!collidable.size())
+	if (!staticCollidable.size())
 		return;
 
 	UINT offset = 0;
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	texture* tex = &collidable[0]->redTexture;
+	texture* tex = &staticCollidable[0]->redTexture;
 
-	collidable[0]->g->m_TextureShader.UpdateWorldMatrixBuffer(pContext, DirectX::XMMatrixIdentity());
-	collidable[0]->g->Begin3DScene();
+	staticCollidable[0]->g->m_TextureShader.UpdateWorldMatrixBuffer(pContext, DirectX::XMMatrixIdentity());
+	staticCollidable[0]->g->Begin3DScene();
 	for (const DirectX::BoundingBox& q : worldQuad) {
-
-
 		pContext->PSSetShaderResources(0, 1, tex->GetTextureResourceViewAddr());
 		std::vector<Vertex> vertices;
 		DirectX::XMFLOAT3 corners[8];
 		q.GetCorners(corners);
-
 		for (DirectX::XMFLOAT3 j : corners)
 		{
 			vertices.emplace_back(j, DirectX::XMFLOAT2(0, 0));
 		}
-
 		VertexBuffer vb;
 		vb.Init(pDevice, vertices.data(), vertices.size());
 		pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
-		pContext->IASetIndexBuffer(collidable[0]->ib.Get(), DXGI_FORMAT_R32_UINT, 0);
+		pContext->IASetIndexBuffer(staticCollidable[0]->ib.Get(), DXGI_FORMAT_R32_UINT, 0);
 		pContext->DrawIndexed(24, 0, 0);
 	}
 }

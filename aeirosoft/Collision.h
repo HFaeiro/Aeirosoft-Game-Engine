@@ -121,18 +121,24 @@ public:
 	virtual std::optional<Events*> Queue();
 	void Clear()
 	{
-		collidable.clear();
+		staticCollidable.clear();
+		dynamicCollidable.clear();
 	}
 	void AddCollidable(Collidable* c)
 	{
 		if (c->Cthis != this)
 			c->Cthis = this;
-		collidable.push_back(c);
+		if (c->type == Collidable::Type::Object)
+			staticCollidable.push_back(c);
+		else
+			dynamicCollidable.push_back(c);
 	}
 	void Check(Collidable* C);
 
 
-	std::vector<Collidable*> collidable;
+	std::vector<Collidable*> staticCollidable;
+
+	std::vector<Collidable*> dynamicCollidable;
 	bool done = true;;
 private:
 	

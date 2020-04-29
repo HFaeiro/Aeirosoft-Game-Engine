@@ -6,8 +6,6 @@ void EntityAi::_Update()
 	for (auto& adjustment : Boundings[0].vAdjustments)
 	{
 		adjustPosition(adjustment);
-		//adjustment = { 0,0,0 };
-		//Boundings[0].vAdjustments.erase(Boundings[0].vAdjustments.begin());
 	}
 		
 	TransformBounds(getWorld());

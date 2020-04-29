@@ -162,25 +162,6 @@ int app::begin()
 		queued.clear();
 		//end of event que
 
-
-		//std::wstringstream wsshots;
-		//std::wstringstream wssAcc;
-
-		//int hits = 0;
-		//for (const auto& b : vBoxes)
-		//	hits += b->GetHits();
-		//
-		//int shots = s->GetActivePlayer().GetShots();
-		//float Accuracy = (float)((float)hits / (shots > 0 ? (float)shots : (float)1));
-
-		//wsshots << L"Shots: " << shots;
-		//wssAcc << L"Accuracy: " << (int)(Accuracy * 100) << L"%";
-		//m_Graphics->pSpriteBatch->Begin();
-		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 20));
-		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wsshots.str().c_str(), DirectX::XMFLOAT2(0, 0));
-		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wssAcc.str().c_str(), DirectX::XMFLOAT2(0, 40));
-		//m_Graphics->pSpriteBatch->End();
-
 		m_Graphics->pSpriteBatch->Begin();
 		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
 		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 40));
