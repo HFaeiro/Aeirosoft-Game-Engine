@@ -85,11 +85,10 @@ public:
 	}
 	std::vector<Vertex> getVertices() const { return vertices; }
 
-	DirectX::XMFLOAT3 Resolve(const aeBounding& otherObject);
+	bool Resolve(const aeBounding& otherObject);
 
-	std::vector< int >QuadID;
+	//std::vector< int >QuadID;
 	bool hasSphere = false;
-	bool collision = false;
 	std::vector<DirectX::XMFLOAT3> vAdjustments;
 private:
 

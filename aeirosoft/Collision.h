@@ -146,10 +146,11 @@ private:
 	ID3D11DeviceContext* pContext;
 	struct QuadBox
 	{
-		operator DirectX::BoundingBox() const { return box; }
-		QuadBox(DirectX::BoundingBox b) : box(b) {}
-		int contains = 0;
-		DirectX::BoundingBox box;
+		operator DirectX::BoundingBox() const { return myBox; }
+		QuadBox(DirectX::BoundingBox b) : myBox(b) {}
+		DirectX::BoundingBox myBox;
+		std::vector<aeBounding*> staticInside;
+		std::vector<aeBounding*> inside;
 	};
 	std::vector<QuadBox> Subdivide(DirectX::BoundingBox box) const;
 	std::vector<QuadBox> Subdivide(std::vector<QuadBox>& qBox, int limit);

@@ -67,7 +67,7 @@ void aeBounding::InverseTransformFromFloat3(DirectX::XMFLOAT3 f3)
 
 }
 
-DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
+bool aeBounding::Resolve(const aeBounding& otherObject)
 {
 	using namespace DirectX;
 	DirectX::XMFLOAT3 adjustment = { 0,0,0 };
@@ -112,8 +112,7 @@ DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
 
 		if (normalMag > radius * radius)
 		{
-			collision = false;
-			return adjustment;
+			return false;
 		}
 
 		normalMag = std::sqrt(normalMag);
@@ -137,7 +136,7 @@ DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
 
 		float normalMag = d.x * d.x + d.y * d.y + d.z * d.z;
 		if (normalMag > r2)
-			return adjustment;
+			return false;
 
 		normalMag = std::sqrt(normalMag);
 		float penetration = 0;
@@ -157,7 +156,5 @@ DirectX::XMFLOAT3 aeBounding::Resolve(const aeBounding& otherObject)
 		vAdjustments.emplace_back(adjustment);
 
 	}
-
-	collision = false;
-	return adjustment;
+	return true;
 }

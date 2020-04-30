@@ -79,7 +79,7 @@ public:
 		float sight = 600.f;
 
 		if (((posDifference.x <= sight && posDifference.x >= -sight) && posDifference.z <= sight && posDifference.z >= -sight) || attackMode) {
-			adjustPosition(-posDifference.x * delta, -30 * delta, -posDifference.z * delta);
+			adjustPosition(-posDifference.x * delta, 0, -posDifference.z * delta);
 			LookAt(posDifference);
 			lastLookAt = posDifference;
 		}

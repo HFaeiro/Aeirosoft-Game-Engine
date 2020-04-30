@@ -61,9 +61,9 @@ void Collidable::DrawBoundingOrientedBox()
 	g->Begin3DScene();
 	for (auto& v : tmpb) {
 
-		if (v.collision)
+		/*if (v.collision)
 			tex = &redTexture;
-		else
+		else*/
 			tex = &blueTexture;
 
 		pContext->PSSetShaderResources(0, 1, tex->GetTextureResourceViewAddr());
@@ -189,113 +189,66 @@ bool Collision::Initialize()
 //////////////////////////////////////////////////////////////////////////////
 std::optional<Events*> Collision::Queue()
 {
+	for (auto& quad : worldQuad)
+	{
+		quad.inside.clear();
+
+	}
 
 	for (auto& C : dynamicCollidable)
 	{
-		C->Boundings[0].QuadID.clear();
-		int i = 0;
-		for (const DirectX::BoundingBox& quad : worldQuad)
+		for (auto& quad : worldQuad)
 		{
-			if (quad.Intersects(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
-				C->Boundings[0].QuadID.push_back(i);
-			i++;
+			if (quad.myBox.Intersects(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
+				quad.inside.push_back(&C->Boundings[0]);
 		}
-
 		if (C->CheckRay)
-		{
-			float f = 0.f;
-			for (const auto& c : dynamicCollidable)
-			{
-				if (c != C)
-				{
-					std::vector<aeBounding> bounds = c->GetBounds();
-					if (c->hasMainBox || bounds.size() == 1)
-						if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
-							bounds.erase(bounds.begin());
-						else
-							continue;
-					for (const DirectX::BoundingOrientedBox& box : bounds)
-						if (box.Intersects(C->clickOrigin, C->clickDestination, f))
-						{
-							c->hit = true;
-							C->CheckRay = false;
-							break;
-						}
-				}
-			}
-		}
-
-		if (C->Boundings[0].QuadID.size())
 			Check(C);
 #ifdef _DEBUG
 		C->DrawBoundingOrientedBox();
 #endif
 	}
+	for (auto& quad : worldQuad)
+	{
+		for (int i = 0; i < quad.inside.size(); i++) {
+			for (const auto& object : quad.staticInside)
+				quad.inside[i]->Resolve(*object);
+			
+			for (int j = i; j < quad.inside.size(); j++)
+				quad.inside[i]->Resolve(*quad.inside[j]);
+		}
+
+	}
+#ifdef _DEBUG
 	DrawBoundingQuads();
+#endif
 	return {};
 }
 
 void Collision::Check(Collidable* C)
 {
 	auto mySphere = C->GetBoundSphere();
+	float f = 0.f;
 	for (const auto& c : dynamicCollidable)
 	{
-		//auto theirSphere = c->GetBoundSphere();
-		for (const auto& qID : c->Boundings[0].QuadID)
-			for (const auto& myqID : C->Boundings[0].QuadID)
-				if (qID == myqID) {
-					//if (mySphere.Intersects(theirSphere))
-					//{
-					C->Boundings[0].Resolve(c->Boundings[0]);
-					//}
-				}
+		if (C != c) {
+			
+				std::vector<aeBounding> bounds = c->GetBounds();
+				if (c->hasMainBox || bounds.size() == 1)
+					if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
+						bounds.erase(bounds.begin());
+					else
+						continue;
+				for (const DirectX::BoundingOrientedBox& box : bounds)
+					if (box.Intersects(C->clickOrigin, C->clickDestination, f))
+					{
+						c->hit = true;
+						C->CheckRay = false;
+						break;
+					}
+		}
 	}
-	for (const auto& c : staticCollidable)
-	{
-			auto bounds = c->GetBounds();
-//
-//			if (c->hasMainBox || bounds.size() == 1)
-//			{
-//				for (const auto& qID : bounds[0].QuadID)
-//					for (const auto& myqID : C->Boundings[0].QuadID)
-//						if (qID == myqID) {
-//							auto bound = (bounds[0].hasSphere ? bounds[0].getSphere() : bounds[0]);
-//							if (box.Intersects(bound))
-//							{
-//#ifdef _DEBUG
-//								c->Boundings[0].collision = true;
-//								C->Boundings[0].collision = true;
-//#endif // _DEBUG
-//								if (c->type != Collidable::Type::EntityAi)
-//								{
-//									if (c->resolve)
-//										c->hit = true;
-//								}
-//								C->Boundings[0].Resolve(bounds[0]);
-//
-//
-//								continue;
-//							}
-//#ifdef _DEBUG
-//							else
-//							{
-//								c->Boundings[0].collision = false;
-//								continue;
-//							}
-//#endif // _DEBUG
-//						}
-//			}
-			for (const auto& bound : bounds)
-				for (const auto& qID : bound.QuadID)
-					for (const auto& myqID : C->Boundings[0].QuadID)
-						if (qID == myqID)
-							if (mySphere.Intersects((const DirectX::BoundingOrientedBox)bound))
-							{
-								C->Boundings[0].Resolve(bound);
-								continue;
-							}
-	}
-
+	C->CheckRay = false;
 }
 std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::QuadBox>& qBox, int limit)
 {
@@ -305,7 +258,7 @@ std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::Quad
 
 	for (const auto& quad : tmpWorld)
 	{
-		if (quad.contains > limit)
+		if (quad.inside.size() > limit)
 		{
 			std::vector<QuadBox> tmpBox2 = Subdivide(quad);
 			for (const auto& box : tmpBox2)
@@ -399,8 +352,7 @@ std::vector<Collision::QuadBox> Collision::Subdivide(DirectX::BoundingBox box) c
 }
 void Collision::FillBoundingsAndQuads()
 {
-	for (auto& quad : worldQuad)
-		quad.contains = 0;
+
 	for (auto& object : staticCollidable)
 	{
 		for (auto& bound : object->Boundings)
@@ -410,8 +362,8 @@ void Collision::FillBoundingsAndQuads()
 			{
 				if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingOrientedBox>(bound)))
 				{
-					quad.contains++;
-					bound.QuadID.emplace_back(i);
+					//bound.QuadID.emplace_back(i);
+					quad.staticInside.push_back(&bound);
 				}
 				i++;
 			}
