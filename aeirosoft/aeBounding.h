@@ -7,6 +7,7 @@ class aeBounding
 public:
 	aeBounding(){}
 	operator DirectX::BoundingOrientedBox() const { return tOB; }
+	operator DirectX::BoundingBox() const { return ogBB; }
 //	operator DirectX::BoundingOrientedBox (){ return tOB; }
 	operator DirectX::BoundingSphere () const { return bSphere; }
 	operator DirectX::XMMATRIX() const { return world; }
@@ -72,7 +73,14 @@ public:
 		if (corners.size() == 8)
 		{
 			ogOB.CreateFromPoints(ogOB, 8, corners.data(), sizeof(DirectX::XMFLOAT3));
-			return true;
+			if (std::isnan(ogOB.Center.x))
+			{
+				useBB = true;
+				ogBB.CreateFromPoints(ogBB, 8, corners.data(), sizeof(DirectX::XMFLOAT3));
+				return !std::isnan(ogBB.Center.x);
+			}
+			else
+				return true;
 		}
 		else
 			return false;
@@ -91,10 +99,11 @@ public:
 	bool hasSphere = false;
 	std::vector<DirectX::XMFLOAT3> vAdjustments;
 private:
-
+	bool useBB = false;
 	DirectX::BoundingOrientedBox ogOB;
 	DirectX::BoundingOrientedBox tOB;
 	DirectX::BoundingBox ogBB;
+	DirectX::BoundingBox tBB;
 	DirectX::BoundingSphere bSphere;
 	std::vector<Vertex> vertices;
 	DirectX::XMMATRIX* transformation = nullptr;

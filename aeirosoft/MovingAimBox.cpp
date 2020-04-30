@@ -1,6 +1,6 @@
 #include "MovingAimBox.h"
 
-MovingAimBox::MovingAimBox(graphics* g) : g(g), EntityAi(g, L"Data\\Objects\\Bully\\Bully.fbx", 25) { srand(static_cast <unsigned> (time(0))); }
+MovingAimBox::MovingAimBox(graphics* g) : g(g), EntityAi(g, L"Data\\Objects\\Bully\\Bully.fbx") { srand(static_cast <unsigned> (time(0))); }
 
 std::optional<Events*> MovingAimBox::Queue()
 {

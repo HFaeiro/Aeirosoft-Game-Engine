@@ -106,7 +106,7 @@ public:
 			if (s.sceneName == sceneName)
 			{
 
-				s.events.push_back(E);
+				s.events.emplace_back(E);
 				s.C->AddCollidable(E);
 				return true;
 			}

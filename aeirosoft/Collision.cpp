@@ -148,7 +148,6 @@ bool Collision::Initialize()
 	//first we have to get all our corners and create a box around the whole thing. 
 	for (const auto& object : staticCollidable)
 	{
-		if (object->type == Collidable::Type::Object)
 		for (const auto& bound : object->Boundings)
 		{
 			static_cast<DirectX::BoundingOrientedBox>(bound).GetCorners(tmpf3);
@@ -382,11 +381,11 @@ void Collision::DrawBoundingQuads()
 
 	staticCollidable[0]->g->m_TextureShader.UpdateWorldMatrixBuffer(pContext, DirectX::XMMatrixIdentity());
 	staticCollidable[0]->g->Begin3DScene();
-	for (const DirectX::BoundingBox& q : worldQuad) {
+	for (const auto& q : worldQuad) {
 		pContext->PSSetShaderResources(0, 1, tex->GetTextureResourceViewAddr());
 		std::vector<Vertex> vertices;
 		DirectX::XMFLOAT3 corners[8];
-		q.GetCorners(corners);
+		static_cast<DirectX::BoundingBox>(q).GetCorners(corners);
 		for (DirectX::XMFLOAT3 j : corners)
 		{
 			vertices.emplace_back(j, DirectX::XMFLOAT2(0, 0));
@@ -396,5 +395,20 @@ void Collision::DrawBoundingQuads()
 		pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
 		pContext->IASetIndexBuffer(staticCollidable[0]->ib.Get(), DXGI_FORMAT_R32_UINT, 0);
 		pContext->DrawIndexed(24, 0, 0);
+		for (const auto& object : q.staticInside)
+		{
+			std::vector<Vertex> vertices;
+		DirectX::XMFLOAT3 corners[8];
+		static_cast<DirectX::BoundingOrientedBox>(*object).GetCorners(corners);
+		for (DirectX::XMFLOAT3 j : corners)
+		{
+			vertices.emplace_back(j, DirectX::XMFLOAT2(0, 0));
+		}
+		VertexBuffer vb;
+		vb.Init(pDevice, vertices.data(), vertices.size());
+		pContext->IASetVertexBuffers(0, 1, vb.GetAddressOf(), vb.GetStridePtr(), &offset);
+		pContext->IASetIndexBuffer(staticCollidable[0]->ib.Get(), DXGI_FORMAT_R32_UINT, 0);
+		pContext->DrawIndexed(24, 0, 0);
+		}
 	}
 }

@@ -11,7 +11,7 @@ public:
 	virtual std::optional<Events*> Queue() = 0;
 	EntityAi(const EntityAi& e) : model(e), Collidable(e)
 	{
-		*this = e;
+		this->name = e.name;
 		std::vector< std::vector<Vertex>> vertices = getVertices();
 		std::vector<DirectX::XMMATRIX*> transformations = getTransforms();
 		//for (const auto& v : vertices)

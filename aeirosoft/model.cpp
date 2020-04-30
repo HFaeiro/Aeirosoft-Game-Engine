@@ -14,6 +14,7 @@ Bone* model::copyConstructBoneRecursive(Bone* const& copyBone, Bone* parent)
 	else
 		vBones.emplace_back(retBone);
 	retBone->parent = parent;
+	retBone->vertices = copyBone->vertices;
 	retBone->name = copyBone->name;
 	retBone->offsetMatrix = copyBone->offsetMatrix;
 	retBone->OGTransformationMatrix = copyBone->OGTransformationMatrix;
@@ -128,6 +129,7 @@ model::model(const model& m)
 		vBones.clear();
 		copyConstructBoneRecursive(m.pBoneMaster, nullptr);
 	}
+	return;
 }
 
 void model::adjustPosition(DirectX::XMFLOAT3 pos)

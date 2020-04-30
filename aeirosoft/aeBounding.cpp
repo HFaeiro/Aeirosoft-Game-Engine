@@ -33,22 +33,40 @@ void aeBounding::Transform(DirectX::XMMATRIX _world, bool makeSphere)
 	DirectX::XMFLOAT3 corners[8];
 	DirectX::XMVECTOR vCorners[8];
 	DirectX::XMVECTOR vCornersT[8];
-	ogOB.GetCorners(corners);
+
+
+	if (useBB)
+		ogBB.GetCorners(corners);
+	else
+		ogOB.GetCorners(corners);
 	for (int i = 0; i < 8; i++)
 	{
 		vCorners[i] = { corners[i].x, corners[i].y, corners[i].z, 1.f };
 		vCorners[i] = DirectX::XMVector3Transform(vCorners[i], transformation == nullptr ? world : DirectX::XMMatrixTranspose(*transformation) * world);
 		DirectX::XMStoreFloat3(&corners[i], vCorners[i]);
 	}
-	ogOB.CreateFromPoints(tOB, 8, corners, sizeof(DirectX::XMFLOAT3));
-	if (std::isnan(tOB.Extents.z)) {
+	DirectX::XMFLOAT3 extentsf3;
+	if (useBB)
+	{
+		ogBB.CreateFromPoints(tBB, 8, corners, sizeof(DirectX::XMFLOAT3));
+		extentsf3 = tBB.Extents;
+	}
+	else
+	{
+
+		ogOB.CreateFromPoints(tOB, 8, corners, sizeof(DirectX::XMFLOAT3));
+		extentsf3 = tOB.Extents;
+	}
+
+
+	if (std::isnan(extentsf3.z)) {
 		tOB = ogOB;
 	}
-	float extents = tOB.Extents.z;
+	float extents = extentsf3.z;
 	if (tOB.Extents.x > extents)
-		extents = tOB.Extents.x;
+		extents = extentsf3.x;
 	if (tOB.Extents.y > extents)
-		extents = tOB.Extents.y;
+		extents = extentsf3.y;
 	if (makeSphere)
 		bSphere = DirectX::BoundingSphere(tOB.Center, extents);
 	hasSphere = makeSphere;

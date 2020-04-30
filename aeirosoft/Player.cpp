@@ -23,16 +23,18 @@ void Player::Update()
 	g->Begin3DScene();
 	if (health <= 0)
 		return;
-#ifdef _DEBUG
-	test();
-#endif
+
 	double recoilDelta = recoilTimer.GetSecondsElapsed();
 	if (recoilDelta > main.stats.recoverRate)
 	{
 		i->AdjustInputs(prevAimDif.x * recoilDelta * 2, prevAimDif.y * recoilDelta * 2);
 		recoilTimer.Stop();
 	}
+#ifndef _DEBUG
 	Entity::_Update();
+#endif // !_DEBUG
+
+	//
 	if (isLeftClick())
 	{
 		if (main.shoot())
@@ -188,7 +190,11 @@ std::optional<Events*> Player::Queue()
 		gravity = -((70.f + timefalling) * GetDeltaTime());
 
 	}
+#ifndef _DEBUG
 	adjustPosition(camera::movementType::up, gravity);
+#endif // !_DEBUG
+
+	//adjustPosition(camera::movementType::up, gravity);
 	if (falling)
 	{
 		timefalling += deltaTimer.GetMillisecondsElapsed() * .21;

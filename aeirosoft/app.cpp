@@ -45,26 +45,29 @@ bool app::SetupApplication()
 	auto t1 = std::thread(&app::CreateScenes,this,  std::ref(s), std::ref(gui));
 	//CreateScenes(s, gui);
 	//auto t2 = std::thread(std::bind(&Scenes::AddEntityToScene, s, L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",L"")));
-		s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",
-		L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",
-		L""));
+
 	s->AddOnKeyEventToScene(L"Scene1", L"Pause", gui, false, DIK_ESCAPE);
 
 	events.push_back(i);
 	events.push_back(s);
 #ifdef _DEBUG
 	Zombie z(m_Graphics);
-	s->AddEntityAiToScene(L"Scene1", new Zombie(z));
 
+	s->AddEntityAiToScene(L"Scene1", new Zombie(z));
+	s->AddEntityAiToScene(L"Scene1", new Zombie(z));
 #else
 	MovingAimBox m(m_Graphics);
+	Zombie z(m_Graphics);
 	for (int i = 0; i < Boxes; i++)
 	{
 		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m));
+		s->AddEntityAiToScene(L"Scene1", new Zombie(z));
 	}
-
+	Boxes *= 2;
 #endif // DEBUG
-
+	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",
+		L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",
+		L""));
 	s->SetActiveScene(restart ? L"Scene1" : L"MainMenu");
 
 	t1.join();
@@ -141,7 +144,7 @@ int app::begin()
 	SetupApplication();
 	double loadTime = m_Timer.GetSecondsElapsed();
 	std::wstringstream wss;
-	wss << L"Load Time: " << loadTime << "s";
+	wss << L"Load Time: " << loadTime << "s\n Enemies: " << Boxes;
 	while (true)
 	{
 		if (const auto optional = processMessages())
@@ -213,19 +216,19 @@ void app::CreateScenes(Scenes* s, Gui* gui)
 	//s->CreateEntityObject(L"Data\\FpsArms\\TestAnimMonster.fbx");
 	//s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });
 	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
-	//s->CreateEntityObject(L"Data\\Objects\\Floor\\floor.obj");
+	//s->CreateEntityObject(L"Data\\Objects\\Bully\\untitled.obj");
 
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0});
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0});
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
+	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
 
-	//s->AddObjectToScene(L"Scene1", L"floor.obj", { 0,75,0 }, { 0,0,0 });
+	//s->AddObjectToScene(L"Scene1", L"untitled.obj", { 0,0,0 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -250,0,200 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 250,0,200 }, { 0,0,0 });
 	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });

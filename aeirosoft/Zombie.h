@@ -26,12 +26,7 @@ public:
 	}
 	virtual void Update()
 	{
-
-		if (delta >= .25f)
-		{
-			_Update();
-			delta = 0;
-		}
+		_Update();
 		return;
 	}
 	virtual std::optional<Events*> Queue()
@@ -79,7 +74,7 @@ public:
 		float sight = 600.f;
 
 		if (((posDifference.x <= sight && posDifference.x >= -sight) && posDifference.z <= sight && posDifference.z >= -sight) || attackMode) {
-			adjustPosition(-posDifference.x * delta, 0, -posDifference.z * delta);
+			adjustPosition(-posDifference.x * delta, -30 * delta, -posDifference.z * delta);
 			LookAt(posDifference);
 			lastLookAt = posDifference;
 		}
