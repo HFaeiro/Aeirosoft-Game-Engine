@@ -1,5 +1,7 @@
 #include "graphics.h"
 
+
+
 graphics::graphics(const graphics& g)
 {
 	if (this != &g)
