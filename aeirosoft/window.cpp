@@ -159,7 +159,16 @@ LRESULT window::tWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
     }
     break;
-
+    case WM_MOUSEWHEEL:
+    {
+        SendMessage(hWnd, WM_VSCROLL, WM_MOUSEWHEEL, GET_WHEEL_DELTA_WPARAM(wParam));
+        return 0;
+    }
+    case WM_VSCROLL:
+    {
+        iScroll = true;
+        break;
+    }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

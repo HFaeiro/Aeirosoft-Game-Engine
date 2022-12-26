@@ -97,7 +97,7 @@ std::unique_ptr<DirectX::SoundEffect> graphics::CreateSound(std::wstring name)
 bool graphics::Initialize()
 {
 
-	this->fovDegrees = 120.f;
+	this->fovDegrees = 100.f;
 	FOV = (fovDegrees / 360) * DirectX::XM_PI;
 
 
@@ -185,8 +185,12 @@ void graphics::ChangeFOV(float degrees)
 	FOV = (degrees / 360) * DirectX::XM_PI;
 	m_ProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(FOV, aspectRatio, screenNear, renderDistance);
 	m_Camera.setProjection(m_ProjectionMatrix);
+	fovDegrees = degrees;
 }
-
+float graphics::GetFovDegrees()
+{
+	return fovDegrees;
+}
 void graphics::BeginScene(float red, float green, float blue, float alpha)
 {
 	
@@ -198,12 +202,10 @@ void graphics::BeginScene(float red, float green, float blue, float alpha)
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pStencilView.Get());
 	TurnZBufferOn();
 	m_TextureShader.SetShaders(pContext.Get());
+//
 
-#ifndef _DEBUG
-	m_Camera.render(false);
-#else
-	m_Camera.render(true);
-#endif // _DEBUG
+
+
 
 	m_ViewMatrix = m_Camera.getViewMatrix();
 
@@ -225,7 +227,7 @@ void graphics::BeginScene(float red, float green, float blue, float alpha)
 
 void graphics::EndScene()
 {
-
+	m_Camera.render(false);
 	if(m_vsync_enabled)
  		pSwap->Present(1u, 0u);
 	else

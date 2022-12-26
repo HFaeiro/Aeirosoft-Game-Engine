@@ -12,7 +12,7 @@
 class Gui : public Events
 {
 public:
-	Gui(graphics* g, input* i, window* w) :g(g), i(i), w(w)
+	Gui(graphics* g, input* i) :g(g), i(i)
 	{};
 	//Gui(graphics* g) :g(g) {};
 	~Gui() 
@@ -57,7 +57,6 @@ public:
 	{
 		return activeMenu;
 	}
-	window* w;
 	input* i;
 private:
 	std::wstring mainMenu = L"";

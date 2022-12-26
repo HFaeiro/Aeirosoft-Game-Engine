@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -160,11 +160,14 @@
   <ItemGroup>
     <ClInclude Include="aeBounding.h" />
     <ClInclude Include="aeirosoft.h" />
+    <ClInclude Include="Ai.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="app.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="Container.h" />
+    <ClInclude Include="Controllable.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Events.h" />
     <ClInclude Include="framework.h" />
@@ -173,6 +176,9 @@
     <ClInclude Include="helper.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="interactable.h" />
+    <ClInclude Include="inventory.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="movement.h" />
@@ -184,27 +190,32 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="timer.h" />
-    <ClInclude Include="tmpEntity.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
-    <ClInclude Include="weapon.h" />
+    <ClInclude Include="gun.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="Zombie.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aeBounding.cpp" />
     <ClCompile Include="aeirosoft.cpp" />
+    <ClCompile Include="Ai.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="app.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="color.cpp" />
+    <ClCompile Include="Container.cpp" />
+    <ClCompile Include="Controllable.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="helper.cpp" />
     <ClCompile Include="input.cpp" />
+    <ClCompile Include="interactable.cpp" />
+    <ClCompile Include="inventory.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="movement.cpp" />
@@ -214,8 +225,7 @@
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="timer.cpp" />
-    <ClCompile Include="tmpEntity.cpp" />
-    <ClCompile Include="weapon.cpp" />
+    <ClCompile Include="gun.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="Zombie.cpp" />
   </ItemGroup>

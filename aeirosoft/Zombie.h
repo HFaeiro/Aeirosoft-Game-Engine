@@ -1,15 +1,15 @@
 #pragma once
 #include "Events.h"
 #include "model.h"
-#include "tmpEntity.h"
+#include "Ai.h"
 #include "Timer.h"
-class Zombie : public Events, public EntityAi
+class Zombie : public Events, public Ai
 {
 public:
-	Zombie(graphics* g) : EntityAi(g, L"Data\\FpsArms\\AnimatedZombie.fbx") ,g(g)
+	Zombie(graphics* g) : Ai(g, L"Data\\FpsArms\\AnimatedZombie.fbx") ,g(g)
 	{
 		SetRandomSpawn();
-		SetCurrentAnimation("Scene");
+		//SetCurrentAnimation("Scene");
 	}
 	virtual bool Initialize()
 	{
@@ -24,14 +24,10 @@ public:
 		resolve = true;
 		return true;
 	}
-	virtual void Update()
-	{
-		_Update();
-		return;
-	}
+
 	virtual std::optional<Events*> Queue()
 	{
-		g->Begin3DScene();
+		//g->Begin3DScene();
 
 		if (health <= 0) {
 
@@ -74,7 +70,7 @@ public:
 		float sight = 600.f;
 
 		if (((posDifference.x <= sight && posDifference.x >= -sight) && posDifference.z <= sight && posDifference.z >= -sight) || attackMode) {
-			adjustPosition(-posDifference.x * delta, -30 * delta, -posDifference.z * delta);
+			adjustPosition({ -posDifference.x * delta, -30 * delta, -posDifference.z * delta });
 			LookAt(posDifference);
 			lastLookAt = posDifference;
 		}
@@ -111,5 +107,10 @@ private:
 
 
 	}
+
+
+	// Inherited via Events
+	virtual void Update() override;
+
 };
 

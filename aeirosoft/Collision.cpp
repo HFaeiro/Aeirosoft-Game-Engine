@@ -61,17 +61,15 @@ void Collidable::DrawBoundingOrientedBox()
 	g->Begin3DScene();
 	for (auto& v : tmpb) {
 
-		/*if (v.collision)
-			tex = &redTexture;
-		else*/
+		//if (v.collision)
+		//	tex = &redTexture;
+		//else
 			tex = &blueTexture;
 
 		pContext->PSSetShaderResources(0, 1, tex->GetTextureResourceViewAddr());
 		std::vector<Vertex> vertices;
-		DirectX::XMFLOAT3 corners[8];
-		((DirectX::BoundingOrientedBox)v).GetCorners(corners);
 
-		for (DirectX::XMFLOAT3 j : corners)
+		for (DirectX::XMFLOAT3 j : v.getCorners())
 		{
 			vertices.emplace_back(j, DirectX::XMFLOAT2(0, 0));
 		}
@@ -121,6 +119,7 @@ void Collidable::CreateBoundingOrientedBox(std::vector<Vertex> v)
 	aeBounding tmpBounds;
 	if (tmpBounds.Create(v))
 		Boundings.emplace_back(tmpBounds);
+
 }
 
 void Collidable::CreateBoundingOrientedBox(DirectX::XMFLOAT3& size)
@@ -142,78 +141,144 @@ bool Collision::Initialize()
 	else
 		return false;
 	//Create Quad Tree now that everything should be added to the collidable Vector
-	std::vector < DirectX::XMFLOAT3 > corners;
-	DirectX::XMFLOAT3 tmpf3[8];
 
-	//first we have to get all our corners and create a box around the whole thing. 
-	for (const auto& object : staticCollidable)
+	staticQuad = CreateQuad(staticCollidable);
+
+	FillStaticQuad(staticQuad, staticCollidable);
+
+	worldQuad = CreateQuad(dynamicCollidable);
+
+	FillDynamicQuad(worldQuad, dynamicCollidable);
+	FillStaticQuad(worldQuad, staticCollidable);
+	//std::vector<QuadBox> tmpBox;
+	/*while((tmpBox = Subdivide(worldQuad, 20)).size())
 	{
-		for (const auto& bound : object->Boundings)
+		for (const auto& box : tmpBox)
 		{
-			static_cast<DirectX::BoundingOrientedBox>(bound).GetCorners(tmpf3);
-			for (int i = 0; i < 8; i++)
-				corners.emplace_back(tmpf3[i]);
+			worldQuad.push_back(box);
 		}
-
-	}
-	DirectX::BoundingBox world;
-	if (corners.size())
-		world.CreateFromPoints(world, corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
-	else
-		return false;
-
-	corners.clear();
-
-	worldQuad = Subdivide(world);
-
-
-	FillBoundingsAndQuads();
-	std::vector<QuadBox> tmpBox;
-	//while ((tmpBox = Subdivide(worldQuad, 20)).size())
-	//{
-	//	for (const auto& box : tmpBox)
-	//	{
-	//		worldQuad.push_back(box);
-	//	}
-	//	FillBoundingsAndQuads();
-	//}
+		FillBoundingsAndQuads();
+		if (worldQuad.size() > 28)
+			break;
+	}*/
 
 
 
 
 	return true;
 }
+std::vector<Collision::QuadBox> Collision::CreateQuad(std::vector<Collidable*> vObjects)
+{
+	std::vector < DirectX::XMFLOAT3 > corners;
+	std::vector<DirectX::XMFLOAT3> tmpCorners;
+	for (const auto& object : vObjects)
+	{
+		for (auto& bound : object->Boundings)
+		{
+			tmpCorners = bound.getCorners();
+			if (!tmpCorners.size())
+				_THROW(NULL);
+			for (int i = 0; i < 8; i++)
+				corners.emplace_back(tmpCorners[i]);
+		}
+	}
+	if (corners.size())
+	{
+		DirectX::BoundingBox world;
+		world.CreateFromPoints(world, corners.size(), corners.data(), sizeof(DirectX::XMFLOAT3));
+		return Subdivide(world);
+	}
+
+	std::vector<Collision::QuadBox> retVal;
+	return retVal;
+
+}
+
+void Collision::FillStaticQuad(std::vector<QuadBox>& vQuad, std::vector<Collidable*>& vObjects)
+{
+	for (auto& object : vObjects)
+	{
+		for (auto& bound : object->Boundings)
+		{
+			for (auto& quad : vQuad)
+			{
+				if (bound.useBB) {
+					if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingBox>(bound)))
+						quad.staticInside.push_back(&bound);
+				}
+				else
+					if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingOrientedBox>(bound)))
+						quad.staticInside.push_back(&bound);
+			}
+		}
+	}
+}
+void Collision::FillDynamicQuad(std::vector<QuadBox>& vQuad, std::vector<Collidable*>& vObjects)
+{
+	for (auto& object : vObjects)
+	{
+		for (auto& quad : vQuad)
+		{
+			if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingSphere>(object->Boundings[0])))
+			{
+				quad.inside.push_back(&object->Boundings[0]);
+			}
+		}
+	}
+	
+}
 
 ////Collision/////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 std::optional<Events*> Collision::Queue()
 {
-	for (auto& quad : worldQuad)
-	{
-		quad.inside.clear();
 
+	worldQuad = CreateQuad(staticCollidable);
+	FillDynamicQuad(worldQuad, dynamicCollidable);
+	/*std::vector<QuadBox> tmpBox;
+	while ((tmpBox = Subdivide(worldQuad, 7)).size()){
+
+	for (const auto& box : tmpBox)
+	{
+		worldQuad.push_back(box);
 	}
+	FillDynamicQuad(worldQuad, dynamicCollidable);
+
+	if (worldQuad.size() > 20) 
+		break;
+	
+	}*/
+
+	FillStaticQuad(worldQuad, staticCollidable);
+
+	//std::vector<QuadBox> tmpWorld = worldQuad;
+	//int i = 0;
+	//for (const auto& quad : tmpWorld)
+	//{
+	//	if (quad.inside.size() == 0)
+	//	{
+	//		worldQuad.erase(worldQuad.begin() + i);
+	//	}
+	//	else
+	//		i++;
+	//}
 
 	for (auto& C : dynamicCollidable)
 	{
-		for (auto& quad : worldQuad)
-		{
-			if (quad.myBox.Intersects(static_cast<const DirectX::BoundingSphere>(C->Boundings[0])))
-				quad.inside.push_back(&C->Boundings[0]);
-		}
 		if (C->CheckRay)
 			Check(C);
 #ifdef _DEBUG
 		C->DrawBoundingOrientedBox();
 #endif
-	}
+	} 
+	
 	for (auto& quad : worldQuad)
 	{
 		for (int i = 0; i < quad.inside.size(); i++) {
 			for (const auto& object : quad.staticInside)
 				quad.inside[i]->Resolve(*object);
-			
-			for (int j = i; j < quad.inside.size(); j++)
+			int j = i + 1;
+			for (j ; j < quad.inside.size(); j++)
 				quad.inside[i]->Resolve(*quad.inside[j]);
 		}
 
@@ -228,25 +293,46 @@ void Collision::Check(Collidable* C)
 {
 	auto mySphere = C->GetBoundSphere();
 	float f = 0.f;
-	for (const auto& c : dynamicCollidable)
+
+
+	for (const auto& c : interactCollidable)
 	{
 		if (C != c) {
-			
-				std::vector<aeBounding> bounds = c->GetBounds();
-				if (c->hasMainBox || bounds.size() == 1)
-					if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
-						bounds.erase(bounds.begin());
-					else
-						continue;
-				for (const DirectX::BoundingOrientedBox& box : bounds)
-					if (box.Intersects(C->clickOrigin, C->clickDestination, f))
-					{
+
+			std::vector<aeBounding> bounds = c->GetBounds();
+			if (c->hasMainBox || bounds.size() == 1)
+				if (((const DirectX::BoundingOrientedBox)bounds[0]).Intersects(C->clickOrigin, C->clickDestination, f))
+				{
+					bounds.erase(bounds.begin());
+					if (f < 50) {
 						c->hit = true;
+						C->rayCollidedWith.push_back({ c, f });
+
 						C->CheckRay = false;
 						break;
 					}
+				}
+				else
+					continue;
+			for (const DirectX::BoundingOrientedBox& box : bounds)
+				if (box.Intersects(C->clickOrigin, C->clickDestination, f))
+				{
+
+					if (f < 250) {
+						c->hit = true;
+						C->rayCollidedWith.push_back({ c, f });
+
+						C->CheckRay = false;
+					}
+					break;
+				}
 		}
 	}
+	//g->Begin2DScene();
+	//wss << L"SightCollisionDistance: " << f;
+	//g->pSpriteBatch->Begin();
+	//g->pSpriteFont->DrawString(g->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 0));
+	//g->pSpriteBatch->End();
 	C->CheckRay = false;
 }
 std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::QuadBox>& qBox, int limit)
@@ -266,6 +352,17 @@ std::vector<Collision::QuadBox> Collision::Subdivide(std::vector<Collision::Quad
 		else {
 			qBox.emplace_back(quad);
 		}
+	}
+	tmpWorld = qBox;
+	int i = 0;
+	for (const auto& quad : tmpWorld)
+	{
+		if (quad.inside.size()  == 0)
+		{
+			qBox.erase(qBox.begin() + i);
+		}
+		else
+			i++;
 	}
 	return tmpBox;
 }
@@ -359,16 +456,31 @@ void Collision::FillBoundingsAndQuads()
 			int i = 0;
 			for (auto& quad : worldQuad)
 			{
-				if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingOrientedBox>(bound)))
-				{
-					//bound.QuadID.emplace_back(i);
-					quad.staticInside.push_back(&bound);
+				if (bound.useBB) {
+					if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingBox>(bound)))
+						quad.staticInside.push_back(&bound);
 				}
+				else
+					if (static_cast<DirectX::BoundingBox>(quad).Intersects(static_cast<DirectX::BoundingOrientedBox>(bound)))
+						quad.staticInside.push_back(&bound);
 				i++;
 			}
 		}
 
 	}
+	//for (auto& object : dynamicCollidable)
+	//{
+	//	int i = 0;
+	//	for (auto& quad : worldQuad)
+	//	{
+	//		if (static_cast<DirectX::BoundingBox>(quad).Contains(static_cast<DirectX::BoundingOrientedBox>(object->Boundings[0])))
+	//		{
+	//			//bound.QuadID.emplace_back(i);
+	//			quad.inside.push_back(&object->Boundings[0]);
+	//		}
+	//		i++;
+	//	}
+	//}
 }
 void Collision::DrawBoundingQuads()
 {
@@ -398,9 +510,8 @@ void Collision::DrawBoundingQuads()
 		for (const auto& object : q.staticInside)
 		{
 			std::vector<Vertex> vertices;
-		DirectX::XMFLOAT3 corners[8];
-		static_cast<DirectX::BoundingOrientedBox>(*object).GetCorners(corners);
-		for (DirectX::XMFLOAT3 j : corners)
+		
+		for (DirectX::XMFLOAT3 j : object->getCorners())
 		{
 			vertices.emplace_back(j, DirectX::XMFLOAT2(0, 0));
 		}

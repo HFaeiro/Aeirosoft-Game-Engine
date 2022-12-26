@@ -2,7 +2,6 @@
 #include "framework.h"
 #include "Events.h"
 #include "Entity.h"
-#include "tmpEntity.h"
 #include "Gui.h"
 #include "helper.h"
 #include "Player.h"
@@ -11,124 +10,23 @@ class Scenes :public Events
 public:
 
 	Scenes(graphics* g, input* i) : g(g), i(i){}
-	~Scenes()
-	{
-		for (const auto& scene : vScenes)
-		{
-			for (const auto& events : scene.events)
-			{
-				events->~Events();
-			}
-			for (const auto& ent : scene.entities)
-			{
-				delete ent;
-			}
-			delete scene.C;
-		}
-		for (auto& ent : entities)
-		{
-			ent.~EntityObject();
-		}
-	}
-	//bool Initialize()
-	//{
-	//	return true;
-	//}
-	bool Initialize()
-	{
-		if (!ActiveScene)
-		{
-			if (!vScenes.empty()) {
-				SetActiveScene(vScenes[0].sceneName, false);
-			}
-			else
-				return false;
-		}
-
-		i->w->hideMouse = ActiveScene->hideMouse;
-		for (const auto& event : ActiveScene->events)
-		{
-			
-			event->Initialize();
-		}
-		if (ActiveScene->C != nullptr)
-			ActiveScene->C->Initialize();
-		return true;
-
-	}
+	~Scenes();
+	bool Initialize();
 	virtual std::optional<Events*> Queue();
 	virtual void Update();
 
 	bool CreateScene(const std::wstring& sceneName,Gui* gui = nullptr, bool _guiStart = false, bool hideMouse = false);
-	void ResetActiveEntity();
+	void ResetActiveScene();
 	void RemoveActiveKeyGui();
 	bool SetActiveScene(const std::wstring& sceneName, bool Initalize = true);
-	bool AddObjectToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
-	bool AddEntityToScene(std::wstring sceneName, Entity* E)
-	{
-		for (auto& s : vScenes)
-		{
-			if (s.sceneName == sceneName)
-			{
-				s.E = E;
-				s.events.emplace_back(E);
-				s.C->AddCollidable(E);
-				return true;
-			}
-		}
-		return false;
-	}
-	bool AddOnKeyEventToScene(const std::wstring sceneName, const std::wstring guiName, Gui* gui, bool hideMouse, UCHAR Key)
-	{
-		
-		if (sceneName.empty() || guiName.empty() || gui == nullptr || Key == NULL)
-			return false;
+	//bool AddObjectToScene(const std::wstring& sceneName, const std::wstring& modelName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
+	bool AddEntityToScene(std::wstring sceneName, Entity* E, const DirectX::XMFLOAT3& pos = { 0.f,0.f, 0.f }, const DirectX::XMFLOAT3& rot = { 0.f,0.f, 0.f });
+	bool AddOnKeyEventToScene(const std::wstring sceneName, const std::wstring guiName, Gui* gui, bool hideMouse, UCHAR Key);
+	//bool AddEntityAiToScene(std::wstring sceneName, Ai* E);
 
-		for (auto& s : vScenes)
-		{
-			if (s.sceneName == sceneName)
-			{
-
-				if (s.OnKeyGui.emplace(Key, std::make_tuple(gui, hideMouse, false, guiName)).second)
-					return true;
-				else
-					return false;
-			}
-			else
-				return false;
-		}
-
-	}
-	bool AddEntityAiToScene(std::wstring sceneName, EntityAi* E)
-	{
-		for (auto& s : vScenes)
-		{
-			if (s.sceneName == sceneName)
-			{
-
-				s.events.emplace_back(E);
-				s.C->AddCollidable(E);
-				return true;
-			}
-		}
-	}
-
-	bool CreateEntityObject(std::wstring filePath, float scale = 1.f )
-	{
-
-		std::wstring entName = helper::strings::GetNameFromPath(filePath);
-		
-		for (const auto& e : entities)
-		{
-			if (e.getName() == entName)
-				return false;
-
-		}
-
-		entities.emplace_back(EntityObject(g, filePath, scale));
-		return true;
-	}
-
+	//bool CreateEntityObject(std::wstring filePath, float scale = 1.f);
+	//bool AddItem(Item item);
+	//bool AddItemToScene(int itemId, std::wstring sceneName, const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& rot);
 
 private:
 	
@@ -145,7 +43,8 @@ private:
 		std::wstring sceneName;
 		Gui* gui = nullptr;
 		std::vector<Events*> events;
-		std::vector<EntityObject*> entities;
+		std::vector<Entity*> entities;
+		std::vector<Item*> items;
 		bool guiStart;
 		bool guiVisible = guiStart;
 		bool hideMouse = false;
@@ -155,12 +54,11 @@ private:
 	};
 
 	Scene* ActiveScene = nullptr;
-	std::vector<EntityObject> entities;
+	std::vector<Entity> entities;
 	std::vector<Scene> vScenes;
 	std::vector<Events*> queued;
+	std::vector<Item> items;
 
-	
-	//window* w;
 	input* i;
 
 };

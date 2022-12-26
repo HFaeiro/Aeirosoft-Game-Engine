@@ -145,7 +145,7 @@ DirectX::XMFLOAT2 Gui::GetCursorToWorldOrtho()
 	POINT p;
 	i->GetMouse(p);
 
-	RECT r = helper::window::GetRect(w->getHWND());
+	RECT r = helper::window::GetRect(m_Window);
 
 	DirectX::XMMATRIX world = g->GetWorldMatrix();
 	DirectX::XMVECTOR clickOrigin = DirectX::XMVector3Unproject(DirectX::XMVectorSet(p.x, p.y, 0.f, 0.f),

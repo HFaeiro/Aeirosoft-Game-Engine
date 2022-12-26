@@ -4,6 +4,7 @@
 #include "graphics.h"
 #include "aeBounding.h"
 #include <variant>
+#include <sstream>
 
 
 class Collidable
@@ -12,7 +13,7 @@ public:
 	Collidable(graphics* g);
 	~Collidable() {};
 	void TransformBounds(DirectX::XMMATRIX m);
-	enum Type { Entity, EntityAi, Object };
+	enum Type { eEntity, EntityAi, Object , Interactable};
 	Type type;
 	std::vector<aeBounding> GetBounds()const
 	{
@@ -27,14 +28,29 @@ public:
 		if (Boundings.size())
 			return Boundings[0].getSphere();
 	}
+	virtual std::optional<void*> OnCollision()
+	{
+		return std::optional<void*>();
+	}
 	bool resolve = true;
+
+	friend class Collision;
+	Collision* Cthis;
 protected:
 	void CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, std::vector<DirectX::XMMATRIX*> transforms);
 	void CreateBoundingOrientedBox(std::vector < std::vector<Vertex>> v);
 	void CreateBoundingOrientedBox(std::vector<Vertex> v);
 	void CreateBoundingOrientedBox(DirectX::XMFLOAT3& size);
-	/*void AddBoundingOrientedBox(DirectX::BoundingOrientedBox& bBox);
-	void AddBoundingOrientedBox(DirectX::XMFLOAT3 size);*/
+	void AddHitRay()
+	{
+		AddRay();
+		CheckRay = true;
+	}
+	void AddPulse()
+	{
+		AddRay();
+		CheckPulse = true;
+	}
 	void AddRay()
 	{
 		RECT r = helper::window::GetRect(g->GetWindow());
@@ -67,23 +83,19 @@ protected:
 
 		clickDestination = DirectX::XMVectorSubtract(dest, clickOrigin);
 		clickDestination = DirectX::XMVector3Normalize(clickDestination);
-		CheckRay = true;
+
 
 	}
 	bool hit = false;
 	bool collision = false;
+
 private:
 
-	friend class Collision;
 #ifdef _DEBUG
 	void CreateTexture();
 
 	void DrawBoundingOrientedBox();
 #endif // _DEBUG
-
-
-
-
 
 
 	std::vector<DirectX::XMFLOAT3> g_corners;
@@ -93,6 +105,7 @@ private:
 	DirectX::XMVECTOR clickOrigin = {};
 	DirectX::XMVECTOR clickDestination = {};
 	bool CheckRay = false;
+	bool CheckPulse = false;
 
 	texture redTexture;
 	texture blueTexture;
@@ -100,19 +113,29 @@ private:
 	bool hasMainBox = false;
 	std::vector <DWORD> Indecies;
 	graphics* g;
+
 protected:
 	
 	std::vector<aeBounding> Boundings;
-	Collision* Cthis;
-	std::vector<aeBounding> collidedWith;
-	std::vector<Vertex> vertices;
-};
+	
 
+	std::vector<Vertex> vertices;
+	struct RayCollision
+	{
+		Collidable* collided = nullptr;
+		float distance = NULL;
+	};
+	std::vector<RayCollision> rayCollidedWith;
+};
+/////////////////////////////////////////////////////////////////////
+///////////////////////<<<<<<COLLISION CLASS>>>>>>/////////////////
+///////////////////////////////////////////////////////////////////////
 class Collision : public Events
 {
 public:
 
 	virtual bool Initialize();
+
 	virtual void Update()
 	{
 
@@ -128,16 +151,48 @@ public:
 	{
 		if (c->Cthis != this)
 			c->Cthis = this;
+		for (int i = 0; i < c->Boundings.size(); i++) {
+			c->Boundings[i].aeID = numObjects;
+			numObjects++;
+		
+		}
 		if (c->type == Collidable::Type::Object)
+		{
 			staticCollidable.push_back(c);
-		else
+		}
+		if (c->type == Collidable::Type::Interactable)
+		{
+			interactCollidable.push_back(c);
+		}
+		else 
 			dynamicCollidable.push_back(c);
+	}
+	void RemoveCollidable(Collidable* c)
+	{
+		if (c->type == Collidable::Type::Object)
+			for (int i = 0; i < staticCollidable.size(); i++)
+			{
+				if (staticCollidable[i] == c)
+					staticCollidable.erase(staticCollidable.begin() + i);
+			}
+		if (c->type == Collidable::Type::Interactable)
+			for (int i = 0; i < interactCollidable.size(); i++)
+			{
+				if (interactCollidable[i] == c)
+					interactCollidable.erase(interactCollidable.begin() + i);
+			}
+		else
+			for (int i = 0; i < dynamicCollidable.size(); i++)
+			{
+				if (dynamicCollidable[i] == c)
+					dynamicCollidable.erase(dynamicCollidable.begin() + i);
+			}
 	}
 	void Check(Collidable* C);
 
-
+	int numObjects = 0;
 	std::vector<Collidable*> staticCollidable;
-
+	std::vector<Collidable*> interactCollidable;
 	std::vector<Collidable*> dynamicCollidable;
 	bool done = true;;
 private:
@@ -154,7 +209,11 @@ private:
 	};
 	std::vector<QuadBox> Subdivide(DirectX::BoundingBox box) const;
 	std::vector<QuadBox> Subdivide(std::vector<QuadBox>& qBox, int limit);
+	std::vector<QuadBox> staticQuad;
 	std::vector<QuadBox> worldQuad;
+	void FillStaticQuad(std::vector<QuadBox>& vQuad, std::vector<Collidable*>& vObjects);
+	void FillDynamicQuad(std::vector<QuadBox>& vQuad, std::vector<Collidable*>& vObjects);
+	std::vector<Collision::QuadBox> CreateQuad(std::vector<Collidable*> vObjects);
 	void FillBoundingsAndQuads();
 	void DrawBoundingQuads();
 };

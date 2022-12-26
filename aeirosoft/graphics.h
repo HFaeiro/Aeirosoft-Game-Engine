@@ -32,6 +32,7 @@ public:
 	void CreateIndexAndVectorBuffers(std::vector<Vertex> vertices, DWORD indecies[], VertexBuffer& vb, IndexBuffer& ib);
 	void UpdateOrthoProjectionMatrix();
 	void ChangeFOV(float degrees);
+	float GetFovDegrees();
 	void BeginScene(float, float, float, float);
 	//void Render();
 	void EndScene();

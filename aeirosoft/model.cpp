@@ -269,7 +269,7 @@ void model::SetCurrentAnimation(std::string animName)
 }
 void model::Render(TextureShader pTextureShader)
 {
-	
+	g->Begin3DScene();
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pTextureShader.UpdateWorldMatrixBuffer(pContext.Get(), world);
 

@@ -20,6 +20,7 @@ class window
 	
 
 public:
+	int iScroll = 0; //need to make a capture scroll function/class?
 	bool active = false;
 	bool hideMouse = false;
 	POINT getMousePosition() { return p; }

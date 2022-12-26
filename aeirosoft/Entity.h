@@ -1,6 +1,6 @@
 #pragma once
 #include "Collision.h"
-#include "input.h"
+
 #include "model.h"
 #include <string>
 
@@ -9,88 +9,58 @@ class Entity : public Events, public Collidable,
 	 public model
 {
 public:
+	// Inherited via Events
+	virtual bool Initialize() override;
 
-	//virtual bool Initialize() = 0;
-	//virtual void Update() = 0;
-	//virtual std::optional<Events*> Queue() = 0;
+	virtual void Update() override;
+
+	virtual std::optional<Events*> Queue() override;
 
 
-	Entity(graphics* g, input* _i, std::wstring filename, float scale = 1.f) : model(filename, g, scale), _g(g),Collidable(g), c(&g->m_Camera), i(_i)
+	Entity(graphics* g, std::wstring filename,float scale = 1.f) : model(filename, g, scale), _g(g), Collidable(g)
 	{
-		Collidable::type = Collidable::Entity;
+
+		Collidable::type = Collidable::Object;
 		name = helper::strings::GetNameFromPath(filename);
 		std::vector< std::vector<Vertex>> vertices = getVertices();
 		for (const auto& v : vertices)
 		{
 			Collidable::CreateBoundingOrientedBox(v);
 		}
+		//setPositionAndRotation(pos, rot);
+		//TransformBounds(getWorld());
 	}
 
 	~Entity() 
 	{
 		((model*)this)->~model();
 	}
-	DirectX::XMMATRIX getViewMatrix() { return _g->GetViewMatrix(); }
-	DirectX::XMFLOAT3 getPosition()  { return c->getPosition(); }
-	DirectX::XMFLOAT3 getRotation()  { return c->getRotation(); }
-	void setPosition(DirectX::XMFLOAT3 xmfloat)  { entityHeight = xmfloat.y + 2;  c->setPosition(xmfloat); }
-	bool isLeftClick()  { return i->isLeftClick(); };
-	bool isRightClick() { return i->isRightClick(); };
 
-	void setPosition(float x, float y, float z)  {
-		c->setPosition(x, y, z);
-		TransformBounds(getWorldAtViewMatrix());
-	}
-	virtual bool isKey(UCHAR c)  {
-		return i->isKey(c);
-	}
-	void _Update();
-	void adjustPosition(DirectX::XMFLOAT3 pos)
-	{
-		c->adjustPosition(pos);
-	}
-	void adjustPosition(camera::movementType type, float velocity)
-	{
-		if (velocity > 5 && velocity < -5)
-			if (velocity > 5)
-				velocity = 5;
-			else
-				velocity = -5;
-		prevMove = type;
-		recentVelocity = velocity;
-
-		c->adjustPosition(type, velocity);
-		TransformBounds(getWorldAtViewMatrix());
-		return;
-	}
+	//virtual DirectX::XMFLOAT3 getPosition() = 0;
+	//virtual DirectX::XMFLOAT3 getRotation() = 0;
+	//virtual void setPosition(DirectX::XMFLOAT3 xmfloat) = 0;
+	//virtual void adjustPosition(camera::movementType type, float velocity) = 0;
 
 	camera::movementType prevMove;
 	float recentVelocity;
 	float prevVelocity;
 	const std::wstring getName() const { return name; }
 	bool falling = false;
-
+	bool Q = true;
 protected:
-	void CreateBoundingOrientedBox(DirectX::XMFLOAT3 size)
-	{
-		entityHeight = size.y;
-		Collidable::CreateBoundingOrientedBox(size);
-	}
-	DirectX::XMMATRIX getWorldAtViewMatrix()
-	{
-		DirectX::XMFLOAT3 rot = c->getRotation();
-		DirectX::XMFLOAT3 pos = c->getPosition();
-		return  DirectX::XMMatrixRotationRollPitchYaw(0, rot.y, 0) * DirectX::XMMatrixTranslation(pos.x, pos.y - entityHeight, pos.z);
-	}
 
-private:
+	//void CreateBoundingOrientedBox(std::vector<std::vector<Vertex>> v, std::vector<DirectX::XMMATRIX*> transforms)
+	//{
+	//	Collidable::CreateBoundingOrientedBox(v, transforms);
+	//	Collidable::GetBounds();
+	//}
 
-	float entityHeight;
 
-	input* i;
-	camera* c;
 	std::wstring name;
 	graphics* _g;
+
+
+
 
 
 };

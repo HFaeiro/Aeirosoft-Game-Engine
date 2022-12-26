@@ -1,14 +1,14 @@
 #pragma once
 #include "Events.h"
-#include "tmpEntity.h"
+#include "Ai.h"
 #include <time.h>
 #include "timer.h"
 #include <sstream>
-class MovingAimBox : public Events , public EntityAi
+class MovingAimBox : public Events , public Ai
 
 {
 public:
-	MovingAimBox(const MovingAimBox& m) : EntityAi(m)
+	MovingAimBox(const MovingAimBox& m) : Ai(m)
 	{
 		this->g = m.g;
 	}
@@ -28,7 +28,7 @@ public:
 	}
 	virtual void Update()
 	{
-		_Update();
+		Ai::Update();
 	//	g->TurnOffCulling();
 		Render(g->m_TextureShader);
 	//	g->TurnOnCulling();

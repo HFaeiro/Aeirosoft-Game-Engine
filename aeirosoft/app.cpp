@@ -33,7 +33,7 @@ bool app::SetupApplication()
 	////
 
 	s = new Scenes(m_Graphics, i);
-	gui = new Gui(m_Graphics, i, (window*)this);
+	gui = new Gui(m_Graphics, i);
 	StartupGui(gui);
 
 	s->CreateScene(L"Scene1", gui, false, true);
@@ -42,32 +42,14 @@ bool app::SetupApplication()
 
 
 
-	auto t1 = std::thread(&app::CreateScenes,this,  std::ref(s), std::ref(gui));
-	//CreateScenes(s, gui);
-	//auto t2 = std::thread(std::bind(&Scenes::AddEntityToScene, s, L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",L"")));
+	auto t1 = std::thread(&app::AddEntitiesToScene,this,  std::ref(s), std::ref(gui));
 
 	s->AddOnKeyEventToScene(L"Scene1", L"Pause", gui, false, DIK_ESCAPE);
 
 	events.push_back(i);
 	events.push_back(s);
-#ifdef _DEBUG
-	Zombie z(m_Graphics);
 
-	s->AddEntityAiToScene(L"Scene1", new Zombie(z));
-	s->AddEntityAiToScene(L"Scene1", new Zombie(z));
-#else
-	MovingAimBox m(m_Graphics);
-	Zombie z(m_Graphics);
-	for (int i = 0; i < Boxes; i++)
-	{
-		s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m));
-		s->AddEntityAiToScene(L"Scene1", new Zombie(z));
-	}
-	Boxes *= 2;
-#endif // DEBUG
-	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L"Data\\FpsArms\\FpsArmsAnimated.fbx",
-		L"Data\\Sounds\\Gun_AK47_Single_Shot.wav",
-		L""));
+
 	s->SetActiveScene(restart ? L"Scene1" : L"MainMenu");
 
 	t1.join();
@@ -165,20 +147,20 @@ int app::begin()
 		queued.clear();
 		//end of event que
 
-		m_Graphics->pSpriteBatch->Begin();
-		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
-		m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 40));
-		m_Graphics->pSpriteBatch->End();
+		//m_Graphics->pSpriteBatch->Begin();
+		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
+		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 40));
+		//m_Graphics->pSpriteBatch->End();
 
 		m_Graphics->EndScene();
 
-		if (restart)
+	/*	if (restart)
 		{
 			if (SetupApplication())
 				restart = false;
 			else
 				return false;
-		}
+		}*/
 
 	}
 }
@@ -188,53 +170,85 @@ DirectX::XMFLOAT3 SetRandomSpawn()
 	return { (float)(rand() % 1200 + (-800)) , 50, (float)(rand() % 1200 + (-800)) };
 }
 
-void app::CreateScenes(Scenes* s, Gui* gui)
+void app::AddEntitiesToScene(Scenes* s, Gui* gui)
 {
 
-	s->CreateEntityObject(L"Data\\map\\falling.obj");
-	s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,0,0 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//s->CreateScene(L"Scene1", gui, false, true);
-	//s->CreateScene(L"MainMenu", gui, true);
-	//s->CreateEntityObject(L"Data\\map\\falling.obj");
-	//s->AddObjectToScene(L"Scene1", L"falling.obj", { 0,0,0 }, { 0,0,0 });
-	//s->CreateEntityObject(L"Data\\FpsArms\\AnimatedZombie.fbx");
-	//s->AddObjectToScene(L"Scene1", L"AnimatedZombie.fbx", { 20,0,20 }, { 0,0,0 });
-
-	//s->CreateEntityObject(L"Data\\FpsArms\\TestAnimMonster.fbx");
-	//s->AddObjectToScene(L"Scene1", L"TestAnimMonster.fbx", { -200,0,-200 }, { 0,0,0 });
-	//s->CreateEntityObject(L"Data\\Objects\\Wall\\Wall.obj");
-	//s->CreateEntityObject(L"Data\\Objects\\Bully\\untitled.obj");
-
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0});
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-	////s->AddObjectToScene(L"Scene1", L"floor.obj", SetRandomSpawn(), { DirectX::XM_PI * .5f,0,0 });
-
-	//s->AddObjectToScene(L"Scene1", L"untitled.obj", { 0,0,0 }, { 0,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -250,0,200 }, { 0,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 250,0,200 }, { 0,0,0 });
-	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 0,0,-200 }, { 0,DirectX::XM_PI,0 });
-	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { 200,0,0 }, { 0,DirectX::XM_PI*.5f,0 });
-	//s->AddObjectToScene(L"Scene1", L"Wall.obj", { -200,0,0 }, { 0,DirectX::XM_PI * 1.5f,0 });
+	s->AddEntityToScene(L"Scene1", new Entity(m_Graphics, L"Data\\map\\falling.obj", 1), { 0,0,0 }, { 0,0,0 });
 	
+	ItemStruct iSAK =
+	{
+	1,
+	true,
+	1,
+	1,
+	"AK47",
+	L"Data\\Guns\\AK47\\AK471.obj",
+	L"Data\\FpsArms\\FpsArmsAnimated.fbx",
+	L"",
+	ItemStatus::Ground
+	};
+
+	GunStats gsAK;
+	gsAK.vRecoil = 20.f;
+	gsAK.hRecoil = 12.f;
+	gsAK.spread = 0.f;
+	gsAK.fireRate = 0.125f;
+	gsAK.recoverRate = .0925f;
+	gsAK.damage = 0.f;
+	gsAK.bulletSpeed = 0.f;
+	gsAK.hipPenalty = 1.6f;
+	gsAK.automatic = true;
+	gsAK._shotSound = L"Data\\Sounds\\Gun_AK47_Single_Shot.wav";
+
+	s->AddEntityToScene(L"Scene1", new gun(m_Graphics, iSAK, gsAK), { 0,20,0 }, { 0,0,0 });
+
+	ItemStruct iSDeagle =
+	{
+	2,
+	2,
+	1,
+	1,
+	"Desert Eagle",
+	L"Data\\Guns\\Deagle.obj",
+	L"Data\\Guns\\Deagle.obj",
+	L"",
+	ItemStatus::Ground
+	};
+	GunStats gsDeagle
+	{
+	false,
+	42.f,
+	10.f,
+	0.f,
+	0.25f,
+	0.75f,
+	0.f,
+	0.f,
+	1.2f,
+	L"Data\\Sounds\\Desert Eagle_shot.wav",
+	};
+
+	s->AddEntityToScene(L"Scene1", new gun(m_Graphics, iSDeagle, gsDeagle), { 20,20,10 }, { 0,0,0 });
+
+	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L""), { 0,0,0 }, { 0,0,0 });
+
+#ifdef _DEBUG
+	Zombie z(m_Graphics);
+
+	for (int i = 0; i < 1; i++)
+	{
+		//s->AddEntityToScene(L"Scene1", new Zombie(z));
+	}
+#else
+	MovingAimBox m(m_Graphics);
+	Zombie z(m_Graphics);
+	for (int i = 0; i < Boxes; i++)
+	{
+		//s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m));
+		//s->AddEntityAiToScene(L"Scene1", new Zombie(z));
+	}
+	Boxes *= 2;
+#endif // DEBUG
 }
 
 void app::StartupGui(Gui* gui)
@@ -283,7 +297,10 @@ void app::StartupGui(Gui* gui)
 	//std::function<void(void*)> refunc = [](void* g) { ((app*)g)->restart = true; };
 	//gui->AddButton(refunc, (window*)this, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
 	//	{ -stBWit, -stBHei + 50 }, { stBWit, stBHei + 50 });
-	std::function<void(void*)> refunc = [](void* s) { ((Scenes*)s)->ResetActiveEntity(); ((Scenes*)s)->RemoveActiveKeyGui(); };
+	std::function<void(void*)> refunc = [](void* s) {
+		((Scenes*)s)->ResetActiveScene();
+		((Scenes*)s)->RemoveActiveKeyGui();
+	};
 	gui->AddButton(refunc, (Scenes*)s, L"Pause", L"Data\\Menu\\Main\\Restart.png", L"Data\\Menu\\Main\\Restart_Selected.png",
 		{ -stBWit, -stBHei + 50 }, { stBWit, stBHei + 50 });
 	gui->AddExistingButton(L"Pause", L"Settings_Selected.png"/* L"settings.png"*/);
@@ -294,133 +311,4 @@ void app::StartupGui(Gui* gui)
 
 }
 
-//bool LoadModel(const std::wstring& filename, ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-//{
-//
-//	FILE* file;
-//	_wfopen_s(&file, filename.c_str(), L"r");
-//	if (file == NULL)
-//		return false;
-//	std::wstring line;
-//	const std::wstring directory = helper::strings::GetDirectoryFromPath(filename);
-//	float x, y, z;
-//	int i, t, n;
-//	std::wstring mtlfile = L"";
-//
-//	struct wavefront
-//	{
-//		std::wstring name;
-//		std::wstring material;
-//		std::vector<DirectX::XMFLOAT3> vertices;
-//		std::vector<DirectX::XMFLOAT2> textureCoords;
-//		std::vector<DirectX::XMFLOAT3> normals;
-//		std::vector<DWORD> indecies;
-//		std::vector<DWORD> tindecies;
-//		std::vector<DWORD> nindecies;
-//		wavefront(std::wstring n) { name = n; }
-//	};
-//	std::vector<wavefront> wf;
-//	
-//
-//	int wfsize;
-//	line.resize(100);
-//	while(!feof(file))
-//	//while (fgetws(line.data(), line.size(), file))
-//	{
-//		std::wstring substr;
-//
-//		
-//		wchar_t str[100];
-//		int size = fwscanf_s(file, L"%s", str, 100);
-//		if(size)
-//			substr.resize(size);
-//
-//
-//		wfsize = wf.size() - 1;
-//		if (str[0] == L'#')
-//		{
-//			fgetws(line.data(), line.size(), file);
-//			continue;
-//		}
-//			
-//		if (str[0] == L's')
-//		{
-//			fgetws(line.data(), line.size(), file);
-//			continue;
-//		}
-//		if (str[0] == L'm')
-//		{
-//			fwscanf_s(file, L"%s\n", line.data(), 100);
-//			mtlfile = line;
-//			continue;
-//		}
-//		if (str[0] == L'u')
-//		{
-//			fwscanf_s(file, L"%s\n", line.data(), 100);
-//			wf[wfsize].material = line;
-//			continue;
-//		}
-//		if(str[0] == L'v')
-//		{
-//			fwscanf_s(file, L"%f %f %f\n", &x, &y, &z);
-//			if(str[1] == L'n')
-//				wf[wfsize].normals.push_back({ x, y, z });
-//			else if(str[1] == L't')
-//				wf[wfsize].textureCoords.push_back({ x, y });
-//			else
-//				wf[wfsize].vertices.push_back({ x, y, z });
-//			continue;
-//		}
-//		
-//		if (str[0] == L'f')
-//		{
-//			for (int j = 0; j < 2; j++) {
-//				fwscanf_s(file, L"%d/%d/%d ", &i, &t, &n);
-//				i -= 1;
-//				t -= 1;
-//				n -= 1;
-//				wf[wfsize].indecies.push_back(i);
-//				wf[wfsize].tindecies.push_back(t);
-//				wf[wfsize].nindecies.push_back(n);
-//			}
-//			fwscanf_s(file, L"%d/%d/%d\n", &i, &t, &n);
-//			i -= 1;
-//			t -= 1;
-//			n -= 1;
-//			wf[wfsize].indecies.push_back(i);
-//			wf[wfsize].tindecies.push_back(t);
-//			wf[wfsize].nindecies.push_back(n);
-//			continue;
-//		}
-//		if (str[0] == L'o')
-//		{
-//			fwscanf_s(file, L"%s\n", line.data(), 100);
-//			wf.push_back(line);
-//			continue;
-//		}
-//		
-//	}
-//	fclose(file);
-//	std::vector<Vertex> v;
-//	std::vector<texture> vTexture;
-//	std::vector<Mesh> meshes;
-//	vTexture.push_back(texture(pDevice, colors::UnhandledTexturecolor, aiTextureType::aiTextureType_DIFFUSE));
-//	for (auto& w : wf)
-//	{
-//
-//		
-//
-//		for (auto& index : w.tindecies)
-//		{
-//			if (index >= w.vertices.size() || index >= w.textureCoords.size())
-//			{
-//				int poo = 0;
-//			}
-//			v.emplace_back(w.vertices[index], w.textureCoords[index]);
-//			
-//		}
-//		meshes.push_back(Mesh(pDevice, pContext, v, w.indecies, vTexture));
-//		v.clear();
-//	}
-//	int p = 8;
-//}
+

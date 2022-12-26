@@ -30,46 +30,49 @@ bool aeBounding::Create(const std::vector<Vertex>& _vertices)
 void aeBounding::Transform(DirectX::XMMATRIX _world, bool makeSphere)
 {
 	world = _world;
-	DirectX::XMFLOAT3 corners[8];
 	DirectX::XMVECTOR vCorners[8];
 	DirectX::XMVECTOR vCornersT[8];
-
+	corners.clear();
+	corners.resize(8);
 
 	if (useBB)
-		ogBB.GetCorners(corners);
+		ogBB.GetCorners(corners.data());
 	else
-		ogOB.GetCorners(corners);
+		ogOB.GetCorners(corners.data());
 	for (int i = 0; i < 8; i++)
 	{
 		vCorners[i] = { corners[i].x, corners[i].y, corners[i].z, 1.f };
 		vCorners[i] = DirectX::XMVector3Transform(vCorners[i], transformation == nullptr ? world : DirectX::XMMatrixTranspose(*transformation) * world);
 		DirectX::XMStoreFloat3(&corners[i], vCorners[i]);
 	}
-	DirectX::XMFLOAT3 extentsf3;
+	
 	if (useBB)
 	{
-		ogBB.CreateFromPoints(tBB, 8, corners, sizeof(DirectX::XMFLOAT3));
-		extentsf3 = tBB.Extents;
+		ogBB.CreateFromPoints(tBB, 8, corners.data(), sizeof(DirectX::XMFLOAT3));
+		Extentsf3 = tBB.Extents;
+		Center = tBB.Center;
 	}
 	else
 	{
 
-		ogOB.CreateFromPoints(tOB, 8, corners, sizeof(DirectX::XMFLOAT3));
-		extentsf3 = tOB.Extents;
+		ogOB.CreateFromPoints(tOB, 8, corners.data(), sizeof(DirectX::XMFLOAT3));
+		Extentsf3 = tOB.Extents;
+		Center = tOB.Center;
 	}
 
 
-	if (std::isnan(extentsf3.z)) {
+	if (std::isnan(Extentsf3.z)) {
 		tOB = ogOB;
 	}
-	float extents = extentsf3.z;
+	float extents = Extentsf3.z;
 	if (tOB.Extents.x > extents)
-		extents = extentsf3.x;
+		extents = Extentsf3.x;
 	if (tOB.Extents.y > extents)
-		extents = extentsf3.y;
+		extents = Extentsf3.y;
 	if (makeSphere)
 		bSphere = DirectX::BoundingSphere(tOB.Center, extents);
 	hasSphere = makeSphere;
+
 }
 
 void aeBounding::InverseTransformFromFloat3(DirectX::XMFLOAT3 f3)
@@ -91,15 +94,15 @@ bool aeBounding::Resolve(const aeBounding& otherObject)
 	DirectX::XMFLOAT3 adjustment = { 0,0,0 };
 	//Sphere vs OBB
 	if (hasSphere && !otherObject.hasSphere) {
-		DirectX::BoundingOrientedBox otherBox = otherObject.tOB;
-		DirectX::XMFLOAT3 d = { bSphere.Center.x - otherBox.Center.x ,
-			bSphere.Center.y - otherBox.Center.y  ,
-			bSphere.Center.z - otherBox.Center.z };
+		/*DirectX::BoundingOrientedBox otherBox = otherObject.tOB;*/
+		DirectX::XMFLOAT3 d = { bSphere.Center.x - otherObject.Center.x ,
+			bSphere.Center.y - otherObject.Center.y  ,
+			bSphere.Center.z - otherObject.Center.z };
 		DirectX::XMVECTOR vD = DirectX::XMLoadFloat3(&d);
 		DirectX::XMFLOAT3 closest;
-		closest.x = std::clamp(d.x, -otherBox.Extents.x, otherBox.Extents.x);
-		closest.y = std::clamp(d.y, -otherBox.Extents.y, otherBox.Extents.y);
-		closest.z = std::clamp(d.z, -otherBox.Extents.z, otherBox.Extents.z);
+		closest.x = std::clamp(d.x, -otherObject.Extentsf3.x, otherObject.Extentsf3.x);
+		closest.y = std::clamp(d.y, -otherObject.Extentsf3.y, otherObject.Extentsf3.y);
+		closest.z = std::clamp(d.z, -otherObject.Extentsf3.z, otherObject.Extentsf3.z);
 		bool inside = false;
 
 		if (d.x == closest.x && d.y == closest.y && d.z == closest.z)
@@ -109,16 +112,22 @@ bool aeBounding::Resolve(const aeBounding& otherObject)
 			DirectX::XMStoreFloat3(&dAbs, DirectX::XMVectorAbs(vD));
 
 			////////////How do I include the 3rd dimension?////////////////////////////////////////
-			if (dAbs.x > dAbs.z)
+			if (dAbs.x > dAbs.z && dAbs.x > dAbs.y)
 				if (closest.x > 0)
-					closest.x = otherBox.Extents.x;
+					closest.x = otherObject.Extentsf3.x;
 				else
-					closest.x = -otherBox.Extents.x;
-			else
+					closest.x = -otherObject.Extentsf3.x;
+			else if (dAbs.z > dAbs.x && dAbs.z > dAbs.y)
 				if (closest.z > 0)
-					closest.z = otherBox.Extents.z;
+					closest.z = otherObject.Extentsf3.z;
 				else
-					closest.z = -otherBox.Extents.z;
+					closest.z = -otherObject.Extentsf3.z;
+			//////////////////////////// ???????????????????? guessing here
+			else
+				if (closest.y > 0)
+					closest.y = otherObject.Extentsf3.y;
+				else
+					closest.y = -otherObject.Extentsf3.y;
 			////////////////////////////////////////////////////////////////////////////////
 		}
 
@@ -139,7 +148,11 @@ bool aeBounding::Resolve(const aeBounding& otherObject)
 
 
 		DirectX::XMStoreFloat3(&adjustment, (inside ? -vNormal : vNormal) * offset);
-		vAdjustments.emplace_back(adjustment);
+		if (!inside)
+		{
+			
+			vAdjustments.push_back({ otherObject.aeID, adjustment });
+		}
 	}
 	////Sphere vs Sphere
 	else if (hasSphere && otherObject.hasSphere)
@@ -171,7 +184,7 @@ bool aeBounding::Resolve(const aeBounding& otherObject)
 		adjustment.y = 0;
 
 
-		vAdjustments.emplace_back(adjustment);
+		vAdjustments.push_back({ otherObject.aeID, adjustment });
 
 	}
 	return true;

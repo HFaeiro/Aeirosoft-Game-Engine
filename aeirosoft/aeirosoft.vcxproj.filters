@@ -54,9 +54,6 @@
     <ClInclude Include="Scenes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="weapon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="movement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -64,9 +61,6 @@
       <Filter>Header Files\sys</Filter>
     </ClInclude>
     <ClInclude Include="MovingAimBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tmpEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="graphics.h">
@@ -132,6 +126,27 @@
     <ClInclude Include="aeBounding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interactable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Controllable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ai.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Player.cpp">
@@ -146,9 +161,6 @@
     <ClCompile Include="Scenes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="weapon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="movement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -156,9 +168,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tmpEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="graphics.cpp">
@@ -210,6 +219,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="aeBounding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gun.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interactable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inventory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Controllable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ai.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

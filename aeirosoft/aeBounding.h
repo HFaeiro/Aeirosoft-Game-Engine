@@ -52,7 +52,6 @@ public:
 	bool CreateFromPoints(std::vector<Vertex>& _vertices)
 	{
 		vertices = _vertices;
-		std::vector<DirectX::XMFLOAT3> corners;
 		bool add = true;
 		for (const auto& i : vertices)
 		{
@@ -92,14 +91,35 @@ public:
 		transformation = _transform; 
 	}
 	std::vector<Vertex> getVertices() const { return vertices; }
-
+	
 	bool Resolve(const aeBounding& otherObject);
-
+	std::vector< DirectX::XMFLOAT3> getCorners(){
+		corners.clear();
+		corners.resize(8);
+		if (useBB)
+			ogBB.GetCorners(corners.data());
+		else
+			ogOB.GetCorners(corners.data());
+		return corners;
+	}
 	//std::vector< int >QuadID;
+	int aeID;
+	struct CollisionInfo
+	{
+		CollisionInfo(int id, DirectX::XMFLOAT3 adjustments) : collidedID(id), resolve(adjustments)
+		{}
+		int collidedID;
+		DirectX::XMFLOAT3 resolve;
+	};
 	bool hasSphere = false;
-	std::vector<DirectX::XMFLOAT3> vAdjustments;
-private:
+	std::vector<CollisionInfo> vAdjustments;
 	bool useBB = false;
+
+private:
+
+	std::vector< DirectX::XMFLOAT3> corners;
+	DirectX::XMFLOAT3 Center;
+	DirectX::XMFLOAT3 Extentsf3;
 	DirectX::BoundingOrientedBox ogOB;
 	DirectX::BoundingOrientedBox tOB;
 	DirectX::BoundingBox ogBB;

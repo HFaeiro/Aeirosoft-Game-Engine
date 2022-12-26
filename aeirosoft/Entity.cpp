@@ -1,20 +1,22 @@
 #include "Entity.h"
 
-void Entity::_Update()
+bool Entity::Initialize()
 {
-//	while (!Boundings[0].vAdjustments.empty())
-//	{
 
-		for (auto& adjustment : Boundings[0].vAdjustments)
-		{
-			if (adjustment.y > 0)
-				falling = false;
-			else if (adjustment.y < 0)
-				falling = true;
-			adjustPosition(adjustment);
-		}
-		Boundings[0].vAdjustments.clear();
-//		Collidable::Cthis->Check(this);
-		TransformBounds(getWorldAtViewMatrix());
-//	}
+	return true;
+}
+
+void Entity::Update()
+{
+	//TransformBounds(getWorld());
+	Render(_g->m_TextureShader);
+	return;
+}
+
+std::optional<Events*> Entity::Queue()
+{
+	if (Q)
+		return this;
+	else
+		return std::optional<Events*>();
 }
