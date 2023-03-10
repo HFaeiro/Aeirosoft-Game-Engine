@@ -127,41 +127,48 @@ int app::begin()
 	double loadTime = m_Timer.GetSecondsElapsed();
 	std::wstringstream wss;
 	wss << L"Load Time: " << loadTime << "s\n Enemies: " << Boxes;
-	while (true)
-	{
-		if (const auto optional = processMessages())
-			return *optional;
-
-		m_Graphics->BeginScene(0.f, 0.f, 0.f, 1.f);
-
-		// start of event que
-		std::vector<Events*> queued;
-
-		for (const auto& E : events)
-			if (const auto optional = E->Queue())
-				queued.emplace_back(*optional);
-
-		for (const auto& E : queued)
-			E->Update();
-
-		queued.clear();
-		//end of event que
-
-		//m_Graphics->pSpriteBatch->Begin();
-		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
-		//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 40));
-		//m_Graphics->pSpriteBatch->End();
-
-		m_Graphics->EndScene();
-
-	/*	if (restart)
+	try {
+		while (true)
 		{
-			if (SetupApplication())
-				restart = false;
-			else
-				return false;
-		}*/
+			if (const auto optional = processMessages())
+				return *optional;
 
+			m_Graphics->BeginScene(0.f, 0.f, 0.f, 1.f);
+
+			// start of event que
+			std::vector<Events*> queued;
+
+			for (const auto& E : events)
+				if (const auto optional = E->Queue())
+					queued.emplace_back(*optional);
+
+			for (const auto& E : queued)
+				E->Update();
+
+			queued.clear();
+			//end of event que
+
+			//m_Graphics->pSpriteBatch->Begin();
+			//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), i->fpsString.c_str(), DirectX::XMFLOAT2(0, 20));
+			//m_Graphics->pSpriteFont->DrawString(m_Graphics->pSpriteBatch.get(), wss.str().c_str(), DirectX::XMFLOAT2(0, 40));
+			//m_Graphics->pSpriteBatch->End();
+
+			m_Graphics->EndScene();
+
+			/*	if (restart)
+				{
+					if (SetupApplication())
+						restart = false;
+					else
+						return false;
+				}*/
+
+		}
+	}
+	catch (std::exception erro)
+	{
+		MessageBoxA(this->hWnd, erro.what(), "Exception!", MF_POPUP);
+		
 	}
 }
 
@@ -230,25 +237,25 @@ void app::AddEntitiesToScene(Scenes* s, Gui* gui)
 
 	s->AddEntityToScene(L"Scene1", new gun(m_Graphics, iSDeagle, gsDeagle), { 20,20,10 }, { 0,0,0 });
 
-	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L""), { 0,0,0 }, { 0,0,0 });
+	s->AddEntityToScene(L"Scene1", new Player(m_Graphics, i, L""), { 20,20,10 }, { 0,0,0 });
 
-#ifdef _DEBUG
-	Zombie z(m_Graphics);
-
-	for (int i = 0; i < 1; i++)
-	{
-		//s->AddEntityToScene(L"Scene1", new Zombie(z));
-	}
-#else
-	MovingAimBox m(m_Graphics);
-	Zombie z(m_Graphics);
-	for (int i = 0; i < Boxes; i++)
-	{
-		//s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m));
-		//s->AddEntityAiToScene(L"Scene1", new Zombie(z));
-	}
-	Boxes *= 2;
-#endif // DEBUG
+//#ifdef _DEBUG
+//	Zombie z(m_Graphics);
+//
+//	for (int i = 0; i < 1; i++)
+//	{
+//		//s->AddEntityToScene(L"Scene1", new Zombie(z));
+//	}
+//#else
+//	MovingAimBox m(m_Graphics);
+//	Zombie z(m_Graphics);
+//	for (int i = 0; i < Boxes; i++)
+//	{
+//		//s->AddEntityAiToScene(L"Scene1", new MovingAimBox(m));
+//		//s->AddEntityAiToScene(L"Scene1", new Zombie(z));
+//	}
+//	Boxes *= 2;
+//#endif // DEBUG
 }
 
 void app::StartupGui(Gui* gui)

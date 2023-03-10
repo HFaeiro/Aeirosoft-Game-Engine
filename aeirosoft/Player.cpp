@@ -290,29 +290,34 @@ std::optional<Events*> Player::Queue()
 		jumping = true;
 		jumpStart = getPosition().y;
 	}
-	if (jumping)
-	{
-		walkingSound->Stop();
-		if (getPosition().y - jumpStart >= jumpHeight)
-			hangTimer.Start();
-		else
-			gravity = 120 * GetDeltaTime();
-
-		if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
+	try {
+		if (jumping)
 		{
-			jumping = false;
-			falling = true;
-			hangTimer.Stop();
+			
+			if (getPosition().y - jumpStart >= jumpHeight)
+				hangTimer.Start();
+			else
+				gravity = 120 * GetDeltaTime();
+
+			if ((hangTimer.GetMillisecondsElapsed() * .001) >= hangTime)
+			{
+				jumping = false;
+				falling = true;
+				hangTimer.Stop();
+			}
+
+		}
+		else {
+			
+			gravity = -((70.f + timefalling) * GetDeltaTime());
+
 		}
 
 	}
-	else {
-		if(timefalling)
-			walkingSound->Stop();
-		gravity = -((70.f + timefalling) * GetDeltaTime());
-
+	catch (std::exception e)
+	{
+		MessageBoxA(g->GetWindow(), e.what(), "Exception!", MF_POPUP);
 	}
-
 	adjustPosition(camera::movementType::up, gravity);
 
 

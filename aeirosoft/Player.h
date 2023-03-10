@@ -23,7 +23,7 @@ public:
 		deltaTimer.restart();
 		Boundings[0].vAdjustments.clear();
 		health = 100;
-		SetRandomSpawn();
+		//SetRandomSpawn();
 		TransformBounds(getWorldAtViewMatrix());
 		falling = false;
 		bool rCReleased = true;
